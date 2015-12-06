@@ -494,7 +494,7 @@
             </summary>
             <param name="id">Integer value that gets returned in the response
             message.</param>
-            <returns>"This is messsage #{id}"</returns>
+            <returns>Returns: "This is message #{id}"</returns>
         </member>
     </members>
 </doc>
