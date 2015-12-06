@@ -22,12 +22,8 @@ namespace PollyTestClient.Samples
             var client = new WebClient();
             int successfulAttempts = 0;
             int failedAttempts = 0;
-
-            // Go into a loop 20 times.
-            for (int i = 0; i < 20; i++)
-            {
-                // Retry the following call repeatedly until it succeeds.
-                Policy.Handle<Exception>().RetryForever(Exception =>
+            // Define our policy:
+            var policy = Policy.Handle<Exception>().RetryForever(Exception =>
                 {
                     // This is your new exception handler! 
                     // Tell the user what they've won!
@@ -36,8 +32,13 @@ namespace PollyTestClient.Samples
 
                     // Wait 1 second;
                     System.Threading.Thread.Sleep(1000);
+                });
 
-                }).Execute(() =>
+            // Go into a loop 20 times.
+            for (int i = 0; i < 20; i++)
+            {
+                // Retry the following call repeatedly until it succeeds.
+                policy.Execute(() =>
                 {
                     // This code is executed within the Policy 
 
