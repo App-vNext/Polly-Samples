@@ -14,7 +14,11 @@ namespace PollyTestClient
         {
             // Execute samples:
 
-            Samples.RetryForever.Execute();
+            //Samples.RetryForever.Execute();
+            Task.Run(async () => { await Samples.RetryForeverAsync.Execute(); });
+
+            // Keep the console open.
+            Console.ReadLine();
         }
     }
 }
