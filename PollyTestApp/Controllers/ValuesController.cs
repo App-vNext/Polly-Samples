@@ -27,12 +27,12 @@ namespace PollyTestApp.Controllers
         /// </summary>
         /// <param name="id">Integer value that gets returned in the response
         /// message.</param>
-        /// <returns>Returns: "This is message #{id}"</returns>
+        /// <returns>Returns: "Response from server to request #{id}"</returns>
         
         public Models.Message Get(int id)
         {
             var msg = new Models.Message();
-            msg.Text = "This is messsage #" + id.ToString();
+            msg.Text = "Response from server to request #" + id.ToString();
             return msg;
         }
 

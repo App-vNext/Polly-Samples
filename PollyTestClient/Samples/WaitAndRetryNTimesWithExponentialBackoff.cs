@@ -10,30 +10,33 @@ using System.Threading.Tasks;
 namespace PollyTestClient.Samples
 {
     /// <summary>
-    /// Demonstrates using the RetryForever policy.
+    /// Demonstrates using the WaitAndRetry policy.
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// </summary>
-    public static class RetryForever
+    public static class WaitAndRetryNTimesWithExponentialBackoff
     {
         public static void Execute()
         {
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
+
             var client = new WebClient();
             int eventualSuccesses = 0;
             int retries = 0;
             int eventualFailures = 0;
             // Define our policy:
-            var policy = Policy.Handle<Exception>().RetryForever(Exception =>
+            var policy = Policy.Handle<Exception>()
+                .WaitAndRetry(6,
+                attempt => TimeSpan.FromSeconds(0.25 * (Math.Pow(2, attempt))),
+                (Exception, calculatedWaitDuration) =>
                 {
                     // This is your new exception handler! 
                     // Tell the user what they've won!
                     Console.WriteLine("Exception: " + Exception.Message);
+                    Console.WriteLine(" ... automatically delaying for " + calculatedWaitDuration.TotalMilliseconds + "ms.");
                     retries++;
 
-                    // Wait 1/5 second before next retry.  (Added manually within RetryForever() demo; but Polly has overload to do this automatically...)
-                    Thread.Sleep(200);
                 });
 
             int i = 0;
@@ -44,7 +47,7 @@ namespace PollyTestClient.Samples
 
                 try
                 {
-                    // Retry the following call according to the policy - until it succeeds.
+                    // Retry the following call according to the policy - 3 times.
                     policy.Execute(() =>
                     {
                         // This code is executed within the Policy 
@@ -70,8 +73,8 @@ namespace PollyTestClient.Samples
             Console.WriteLine("");
             Console.WriteLine("Total requests made                 : " + i);
             Console.WriteLine("Requests which eventually succeeded : " + eventualSuccesses);
-            Console.WriteLine("Retries made to help achieve success: " + retries); 
-            Console.WriteLine("Requests which eventually failed    : " + eventualFailures); 
+            Console.WriteLine("Retries made to help achieve success: " + retries);
+            Console.WriteLine("Requests which eventually failed    : " + eventualFailures);
 
         }
     }

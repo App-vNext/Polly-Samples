@@ -11,6 +11,6 @@ namespace PollyTestClient
         /// <summary>
         /// The root Polly Samples web API site address.
         /// </summary>
-        public const string WEB_API_ROOT = "http://pollytestapp.azurewebsites.net";
+        public const string WEB_API_ROOT = "http://localhost:45178/";
     }
 }
