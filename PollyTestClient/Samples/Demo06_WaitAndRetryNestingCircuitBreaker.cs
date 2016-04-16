@@ -1,26 +1,39 @@
-﻿using Polly;
+﻿
+using Polly;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
+using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 using Polly.CircuitBreaker;
 
 namespace PollyTestClient.Samples
 {
     /// <summary>
-    /// Demonstrates using the WaitAndRetry policy and CircuitBreaker.
+    /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
+    /// 
+    /// Discussion:  What if the underlying system was completely down?  
+    /// Keeping retrying would be pointless...
+    /// ... and would leave the client hanging, retrying for successes which never come.
+    /// 
+    /// Enter circuit-breaker: 
+    /// After too many failures, breaks the circuit for a period, during which it blocks calls + fails fast.
+    /// - protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover)
+    /// - allows the client to get a fail response _fast, not wait for ages, if downstream is awol.
+    /// 
+    /// Obervations from this demo:
+    /// Note how after the circuit decides to break, subsequent calls fail faster.
+    /// Note how breaker gives underlying system time to recover ...
+    /// ... by the time circuit closes again, underlying system has recovered!
     /// </summary>
-    public static class WaitAndRetryNestingCircuitBreaker
+    public static class Demo06_WaitAndRetryNestingCircuitBreaker
     {
         public static void Execute()
         {
+            Console.WriteLine(MethodBase.GetCurrentMethod().DeclaringType.Name);
+            Console.WriteLine("=======");
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
 
@@ -32,23 +45,29 @@ namespace PollyTestClient.Samples
 
             // Define our waitAndRetry policy: keep retrying with 200ms gaps.
             var waitAndRetryPolicy = Policy
-                .Handle<Exception>(e => !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker says it's had enough!
+                .Handle<Exception>(e => !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
                 .WaitAndRetryForever(
                 attempt => TimeSpan.FromMilliseconds(200),
-                (Exception, calculatedWaitDuration) =>
+                (exception, calculatedWaitDuration) =>
                 {
                     // This is your new exception handler! 
                     // Tell the user what they've won!
-                    Console.WriteLine("Policy logging: " + Exception.Message);
+                    Console.WriteLine(".Log,then retry: " + exception.Message);
                     retries++;
                 });
 
-            // Define our CircuitBreaker policy: Break if the action fails more than 5 times in a row.
+            // Define our CircuitBreaker policy: Break if the action fails 4 times in a row.
             var circuitBreakerPolicy = Policy
                 .Handle<Exception>()
                 .CircuitBreaker(
-                    exceptionsAllowedBeforeBreaking: 5,
-                    durationOfBreak: TimeSpan.FromSeconds(3)
+                    exceptionsAllowedBeforeBreaking: 4,
+                    durationOfBreak: TimeSpan.FromSeconds(3),
+                    onBreak: (ex, breakDelay) =>
+                    {
+                        Console.WriteLine(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!");
+                        Console.WriteLine("..due to: " + ex.Message);                    },
+                    onReset: () => Console.WriteLine(".Breaker logging: Call ok! Closed the circuit again!"),
+                    onHalfOpen: () => Console.WriteLine(".Breaker logging: Half-open: Next call is a trial!")
                 );
 
 
@@ -72,7 +91,7 @@ namespace PollyTestClient.Samples
                                     // This code is executed within the circuitBreakerPolicy 
 
                                     // Make a request and get a response
-                                    return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i.ToString());
+                                    return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i);
                                 });
 
                         watch.Stop();
@@ -104,11 +123,11 @@ namespace PollyTestClient.Samples
             }
 
             Console.WriteLine("");
-            Console.WriteLine("Total requests made                      : " + i);
-            Console.WriteLine("Requests which eventually succeeded      : " + eventualSuccesses);
-            Console.WriteLine("Retries made to help achieve success     : " + retries);
-            Console.WriteLine("Requests which failed with broken circuit: " + eventualFailuresDueToCircuitBreaking);
-            Console.WriteLine("Requests which eventually failed         : " + eventualFailuresForOtherReasons);
+            Console.WriteLine("Total requests made                        : " + i);
+            Console.WriteLine("Requests which eventually succeeded        : " + eventualSuccesses);
+            Console.WriteLine("Retries made to help achieve success       : " + retries);
+            Console.WriteLine("Requests failed earlier with broken circuit: " + eventualFailuresDueToCircuitBreaking);
+            Console.WriteLine("Requests which failed after longer delay   : " + eventualFailuresForOtherReasons);
 
         }
     }

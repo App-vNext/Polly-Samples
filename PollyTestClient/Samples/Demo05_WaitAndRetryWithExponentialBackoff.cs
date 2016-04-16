@@ -1,23 +1,32 @@
-﻿using Polly;
+﻿
+using Polly;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
+using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollyTestClient.Samples
 {
     /// <summary>
-    /// Demonstrates using the Retry policy.
+    /// Demonstrates WaitAndRetry policy with calculated retry delays to back off.
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
+    /// 
+    /// Observations: All calls still succeed!  Yay!
+    /// But we didn't hammer the underlying server so hard - we backed off.
+    /// That's healthier for it, if it might be struggling ...
+    /// ... and if a lot of clients might be doing this simultaneously.
+    /// 
+    /// ... What if the underlying system was totally down tho?  
+    /// ... Keeping trying forever would be counterproductive (see Demo06)
     /// </summary>
-    public static class RetryNTimes
+    public static class Demo05_WaitAndRetryWithExponentialBackoff
     {
         public static void Execute()
         {
+            Console.WriteLine(MethodBase.GetCurrentMethod().DeclaringType.Name);
+            Console.WriteLine("=======");
+
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
 
@@ -25,18 +34,19 @@ namespace PollyTestClient.Samples
             int eventualSuccesses = 0;
             int retries = 0;
             int eventualFailures = 0;
-            // Define our policy:
-            var policy = Policy.Handle<Exception>().Retry(3, (Exception, attempt) =>
-            {
-                // This is your new exception handler! 
-                // Tell the user what they've won!
-                Console.WriteLine("Exception: " + Exception.Message);
-                retries++;
 
-                // Wait 1/5 second before next retry.  (Added manually within this demo; but Polly has Policy to do this automatically... see other demos!)
-                Thread.Sleep(200);
-            });
+            var policy = Policy.Handle<Exception>()
+                .WaitAndRetry(6, // We can also do this with WaitAndRetryForever... but chose WaitAndRetry this time.
+                attempt => TimeSpan.FromSeconds(0.1 * Math.Pow(2, attempt)), // Back off!  2, 4, 8, 16 etc times 1/4-second
+                (exception, calculatedWaitDuration) =>  // Capture some info for logging!
+                {
+                    // This is your new exception handler! 
+                    // Tell the user what they've won!
+                    Console.WriteLine("Exception: " + exception.Message);
+                    Console.WriteLine(" ... automatically delaying for " + calculatedWaitDuration.TotalMilliseconds + "ms.");
+                    retries++;
 
+                });
             int i = 0;
             // Do the following until a key is pressed
             while (!Console.KeyAvailable)
@@ -45,7 +55,7 @@ namespace PollyTestClient.Samples
 
                 try
                 {
-                    // Retry the following call according to the policy - 3 times.
+                    // Retry the following call according to the policy - 15 times.
                     policy.Execute(() =>
                     {
                         // This code is executed within the Policy 
@@ -56,9 +66,6 @@ namespace PollyTestClient.Samples
                         // Display the response message on the console
                         Console.WriteLine("Response : " + msg);
                         eventualSuccesses++;
-
-                        // Wait one second
-                        Thread.Sleep(500);
                     });
                 }
                 catch (Exception e)
@@ -66,6 +73,9 @@ namespace PollyTestClient.Samples
                     Console.WriteLine("Request " + i + " eventually failed with: " + e.Message);
                     eventualFailures++;
                 }
+
+                // Wait half second before the next request.
+                Thread.Sleep(500);
             }
 
             Console.WriteLine("");

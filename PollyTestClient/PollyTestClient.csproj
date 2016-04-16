@@ -48,12 +48,14 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Samples\WaitAndRetryNestingCircuitBreaker.cs" />
-    <Compile Include="Samples\WaitAndRetryNTimesWithExponentialBackoff.cs" />
-    <Compile Include="Samples\WaitAndRetryNTimesWithFixedWait.cs" />
-    <Compile Include="Samples\RetryForeverAsync.cs" />
-    <Compile Include="Samples\RetryForever.cs" />
-    <Compile Include="Samples\RetryNTimes.cs" />
+    <Compile Include="Samples\Demo00_NoPolicy.cs" />
+    <Compile Include="Samples\Demo02_WaitAndRetryNTimes.cs" />
+    <Compile Include="Samples\Demo03_WaitAndRetryNTimes_WithEnoughRetries.cs" />
+    <Compile Include="Samples\Demo04_WaitAndRetryForever.cs" />
+    <Compile Include="Samples\Demo05_WaitAndRetryWithExponentialBackoff.cs" />
+    <Compile Include="Samples\Demo06_WaitAndRetryNestingCircuitBreaker.cs" />
+    <Compile Include="Samples\Deprecated_NeedToUpdateToDemoStyle_RetryForeverAsync.cs" />
+    <Compile Include="Samples\Demo01_RetryNTimes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

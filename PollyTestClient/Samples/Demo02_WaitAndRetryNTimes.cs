@@ -1,23 +1,28 @@
-﻿using Polly;
+﻿
+using Polly;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
+using System.Reflection;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace PollyTestClient.Samples
 {
     /// <summary>
-    /// Demonstrates using the WaitAndRetry policy.
+    /// Demonstrates the WaitAndRetry policy.
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
+    /// 
+    /// Observations: We now have waits among the retries.
+    /// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
+    /// So we still fail some calls.
     /// </summary>
-    public static class WaitAndRetryNTimesWithFixedWait
+    public static class Demo02_WaitAndRetryNTimes
     {
         public static void Execute()
         {
+            Console.WriteLine(MethodBase.GetCurrentMethod().DeclaringType.Name);
+            Console.WriteLine("=======");
+
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
 
@@ -26,17 +31,16 @@ namespace PollyTestClient.Samples
             int retries = 0;
             int eventualFailures = 0;
             // Define our policy:
-            var policy = Policy.Handle<Exception>().WaitAndRetry(3, 
-                attempt => TimeSpan.FromMilliseconds(200),
-                (Exception, calculatedWaitDuration) =>
+            var policy = Policy.Handle<Exception>().WaitAndRetry(
+                retryCount: 3, // Retry 3 times
+                sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200), // Wait 200ms between each try.
+                onRetry: (exception, calculatedWaitDuration) => // Capture some info for logging!
             {
                 // This is your new exception handler! 
                 // Tell the user what they've won!
-                Console.WriteLine("Exception: " + Exception.Message);
+                Console.WriteLine("Policy logging: " + exception.Message);
                 retries++;
 
-                // Wait 1/5 second before next retry.  (Added manually within RetryForever() demo; but Polly has overload to do this automatically...)
-                // Thread.Sleep(200); // Commented out now: WaitAndRetry(...) Policy used above, to do this.
             });
 
             int i = 0;
