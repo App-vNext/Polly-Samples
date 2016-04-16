@@ -7,7 +7,7 @@ Provides sample implementations of the [Polly library](https://www.github.com/Ap
 
 + The demos show different flavors of retry; then retry combined with Circuit-Breaker.  
 + The demos run against an example 'faulting server' (also within the solution).  To simulate failure, the dummy server rejects more than 3 calls from the same IP in any five-second period.
-+ Be sure to read the `<summary/>` at the top of each demo: this explains the intent of each demo, what it achieves (in relation to the dummy 'faulting server'), what it doesn't yet achieve.
++ Be sure to read the summary at the top of each demo: this explains the intent of each demo, what it achieves (in relation to the dummy 'faulting server'), what it doesn't yet achieve.
 + Explore the demos in sequence for best understanding: each solves a problem which the previous didn't.
 
 ## To run the demos
