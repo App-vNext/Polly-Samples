@@ -13,8 +13,8 @@ Provides sample implementations of the [Polly library](https://www.github.com/Ap
 ## To run the demos
 
 + To start the dummy server, start `PollyTestApp`.  
++ Be sure the port number for the dummy server in `PollyTestClient\Configuration.cs` matches the port on which `PollyTestApp` starts on your machine.
 + To run a demo, uncomment the demo you wish to run in `PollyTestClient\program.cs`.  Then start `PollyTestClient`.  
-
 
 ## Want further information?
 
