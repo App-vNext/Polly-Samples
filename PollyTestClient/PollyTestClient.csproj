@@ -48,6 +48,7 @@
     <Compile Include="Configuration.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Samples\ConsoleHelper.cs" />
     <Compile Include="Samples\Demo00_NoPolicy.cs" />
     <Compile Include="Samples\Demo02_WaitAndRetryNTimes.cs" />
     <Compile Include="Samples\Demo03_WaitAndRetryNTimes_WithEnoughRetries.cs" />

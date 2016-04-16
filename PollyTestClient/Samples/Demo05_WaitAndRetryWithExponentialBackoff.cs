@@ -42,8 +42,8 @@ namespace PollyTestClient.Samples
                 {
                     // This is your new exception handler! 
                     // Tell the user what they've won!
-                    Console.WriteLine("Exception: " + exception.Message);
-                    Console.WriteLine(" ... automatically delaying for " + calculatedWaitDuration.TotalMilliseconds + "ms.");
+                    ConsoleHelper.WriteLineInColor("Exception: " + exception.Message, ConsoleColor.Yellow);
+                    ConsoleHelper.WriteLineInColor(" ... automatically delaying for " + calculatedWaitDuration.TotalMilliseconds + "ms.", ConsoleColor.Yellow);
                     retries++;
 
                 });
@@ -64,13 +64,13 @@ namespace PollyTestClient.Samples
                         var msg = client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i.ToString());
 
                         // Display the response message on the console
-                        Console.WriteLine("Response : " + msg);
+                        ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
                         eventualSuccesses++;
                     });
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Request " + i + " eventually failed with: " + e.Message);
+                    ConsoleHelper.WriteLineInColor("Request " + i + " eventually failed with: " + e.Message, ConsoleColor.Red);
                     eventualFailures++;
                 }
 

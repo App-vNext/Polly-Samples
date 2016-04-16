@@ -52,7 +52,7 @@ namespace PollyTestClient.Samples
                 {
                     // This is your new exception handler! 
                     // Tell the user what they've won!
-                    Console.WriteLine(".Log,then retry: " + exception.Message);
+                    ConsoleHelper.WriteLineInColor(".Log,then retry: " + exception.Message, ConsoleColor.Yellow);
                     retries++;
                 });
 
@@ -64,10 +64,10 @@ namespace PollyTestClient.Samples
                     durationOfBreak: TimeSpan.FromSeconds(3),
                     onBreak: (ex, breakDelay) =>
                     {
-                        Console.WriteLine(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!");
-                        Console.WriteLine("..due to: " + ex.Message);                    },
-                    onReset: () => Console.WriteLine(".Breaker logging: Call ok! Closed the circuit again!"),
-                    onHalfOpen: () => Console.WriteLine(".Breaker logging: Half-open: Next call is a trial!")
+                        ConsoleHelper.WriteLineInColor(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!", ConsoleColor.Magenta);
+                        ConsoleHelper.WriteLineInColor("..due to: " + ex.Message, ConsoleColor.Magenta);                    },
+                    onReset: () => ConsoleHelper.WriteLineInColor(".Breaker logging: Call ok! Closed the circuit again!", ConsoleColor.Magenta),
+                    onHalfOpen: () => ConsoleHelper.WriteLineInColor(".Breaker logging: Half-open: Next call is a trial!", ConsoleColor.Magenta)
                 );
 
 
@@ -97,8 +97,8 @@ namespace PollyTestClient.Samples
                         watch.Stop();
 
                         // Display the response message on the console
-                        Console.Write("Response : " + msg);
-                        Console.WriteLine(" (after " + watch.ElapsedMilliseconds + "ms)");
+                        ConsoleHelper.WriteInColor("Response : " + msg, ConsoleColor.Green);
+                        ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Green);
                         
                         eventualSuccesses++;
                     });
@@ -106,15 +106,15 @@ namespace PollyTestClient.Samples
                 catch (BrokenCircuitException b)
                 {
                     watch.Stop();
-                    Console.Write("Request " + i + " failed with: " + b.GetType().Name);
-                    Console.WriteLine(" (after " + watch.ElapsedMilliseconds + "ms)");
+                    ConsoleHelper.WriteInColor("Request " + i + " failed with: " + b.GetType().Name, ConsoleColor.Red);
+                    ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Red);
                     eventualFailuresDueToCircuitBreaking++;
                 }
                 catch (Exception e)
                 {
                     watch.Stop();
-                    Console.Write("Request " + i + " eventually failed with: " + e.Message);
-                    Console.WriteLine(" (after " + watch.ElapsedMilliseconds + "ms)");
+                    ConsoleHelper.WriteInColor("Request " + i + " eventually failed with: " + e.Message, ConsoleColor.Red);
+                    ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Red);
                     eventualFailuresForOtherReasons++;
                 }
 
@@ -123,11 +123,11 @@ namespace PollyTestClient.Samples
             }
 
             Console.WriteLine("");
-            Console.WriteLine("Total requests made                        : " + i);
-            Console.WriteLine("Requests which eventually succeeded        : " + eventualSuccesses);
-            Console.WriteLine("Retries made to help achieve success       : " + retries);
-            Console.WriteLine("Requests failed earlier with broken circuit: " + eventualFailuresDueToCircuitBreaking);
-            Console.WriteLine("Requests which failed after longer delay   : " + eventualFailuresForOtherReasons);
+            Console.WriteLine("Total requests made                     : " + i);
+            Console.WriteLine("Requests which eventually succeeded     : " + eventualSuccesses);
+            Console.WriteLine("Retries made to help achieve success    : " + retries);
+            Console.WriteLine("Requests failed early by broken circuit : " + eventualFailuresDueToCircuitBreaking);
+            Console.WriteLine("Requests which failed after longer delay: " + eventualFailuresForOtherReasons);
 
         }
     }
