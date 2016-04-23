@@ -13,7 +13,7 @@ namespace PollyTestClient.Samples
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// </summary>
-    public static class RetryForeverAsync
+    public static class Deprecated_NeedToUpdateToDemoStyle_RetryForeverAsync
     {
         public static async Task Execute()
         {
