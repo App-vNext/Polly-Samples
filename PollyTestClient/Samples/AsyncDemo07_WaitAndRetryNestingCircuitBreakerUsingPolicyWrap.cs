@@ -8,33 +8,26 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly.CircuitBreaker;
+using Polly.Wrap;
 
 namespace PollyTestClient.Samples
 {
     /// <summary>
     /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.
+    /// Same as Demo06 - but this time demonstrates combining the policies, using PolicyWrap.
+    /// 
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// 
-    /// Discussion:  What if the underlying system was completely down?  
-    /// Keeping retrying would be pointless...
-    /// ... and would leave the client hanging, retrying for successes which never come.
-    /// 
-    /// Enter circuit-breaker: 
-    /// After too many failures, breaks the circuit for a period, during which it blocks calls + fails fast.
-    /// - protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover)
-    /// - allows the client to get a fail response _fast, not wait for ages, if downstream is awol.
-    /// 
     /// Obervations from this demo:
-    /// Note how after the circuit decides to break, subsequent calls fail faster.
-    /// Note how breaker gives underlying system time to recover ...
-    /// ... by the time circuit closes again, underlying system has recovered!
+    /// The operation is identical to Demo06.  
+    /// The code demonstrates how operation the PolicyWrap .
     /// </summary>
-    public static class AsyncDemo06_WaitAndRetryNestingCircuitBreaker
+    public static class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
     {
         public static async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            Console.WriteLine(typeof(AsyncDemo06_WaitAndRetryNestingCircuitBreaker).Name);
+            Console.WriteLine(typeof(AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap).Name);
             Console.WriteLine("=======");
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
@@ -67,11 +60,14 @@ namespace PollyTestClient.Samples
                     onBreak: (ex, breakDelay) =>
                     {
                         ConsoleHelper.WriteLineInColor(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!", ConsoleColor.Magenta);
-                        ConsoleHelper.WriteLineInColor("..due to: " + ex.Message, ConsoleColor.Magenta);                    },
+                        ConsoleHelper.WriteLineInColor("..due to: " + ex.Message, ConsoleColor.Magenta);
+                    },
                     onReset: () => ConsoleHelper.WriteLineInColor(".Breaker logging: Call ok! Closed the circuit again!", ConsoleColor.Magenta),
                     onHalfOpen: () => ConsoleHelper.WriteLineInColor(".Breaker logging: Half-open: Next call is a trial!", ConsoleColor.Magenta)
                 );
 
+            // New for demo07: combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap.
+            PolicyWrap policyWrap = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
 
             int i = 0;
             // Do the following until a key is pressed
@@ -83,27 +79,21 @@ namespace PollyTestClient.Samples
 
                 try
                 {
-                    // Retry the following call according to the policy - 3 times.
-                    await waitAndRetryPolicy.ExecuteAsync(async token =>
+                    // Retry the following call according to the policy wrap
+                    string msg = await policyWrap.ExecuteAsync<String>(ct =>
                     {
-                        // This code is executed within the waitAndRetryPolicy 
+                        // This code is executed through both policies in the wrap: WaitAndRetry outer, then CircuitBreaker inner.  Demo 06 shows a broken-out version of what this is equivalent to.
 
-                        string msg = await circuitBreakerPolicy.ExecuteAsync<String>(() => // Note how we can also Execute() a Func<TResult> and pass back the value.
-                                {
-                                    // This code is executed within the circuitBreakerPolicy 
-
-                                    // Make a request and get a response
-                                    return client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + i);
-                                });
-
-                        watch.Stop();
-
-                        // Display the response message on the console
-                        ConsoleHelper.WriteInColor("Response : " + msg, ConsoleColor.Green);
-                        ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Green);
-                        
-                        eventualSuccesses++;
+                        return client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + i);
                     }, cancellationToken);
+
+                    watch.Stop();
+
+                    // Display the response message on the console
+                    ConsoleHelper.WriteInColor("Response : " + msg, ConsoleColor.Green);
+                    ConsoleHelper.WriteLineInColor(" (after " + watch.ElapsedMilliseconds + "ms)", ConsoleColor.Green);
+
+                    eventualSuccesses++;
                 }
                 catch (BrokenCircuitException b)
                 {

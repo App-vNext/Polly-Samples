@@ -32,8 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Polly, Version=4.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Polly.4.2.0\lib\net45\Polly.dll</HintPath>
+    <Reference Include="Polly, Version=5.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Polly.5.0.1-v5-0-alpha0001\lib\net45\Polly.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -56,6 +56,7 @@
     <Compile Include="Samples\AsyncDemo04_WaitAndRetryForever.cs" />
     <Compile Include="Samples\AsyncDemo05_WaitAndRetryWithExponentialBackoff.cs" />
     <Compile Include="Samples\AsyncDemo06_WaitAndRetryNestingCircuitBreaker.cs" />
+    <Compile Include="Samples\AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
     <Compile Include="Samples\ConsoleHelper.cs" />
     <Compile Include="Samples\Demo00_NoPolicy.cs" />
     <Compile Include="Samples\Demo02_WaitAndRetryNTimes.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Samples\Demo04_WaitAndRetryForever.cs" />
     <Compile Include="Samples\Demo05_WaitAndRetryWithExponentialBackoff.cs" />
     <Compile Include="Samples\Demo06_WaitAndRetryNestingCircuitBreaker.cs" />
+    <Compile Include="Samples\Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
     <Compile Include="Samples\Deprecated_NeedToUpdateToDemoStyle_RetryForeverAsync.cs" />
     <Compile Include="Samples\Demo01_RetryNTimes.cs" />
   </ItemGroup>

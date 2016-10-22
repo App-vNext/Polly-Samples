@@ -24,7 +24,7 @@ namespace PollyTestClient.Samples
     /// </summary>
     public static class AsyncDemo05_WaitAndRetryWithExponentialBackoff
     {
-        public static async Task Execute(CancellationToken cancellationToken)
+        public static async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine(typeof(AsyncDemo05_WaitAndRetryWithExponentialBackoff).Name);
             Console.WriteLine("=======");
