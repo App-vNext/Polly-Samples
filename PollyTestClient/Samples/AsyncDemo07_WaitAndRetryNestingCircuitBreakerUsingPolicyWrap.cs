@@ -1,10 +1,7 @@
-﻿
-using Polly;
+﻿using Polly;
 using System;
 using System.Diagnostics;
-using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly.CircuitBreaker;
@@ -21,7 +18,7 @@ namespace PollyTestClient.Samples
     /// 
     /// Obervations from this demo:
     /// The operation is identical to Demo06.  
-    /// The code demonstrates how operation the PolicyWrap .
+    /// The code demonstrates how using the PolicyWrap makes your combined-Policy-strategy more concise, at the point of execution.
     /// </summary>
     public static class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
     {

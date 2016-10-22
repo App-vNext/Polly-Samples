@@ -1,5 +1,4 @@
-﻿
-using Polly;
+﻿using Polly;
 using System;
 using System.Diagnostics;
 using System.Net;
@@ -13,14 +12,14 @@ namespace PollyTestClient.Samples
 {
     /// <summary>
     /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.
-    /// Same as Demo06 - but this time demonstrates combining the policies, using PolicyWrap.
+    /// Same as Demo06 - but this time demonstrates combining the policies using PolicyWrap.
     /// 
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// 
     /// Obervations from this demo:
     /// The operation is identical to Demo06.  
-    /// The code demonstrates how operation the PolicyWrap .
+    /// The code demonstrates how using the PolicyWrap makes your combined-Policy-strategy more concise, at the point of execution.
     /// </summary>
     public static class Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
     {
@@ -85,6 +84,9 @@ namespace PollyTestClient.Samples
 
                                 return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i);
                             });
+
+                    // Without the extra comments in the anonymous method { } above, it could even be as concise as this:
+                    // string msg = policyWrap.Execute(() => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + i));
 
                     watch.Stop();
 

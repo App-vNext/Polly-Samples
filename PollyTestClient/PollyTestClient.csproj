@@ -57,6 +57,8 @@
     <Compile Include="Samples\AsyncDemo05_WaitAndRetryWithExponentialBackoff.cs" />
     <Compile Include="Samples\AsyncDemo06_WaitAndRetryNestingCircuitBreaker.cs" />
     <Compile Include="Samples\AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
+    <Compile Include="Samples\AsyncDemo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
+    <Compile Include="Samples\AsyncDemo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
     <Compile Include="Samples\ConsoleHelper.cs" />
     <Compile Include="Samples\Demo00_NoPolicy.cs" />
     <Compile Include="Samples\Demo02_WaitAndRetryNTimes.cs" />
@@ -65,6 +67,8 @@
     <Compile Include="Samples\Demo05_WaitAndRetryWithExponentialBackoff.cs" />
     <Compile Include="Samples\Demo06_WaitAndRetryNestingCircuitBreaker.cs" />
     <Compile Include="Samples\Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
+    <Compile Include="Samples\Demo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
+    <Compile Include="Samples\Demo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
     <Compile Include="Samples\Deprecated_NeedToUpdateToDemoStyle_RetryForeverAsync.cs" />
     <Compile Include="Samples\Demo01_RetryNTimes.cs" />
   </ItemGroup>

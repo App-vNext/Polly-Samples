@@ -20,7 +20,7 @@ namespace PollyTestClient.Samples
     /// ... and if a lot of clients might be doing this simultaneously.
     /// 
     /// ... What if the underlying system was totally down tho?  
-    /// ... Keeping trying forever would be counterproductive (see Demo06)
+    /// ... Keeping trying forever would be counterproductive (so, see Demo06)
     /// </summary>
     public static class AsyncDemo05_WaitAndRetryWithExponentialBackoff
     {
