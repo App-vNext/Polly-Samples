@@ -44,7 +44,7 @@ namespace PollyTestClient
 
             // These async demos use .Wait() (rather than await) with the async calls, only for the purposes of allowing the demos still to remain the primary execution thread and own the Console output.
 
-            //Samples.AsyncDemo00_NoPolicy.ExecuteAsync(cancellationToken).Wait();
+            Samples.AsyncDemo00_NoPolicy.ExecuteAsync(cancellationToken).Wait();
             //Samples.AsyncDemo01_RetryNTimes.ExecuteAsync(cancellationToken).Wait();
             //Samples.AsyncDemo02_WaitAndRetryNTimes.ExecuteAsync(cancellationToken).Wait();
             //Samples.AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries.ExecuteAsync(cancellationToken).Wait();
