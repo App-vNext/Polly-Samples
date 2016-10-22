@@ -21,3 +21,7 @@ Provides sample implementations of the [Polly library](https://www.github.com/Ap
 + Any questions about the operation of the demos, ask on this repo; any questions about Polly, ask at [Polly](https://www.github.com/App-vNext/Polly).
 + For full Polly syntax, see [Polly](https://www.github.com/App-vNext/Polly).  
 + For deeper discussions of transient fault-handling and further Polly patterns, see the [Polly wiki](https://github.com/App-vNext/Polly/wiki)
+
+## Slide deck from DevIntersections presentation
+
+View the [slides presented](https://github.com/App-vNext/Polly-Samples/blob/master/Demo-Slides.pdf) at the April 2016 DevIntersections Polly demo by Carl Franklin.
