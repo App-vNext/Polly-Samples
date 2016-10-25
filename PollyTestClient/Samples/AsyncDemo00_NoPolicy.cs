@@ -14,7 +14,7 @@ namespace PollyTestClient.Samples
     /// </summary>
     public static class AsyncDemo00_NoPolicy
     {
-        public static async Task Execute(CancellationToken cancellationToken)
+        public static async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine(typeof(AsyncDemo00_NoPolicy).Name);
             Console.WriteLine("=======");

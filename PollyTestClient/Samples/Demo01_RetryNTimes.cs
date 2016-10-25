@@ -58,7 +58,7 @@ namespace PollyTestClient.Samples
                         ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
                         eventualSuccesses++;
 
-                        // Wait one second
+                        // Wait half second
                         Thread.Sleep(500);
                     });
                 }

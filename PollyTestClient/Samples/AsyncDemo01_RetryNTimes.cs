@@ -18,7 +18,7 @@ namespace PollyTestClient.Samples
     /// </summary>
     public static class AsyncDemo01_RetryNTimes
     {
-        public static async Task Execute(CancellationToken cancellationToken)
+        public static async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine(typeof(AsyncDemo01_RetryNTimes).Name);
             Console.WriteLine("=======");
@@ -60,7 +60,7 @@ namespace PollyTestClient.Samples
                         ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
                         eventualSuccesses++;
 
-                        // Wait one second
+                        // Wait half second
                         await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                     });
                 }

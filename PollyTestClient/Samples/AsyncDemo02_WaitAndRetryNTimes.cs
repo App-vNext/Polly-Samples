@@ -20,7 +20,7 @@ namespace PollyTestClient.Samples
     /// </summary>
     public static class AsyncDemo02_WaitAndRetryNTimes
     {
-        public static async Task Execute(CancellationToken cancellationToken)
+        public static async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             Console.WriteLine(typeof(AsyncDemo02_WaitAndRetryNTimes).Name);
             Console.WriteLine("=======");
