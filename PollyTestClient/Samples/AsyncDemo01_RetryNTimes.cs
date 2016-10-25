@@ -60,7 +60,7 @@ namespace PollyTestClient.Samples
                         ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
                         eventualSuccesses++;
 
-                        // Wait one second
+                        // Wait half second
                         await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                     });
                 }
