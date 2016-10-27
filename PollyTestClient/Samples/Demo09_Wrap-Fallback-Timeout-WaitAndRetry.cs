@@ -85,7 +85,7 @@ namespace PollyTestClient.Samples
 
 
             // Compared to previous demo08: here we use *instance* wrap syntax, to wrap all in one go.
-            PolicyWrap<String> policyWrap = fallbackForAnyException.Wrap(fallbackForTimeout).Wrap(timeoutPolicy).Wrap(waitAndRetryPolicy).Wrap(waitAndRetryPolicy);
+            PolicyWrap<String> policyWrap = fallbackForAnyException.Wrap(fallbackForTimeout).Wrap(timeoutPolicy).Wrap(waitAndRetryPolicy);
 
             int i = 0;
             while (!Console.KeyAvailable)
