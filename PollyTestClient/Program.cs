@@ -21,7 +21,7 @@ namespace PollyTestClient
 
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // Synchonous demos
+            // Synchronous demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             //Samples.Demo00_NoPolicy.Execute();
@@ -36,7 +36,7 @@ namespace PollyTestClient
             //Samples.Demo09_Wrap_Fallback_Timeout_WaitAndRetry.Execute();
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // Asynchonous demos
+            // Asynchronous demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
@@ -54,6 +54,14 @@ namespace PollyTestClient
             //Samples.AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.ExecuteAsync(cancellationToken).Wait();
             //Samples.AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker.ExecuteAsync(cancellationToken).Wait();
             //Samples.AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry.ExecuteAsync(cancellationToken).Wait();
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Bulkhead demos
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            //Samples.BulkheadAsyncDemo00_NoBulkhead.ExecuteAsync(cancellationToken).Wait();
+            //Samples.BulkheadAsyncDemo01_WithBulkheads.ExecuteAsync(cancellationToken).Wait();
+
 
             // Keep the console open.
             Console.ReadLine();

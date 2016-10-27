@@ -32,6 +32,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ParallelExtensionsExtras, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MSFT.ParallelExtensionsExtras.1.2.0\lib\ParallelExtensionsExtras.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Polly, Version=5.0.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Polly.5.0.1-v5-0-alpha0001\lib\net45\Polly.dll</HintPath>
       <Private>True</Private>
@@ -59,6 +63,8 @@
     <Compile Include="Samples\AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
     <Compile Include="Samples\AsyncDemo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
     <Compile Include="Samples\AsyncDemo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
+    <Compile Include="Samples\BulkheadAsyncDemo00_NoBulkhead.cs" />
+    <Compile Include="Samples\BulkheadAsyncDemo01_WithBulkheads.cs" />
     <Compile Include="Samples\ConsoleHelper.cs" />
     <Compile Include="Samples\Demo00_NoPolicy.cs" />
     <Compile Include="Samples\Demo02_WaitAndRetryNTimes.cs" />
@@ -69,7 +75,6 @@
     <Compile Include="Samples\Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
     <Compile Include="Samples\Demo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
     <Compile Include="Samples\Demo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
-    <Compile Include="Samples\Deprecated_NeedToUpdateToDemoStyle_RetryForeverAsync.cs" />
     <Compile Include="Samples\Demo01_RetryNTimes.cs" />
   </ItemGroup>
   <ItemGroup>
