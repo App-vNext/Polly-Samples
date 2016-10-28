@@ -34,7 +34,7 @@ namespace PollyTestClient.Samples
             int eventualFailures = 0;
             // Define our policy:
             var policy = Policy.Handle<Exception>().WaitAndRetryAsync(
-                retryCount: 15, // Retry up to 15 times! - should be enough that we eventually succeed.
+                retryCount: 20, // Retry up to 20 times! - should be enough that we eventually succeed.
                 sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200), // Wait 200ms between each try.
                 onRetry: (exception, calculatedWaitDuration) => // Capture some info for logging!
             {
