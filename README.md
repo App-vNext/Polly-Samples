@@ -35,7 +35,7 @@ The bulkhead isolation demos place calls against two different imaginary endpoin
 In all bulkhead demos, the upstream system makes a random mixture of calls to the **good** and **faulting** endpoints.
 
 + In Demo 00 there is **no bulkhead isolation**.  
-  + Sooner or later, the **faulting stream of calls saturates **all resource in the caller, starving the calls to the **good** endpoint of resource too.   
+  + Sooner or later, the **faulting stream of calls saturates** all resource in the caller, starving the calls to the **good** endpoint of resource too.   
   + Watch how the the calls to the **good** endpoint eventually start backing up too (watch the 'pending' count climb), as the faulting stream starves the whole system of resource.
 + In demo 01, the calls to **faulting** and **good** endpoints are **isolated by bulkhead isolation**.  
   + The faulting stream of calls still backs up.
