@@ -10,6 +10,8 @@ namespace PollyTestApp
 {
     public static class WebApiConfig
     {
+        internal static readonly IThrottleStore ThrottleStore = new InMemoryThrottleStore();
+
         public static void Register(HttpConfiguration config)
         {
             // Web API routes
@@ -24,8 +26,9 @@ namespace PollyTestApp
             // Implement our custom throttling handler to limit API method calls.
             // Specify the throttle store, max number of allowed requests within specified timespan,
             // and message displayed in the error response when exceeded.
+            
             config.MessageHandlers.Add(new ThrottlingHandler(
-                new InMemoryThrottleStore(),
+                ThrottleStore,
                 id => 3,
                 TimeSpan.FromSeconds(5),
                 "You have exceeded the maximum number of allowed calls. Please wait until after the cooldown period to try again."

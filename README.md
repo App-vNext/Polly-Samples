@@ -20,6 +20,27 @@ Provides sample implementations using the [Polly library](https://www.github.com
 + Demo 08 adds Polly v5.0 `Fallback`, making the call protected (in a PolicyWrap) by a Fallback, Retry, Circuitbreaker. 
 + Demo 09 shows the Polly v5.0 `Timeout` policy for an overall call timeout, in combination with `Fallback` and `WaitAndRetry`.
 
+## Bulkhead isolation demos
+
+### Background
+
+The bulkhead isolation demos place calls against two different imaginary endpoints on a downstream server:
+
++ The **good** endpoint returns results in a timely manner
++ The **faulting** endpoint simulates a faulting downstream system: it does respond, but only after a long delay.
++ (_Note_: Unlike the other demos, there is no throttling rejection of the caller.)
+
+### Sequence
+
+In all bulkhead demos, the upstream system makes a random mixture of calls to the **good** and **faulting** endpoints.
+
++ In Demo 00 there is **no bulkhead isolation**.  
+  + Sooner or later, the **faulting stream of calls saturates **all resource in the caller, starving the calls to the **good** endpoint of resource too.   
+  + Watch how the the calls to the **good** endpoint eventually start backing up too (watch the 'pending' count climb), as the faulting stream starves the whole system of resource.
++ In demo 01, the calls to **faulting** and **good** endpoints are **isolated by bulkhead isolation**.  
+  + The faulting stream of calls still backs up.
+  + But **the calls to the good endpoint are unaffected - they consistently succeed**, because they are isolated in a separate bulkhead.   
+
 ## To run the demos
 
 + To start the dummy server, start `PollyTestApp`.  

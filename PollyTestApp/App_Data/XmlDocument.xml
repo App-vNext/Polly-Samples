@@ -481,6 +481,38 @@
             </summary>
             <param name="documentPath">The physical path to XML document.</param>
         </member>
+        <member name="M:PollyTestApp.Controllers.NonThrottledFaultingController.Get">
+            <summary>
+            Returns a simple string array of values.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PollyTestApp.Controllers.NonThrottledFaultingController.Get(System.Int32)">
+            <summary>
+            Accepts a simple integer parameter, which is written back to the
+            response in the form of a simple message.  Faults by delaying for a 
+            fixed period, before responding.
+            </summary>
+            <param name="id">Integer value that gets returned in the response
+            message.</param>
+            <returns>Returns: "Response from server to request #{id}"</returns>
+        </member>
+        <member name="M:PollyTestApp.Controllers.NonThrottledGoodController.Get">
+            <summary>
+            Returns a simple string array of values.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:PollyTestApp.Controllers.NonThrottledGoodController.Get(System.Int32)">
+            <summary>
+            Accepts a simple integer parameter, which is written back to the
+            response in the form of a simple message.  Faults by delaying for a 
+            fixed period, before responding.
+            </summary>
+            <param name="id">Integer value that gets returned in the response
+            message.</param>
+            <returns>Returns: "Response from server to request #{id}"</returns>
+        </member>
         <member name="M:PollyTestApp.Controllers.ValuesController.Get">
             <summary>
             Returns a simple string array of values.

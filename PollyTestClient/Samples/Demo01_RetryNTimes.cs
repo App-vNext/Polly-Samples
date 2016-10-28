@@ -58,8 +58,6 @@ namespace PollyTestClient.Samples
                         ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
                         eventualSuccesses++;
 
-                        // Wait half second
-                        Thread.Sleep(500);
                     });
                 }
                 catch (Exception e)
@@ -67,6 +65,9 @@ namespace PollyTestClient.Samples
                     ConsoleHelper.WriteLineInColor("Request " + i + " eventually failed with: " + e.Message, ConsoleColor.Red);
                     eventualFailures++;
                 }
+
+                // Wait half second
+                Thread.Sleep(500);
             }
 
             Console.WriteLine("");
