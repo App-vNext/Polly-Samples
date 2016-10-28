@@ -1,4 +1,5 @@
 ﻿using Polly;
+using Polly.Bulkhead;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,23 +7,25 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Schedulers;
-using Polly.Bulkhead;
 
 namespace PollyTestClient.Samples
 {
     /// <summary>
+    /// Same scenario as previous demo:
     /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
     /// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
-    /// Imagine the _caller_ has limited capacity (all services/webapps eventually hit some capacity limit).
+    /// Imagine the _caller_ has limited capacity (all single instances of services/webapps eventually hit some capacity limit).
     /// 
-    /// Compared to demo 00, this demo 01 isolates the calls to the 'good' and 'faulting'
-    /// endpoints into separate bulkheads.
+    /// Compared to bulkhead demo 00, this demo 01 isolates the calls 
+    /// to the 'good' and 'faulting' endpoints in separate bulkheads.
     /// A random combination of calls to the 'good' and 'faulting' endpoint are made.
-    /// Because the separate 'good' and 'faulting' streams are isolated
-    /// in separate bulkheads, the 'faulting' calls back up,
-    /// but the throughput for 'good' calls in unaffected.
     /// 
-    /// Bulkhead: one fault doesn't sink the whole ship!
+    /// Observe --
+    /// Because the separate 'good' and 'faulting' streams are isolated in separate bulkheads, 
+    /// the 'faulting' calls stil back up (high pending number), but 
+    /// 'good' calls (in a separate bulkhead) are *unaffected* (all succeed; none pending).
+    /// 
+    /// Bulkheads: making sure one fault doesn't sink the whole ship!
     /// </summary>
     public static class BulkheadAsyncDemo01_WithBulkheads
     {
@@ -45,8 +48,8 @@ namespace PollyTestClient.Samples
             const int callerParallelCapacity = 8; // (artificially low - but easier to follow, to illustrate principle)
             var limitedCapacityCaller = new LimitedConcurrencyLevelTaskScheduler(callerParallelCapacity);
 
-            BulkheadPolicy bulkheadForGoodCalls = Policy.BulkheadAsync(callerParallelCapacity/2, int.MaxValue);
-            BulkheadPolicy bulkheadForFaultingCalls = Policy.BulkheadAsync(callerParallelCapacity - callerParallelCapacity/2, int.MaxValue);
+            BulkheadPolicy bulkheadForGoodCalls = Policy.BulkheadAsync(callerParallelCapacity/2, int.MaxValue); 
+            BulkheadPolicy bulkheadForFaultingCalls = Policy.BulkheadAsync(callerParallelCapacity - callerParallelCapacity/2, int.MaxValue); // In this demo we let any number (int.MaxValue) of calls _queue for an execution slot in the bulkhead (simulating a system still _trying to accept/process as many of the calls as possible).  A subsequent demo will look at using no queue (and bulkhead rejections) to simulate automated horizontal scaling.
 
             var client = new HttpClient();
             var rand = new Random();
@@ -66,9 +69,9 @@ namespace PollyTestClient.Samples
                 //if (i % 2 == 0)
                 {
                     goodRequestsMade++;
-                    // Call 'good' endpoint.
                     tasks.Add(Task.Factory.StartNew(j =>
 
+                        // Call 'good' endpoint: through the bulkhead.
                         bulkheadForGoodCalls.ExecuteAsync(async () =>
                         {
 
@@ -76,18 +79,14 @@ namespace PollyTestClient.Samples
                             {
                                 // Make a request and get a response, from the good endpoint
                                 string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledgood/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
-                                if (!combinedToken.IsCancellationRequested)
-                                {
-                                    ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
-                                }
+                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
+
                                 goodRequestsSucceeded++;
                             }
                             catch (Exception e)
                             {
-                                if (!combinedToken.IsCancellationRequested)
-                                {
-                                    ConsoleHelper.WriteLineInColor("Request " + j + " eventually failed with: " + e.Message, ConsoleColor.Red);
-                                }
+                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Request " + j + " eventually failed with: " + e.Message, ConsoleColor.Red);
+
                                 goodRequestsFailed++;
                             }
                         }), i, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
@@ -97,27 +96,24 @@ namespace PollyTestClient.Samples
                 else
                 {
                     faultingRequestsMade++;
-                    // call 'faulting' endpoint.
+                    
                     tasks.Add(Task.Factory.StartNew(j =>
 
+                        // call 'faulting' endpoint: through the bulkhead.
                         bulkheadForFaultingCalls.ExecuteAsync(async () =>
                         {
                             try
                             {
                                 // Make a request and get a response, from the faulting endpoint
                                 string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledfaulting/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
-                                if (!combinedToken.IsCancellationRequested)
-                                {
-                                    ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
-                                }
+                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
+
                                 faultingRequestsSucceeded++;
                             }
                             catch (Exception e)
                             {
-                                if (!combinedToken.IsCancellationRequested)
-                                {
-                                    ConsoleHelper.WriteLineInColor("Request " + j + " eventually failed with: " + e.Message, ConsoleColor.Red);
-                                }
+                                if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Request " + j + " eventually failed with: " + e.Message, ConsoleColor.Red);
+
                                 faultingRequestsFailed++;
                             }
                         }), i, combinedToken, TaskCreationOptions.LongRunning, limitedCapacityCaller).Unwrap()
@@ -137,7 +133,7 @@ namespace PollyTestClient.Samples
             OutputState();
             Console.WriteLine("");
 
-            // Cancel any unstarted tasks.
+            // Cancel any unstarted and running tasks.
             internalCancellationTokenSource.Cancel();
             try
             {
@@ -145,7 +141,7 @@ namespace PollyTestClient.Samples
             }
             catch 
             {
-                // Swallow any shutdown exceptions eg TaskCanceledException - we don't care - we are just shutting down.
+                // Swallow any shutdown exceptions eg TaskCanceledException - we don't care - we are shutting down the demo.
             }
         }
 
