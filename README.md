@@ -46,6 +46,7 @@ In all bulkhead demos, the upstream system makes a random mixture of calls to th
 + To start the dummy server, start `PollyTestApp`.  
 + Be sure the port number for the dummy server in `PollyTestClient\Configuration.cs` matches the port on which `PollyTestApp` has started on your machine (in the previous step).
 + To run a demo, uncomment the demo you wish to run in `PollyTestClient\program.cs`.  Then start `PollyTestClient`.  
++ Many Polly policies are of course all about handling exceptions.  If running the demos in debug mode out of Visual Studio and flow is interrupted by Visual Studio breaking on exceptions, consider unchecking the box "Break when this exception type is user-unhandled" in the dialog that pops up when Visual Studio breaks on an exception.
 
 ## Want further information?
 
