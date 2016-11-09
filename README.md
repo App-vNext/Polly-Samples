@@ -56,4 +56,4 @@ In all bulkhead demos, the upstream system makes a random mixture of calls to th
 
 ## Slide deck from DevIntersections presentation
 
-View the [slides presented](https://github.com/App-vNext/Polly-Samples/blob/master/Demo-Slides.pdf) at DevIntersections in October 2016.
+View the [slides presented](Demo-Slides.pdf) at DevIntersections in October 2016.
