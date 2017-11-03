@@ -56,4 +56,4 @@ In all bulkhead demos, the upstream system makes a random mixture of calls to th
 
 ## Slide deck from DevIntersections presentation
 
-View the [slides presented](AppvNext-DotNetFoundation-Polly-DemoSlides-October-2016-generic.pptx) at DevIntersections in October 2016.  You are welcome to use and adapt this presentation for not-for-profit presentations of Polly to co-workers, user groups and similar, subject to the condition that references to the .NET Foundation and App-vNext are retained.
+View the [slides presented](AppvNext-DotNetFoundation-Polly-DemoSlides-Oct-2017-generic.pptx) at DevIntersections and other conferences.  You are welcome to use and adapt this presentation for not-for-profit presentations of Polly to co-workers, user groups and similar, subject to the condition that references to the .NET Foundation, App-vNext and Polly team are retained.
