@@ -6,6 +6,7 @@
 *.user
 *.sln.docstates
 .vs/
+[Pp]ackages/
 
 # Build results
 [Dd]ebug/
