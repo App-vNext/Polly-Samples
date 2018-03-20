@@ -66,6 +66,7 @@ namespace PollyTestClient
             // Keep the console open.
             Console.ReadLine();
             cancellationTokenSource.Cancel();
+            Console.ReadLine();
         }
     }
 }
