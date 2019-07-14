@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Polly;
 using Polly.Fallback;
 using Polly.Timeout;
+using Polly.Utilities;
 using Polly.Wrap;
 using PollyDemos.OutputHelpers;
 
@@ -54,8 +55,37 @@ namespace PollyDemos.Async
             Stopwatch watch = null;
 
             // Define our timeout policy: time out after 2 seconds.  We will use the pessimistic timeout strategy, which forces a timeout - even when the underlying delegate doesn't support it.
+            // We attach a handler to show if any walked-away-from (timed-out) tasks later throw an exception.
             var timeoutPolicy = Policy
-                .TimeoutAsync(TimeSpan.FromSeconds(2), TimeoutStrategy.Pessimistic);
+                .TimeoutAsync(TimeSpan.FromSeconds(2), TimeoutStrategy.Pessimistic,
+                    onTimeoutAsync: (ctx, span, abandonedTask) =>
+                    {
+                        {
+                            abandonedTask.ContinueWith(t =>
+                            {
+                                // ContinueWith important!: the abandoned task may very well still be executing, when the caller times out on waiting for it! 
+
+                                if (t.IsFaulted)
+                                {
+                                    progress.Report(ProgressWithMessage(".The task previously walked-away-from now terminated with exception: " + t.Exception.Message, 
+                                        Color.Yellow));
+                                }
+                                else if (t.IsCanceled)
+                                {
+                                    // (If the executed delegates do not honour cancellation, this IsCanceled branch may never be hit.  It can be good practice however to include, in case a Policy configured with TimeoutStrategy.Pessimistic is used to execute a delegate honouring cancellation.)  
+                                    progress.Report(ProgressWithMessage(".The task previously walked-away-from now was canceled.", Color.Yellow));
+                                }
+                                else
+                                {
+                                    // extra logic (if desired) for tasks which complete, despite the caller having 'walked away' earlier due to timeout.
+                                    progress.Report(ProgressWithMessage(".The task previously walked-away-from now eventually completed.", Color.Yellow));
+                                }
+                            });
+
+                            return Task.FromResult(true);
+                        }
+                    }
+                );
 
             // Define our waitAndRetry policy: keep retrying with 4 second gaps.  This is (intentionally) too long: to demonstrate that the timeout policy will time out on this before waiting for the retry.
             var waitAndRetryPolicy = Policy
