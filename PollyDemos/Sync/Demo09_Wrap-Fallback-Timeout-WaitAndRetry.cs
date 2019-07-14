@@ -56,6 +56,7 @@ namespace PollyDemos.Sync
             // Define our timeout policy: time out after 2 seconds.  We will use the pessimistic timeout strategy, which forces a timeout - even when the underlying delegate doesn't support it.
             var timeoutPolicy = Policy
                 .Timeout(TimeSpan.FromSeconds(2), TimeoutStrategy.Pessimistic,
+                    // This use of onTimeout demonstrates the point about capturing walked-away-from Tasks with TimeoutStrategy.Pessimistic discussed in the Polly wiki, here: https://github.com/App-vNext/Polly/wiki/Timeout#pessimistic-timeout-1
                     onTimeout: (ctx, span, abandonedTask) =>
                     {
                         {

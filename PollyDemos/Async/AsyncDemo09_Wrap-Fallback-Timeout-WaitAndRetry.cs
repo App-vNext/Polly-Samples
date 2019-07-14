@@ -58,6 +58,7 @@ namespace PollyDemos.Async
             // We attach a handler to show if any walked-away-from (timed-out) tasks later throw an exception.
             var timeoutPolicy = Policy
                 .TimeoutAsync(TimeSpan.FromSeconds(2), TimeoutStrategy.Pessimistic,
+                    // This use of onTimeoutAsync demonstrates the point about capturing walked-away-from Tasks with TimeoutStrategy.Pessimistic, discussed in the Polly wiki, here: https://github.com/App-vNext/Polly/wiki/Timeout#pessimistic-timeout-1
                     onTimeoutAsync: (ctx, span, abandonedTask) =>
                     {
                         {
