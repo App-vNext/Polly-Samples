@@ -68,6 +68,6 @@ Then ...
 + For full Polly syntax, see [Polly](https://www.github.com/App-vNext/Polly).  
 + For deeper discussions of transient fault-handling and further Polly patterns, see the [Polly wiki](https://github.com/App-vNext/Polly/wiki)
 
-## Slide deck from DevIntersections presentation
+## Slide decks
 
-View the [slides presented](AppvNext-DotNetFoundation-Polly-DemoSlides-Oct-2017-generic.pptx) at DevIntersections and other conferences.  You are welcome to use and adapt this presentation for not-for-profit presentations of Polly to co-workers, user groups and similar, subject to the condition that references to the .NET Foundation, App-vNext and Polly team are retained.
+View the [slides presented](AppvNext-DotNetFoundation-Polly-DemoSlides-Nov-2019-generic.pptx) at NDC, DevIntersections and other conferences.  You are welcome to use and adapt this presentation for not-for-profit presentations of Polly to co-workers, user groups and similar, subject to the condition that references to the .NET Foundation, App-vNext and the individual members of the Polly team are retained.
