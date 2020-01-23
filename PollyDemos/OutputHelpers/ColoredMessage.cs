@@ -5,7 +5,7 @@ namespace PollyDemos.OutputHelpers
     public struct ColoredMessage
     {
         public Color Color { get; }
-        public String Message { get; }
+        public string Message { get; }
 
         public ColoredMessage(string message, Color color)
         {
@@ -13,6 +13,8 @@ namespace PollyDemos.OutputHelpers
             Color = color;
         }
 
-        public ColoredMessage(string message) : this(message, Color.Default) { }
+        public ColoredMessage(string message) : this(message, Color.Default)
+        {
+        }
     }
 }

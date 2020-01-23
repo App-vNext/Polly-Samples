@@ -17,7 +17,7 @@ namespace PollyDemos.OutputHelpers
         public DemoProgress(Statistic[] statistics, ColoredMessage message)
         {
             Statistics = statistics;
-            Messages = new []{message};
+            Messages = new[] {message};
         }
     }
 }

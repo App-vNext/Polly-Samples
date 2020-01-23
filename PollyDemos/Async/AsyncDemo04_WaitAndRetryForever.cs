@@ -25,7 +25,8 @@ namespace PollyDemos.Async
         private int retries;
         private int eventualFailures;
 
-        public override string Description => "This demo also retries enough to always ensure success.  But we haven't had to 'guess' how many retries were necessary.  We just said: wait-and-retry-forever.";
+        public override string Description =>
+            "This demo also retries enough to always ensure success.  But we haven't had to 'guess' how many retries were necessary.  We just said: wait-and-retry-forever.";
 
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -41,24 +42,23 @@ namespace PollyDemos.Async
 
             progress.Report(ProgressWithMessage(typeof(AsyncDemo04_WaitAndRetryForever).Name));
             progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(String.Empty));
+            progress.Report(ProgressWithMessage(string.Empty));
 
             // Define our policy:
             var policy = Policy.Handle<Exception>().WaitAndRetryForeverAsync(
-                sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200), // Wait 200ms between each try.
-                onRetry: (exception, calculatedWaitDuration) => // Capture some info for logging!
-            {
-                // This is your new exception handler! 
-                // Tell the user what they've won!
-                progress.Report(ProgressWithMessage("Log, then retry: " + exception.Message, Color.Yellow));
-                retries++;
-
-            });
+                attempt => TimeSpan.FromMilliseconds(200), // Wait 200ms between each try.
+                (exception, calculatedWaitDuration) => // Capture some info for logging!
+                {
+                    // This is your new exception handler! 
+                    // Tell the user what they've won!
+                    progress.Report(ProgressWithMessage("Log, then retry: " + exception.Message, Color.Yellow));
+                    retries++;
+                });
 
             using (var client = new HttpClient())
             {
                 totalRequests = 0;
-                bool internalCancel = false;
+                var internalCancel = false;
                 // Do the following until a key is pressed
                 while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
@@ -72,7 +72,8 @@ namespace PollyDemos.Async
                             // This code is executed within the Policy 
 
                             // Make a request and get a response
-                            string msg = await client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                            var msg = await client.GetStringAsync(
+                                Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
 
                             // Display the response message on the console
                             progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
@@ -81,7 +82,8 @@ namespace PollyDemos.Async
                     }
                     catch (Exception e)
                     {
-                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
+                        progress.Report(ProgressWithMessage(
+                            "Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
                         eventualFailures++;
                     }
 
@@ -100,6 +102,5 @@ namespace PollyDemos.Async
             new Statistic("Retries made to help achieve success", retries, Color.Yellow),
             new Statistic("Requests which eventually failed", eventualFailures, Color.Red),
         };
-
     }
 }

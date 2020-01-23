@@ -14,6 +14,9 @@
             Value = value;
             Color = color;
         }
-        public Statistic(string description, double value) : this(description, value, Color.Default) { }
+
+        public Statistic(string description, double value) : this(description, value, Color.Default)
+        {
+        }
     }
 }

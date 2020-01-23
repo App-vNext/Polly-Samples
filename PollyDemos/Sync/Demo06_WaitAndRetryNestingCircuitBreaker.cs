@@ -35,7 +35,8 @@ namespace PollyDemos.Sync
         private int eventualFailuresDueToCircuitBreaking;
         private int eventualFailuresForOtherReasons;
 
-        public override string Description => "This demonstrates CircuitBreaker.  When an underlying system is completely down or seriously struggling, it can be better to fail fast and not put calls through.";
+        public override string Description =>
+            "This demonstrates CircuitBreaker.  When an underlying system is completely down or seriously struggling, it can be better to fail fast and not put calls through.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -52,44 +53,51 @@ namespace PollyDemos.Sync
 
             progress.Report(ProgressWithMessage(typeof(Demo06_WaitAndRetryNestingCircuitBreaker).Name));
             progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(String.Empty));
+            progress.Report(ProgressWithMessage(string.Empty));
 
             // Define our waitAndRetry policy: keep retrying with 200ms gaps.
             var waitAndRetryPolicy = Policy
-                .Handle<Exception>(e => !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
+                .Handle<Exception
+                >(e =>
+                    !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
                 .WaitAndRetryForever(
-                attempt => TimeSpan.FromMilliseconds(200),
-                (exception, calculatedWaitDuration) =>
-                {
-                    // This is your new exception handler! 
-                    // Tell the user what they've won!
-                    progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
-                    retries++;
-                });
+                    attempt => TimeSpan.FromMilliseconds(200),
+                    (exception, calculatedWaitDuration) =>
+                    {
+                        // This is your new exception handler! 
+                        // Tell the user what they've won!
+                        progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
+                        retries++;
+                    });
 
             // Define our CircuitBreaker policy: Break if the action fails 4 times in a row.
             var circuitBreakerPolicy = Policy
                 .Handle<Exception>()
                 .CircuitBreaker(
-                    exceptionsAllowedBeforeBreaking: 4,
-                    durationOfBreak: TimeSpan.FromSeconds(3),
-                    onBreak: (ex, breakDelay) =>
+                    4,
+                    TimeSpan.FromSeconds(3),
+                    (ex, breakDelay) =>
                     {
-                        progress.Report(ProgressWithMessage(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!", Color.Magenta));
-                        progress.Report(ProgressWithMessage("..due to: " + ex.Message, Color.Magenta));                    },
-                    onReset: () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!", Color.Magenta)),
-                    onHalfOpen: () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta))
+                        progress.Report(ProgressWithMessage(
+                            ".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!",
+                            Color.Magenta));
+                        progress.Report(ProgressWithMessage("..due to: " + ex.Message, Color.Magenta));
+                    },
+                    () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!",
+                        Color.Magenta)),
+                    () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!",
+                        Color.Magenta))
                 );
 
             using (var client = new WebClient())
             {
-                bool internalCancel = false;
+                var internalCancel = false;
                 totalRequests = 0;
                 // Do the following until a key is pressed
                 while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
-                    Stopwatch watch = new Stopwatch();
+                    var watch = new Stopwatch();
                     watch.Start();
 
                     try
@@ -97,35 +105,40 @@ namespace PollyDemos.Sync
                         // Retry the following call according to the policy - 3 times.
                         waitAndRetryPolicy.Execute(
                             ct => // The Execute() overload takes a CancellationToken, but it happens the executed code does not honour it.
-                        {
-                            // This code is executed within the waitAndRetryPolicy 
+                            {
+                                // This code is executed within the waitAndRetryPolicy 
 
-                            string response = circuitBreakerPolicy.Execute<String>(
+                                var response = circuitBreakerPolicy.Execute<string>(
                                     () => // Note how we can also Execute() a Func<TResult> and pass back the value.
                                     {
                                         // This code is executed within the circuitBreakerPolicy 
 
                                         // Make a request and get a response
-                                        return client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                                        return client.DownloadString(
+                                            Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
                                     });
 
-                            watch.Stop();
+                                watch.Stop();
 
-                            // Display the response message on the console
-                            progress.Report(ProgressWithMessage("Response : " + response
-                                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                                // Display the response message on the console
+                                progress.Report(ProgressWithMessage("Response : " + response
+                                                                                  + " (after " +
+                                                                                  watch.ElapsedMilliseconds + "ms)",
+                                    Color.Green));
 
-                            eventualSuccesses++;
-                        }
-                        , cancellationToken // The cancellationToken passed in to Execute() enables the policy instance to cancel retries, when the token is signalled.
+                                eventualSuccesses++;
+                            }
+                            , cancellationToken // The cancellationToken passed in to Execute() enables the policy instance to cancel retries, when the token is signalled.
                         );
                     }
                     catch (BrokenCircuitException b)
                     {
                         watch.Stop();
 
-                        progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " + b.GetType().Name
-                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " +
+                                                            b.GetType().Name
+                                                            + " (after " + watch.ElapsedMilliseconds + "ms)",
+                            Color.Red));
 
                         eventualFailuresDueToCircuitBreaking++;
                     }
@@ -133,8 +146,10 @@ namespace PollyDemos.Sync
                     {
                         watch.Stop();
 
-                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message
-                                                + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " +
+                                                            e.Message
+                                                            + " (after " + watch.ElapsedMilliseconds + "ms)",
+                            Color.Red));
 
                         eventualFailuresForOtherReasons++;
                     }
@@ -152,9 +167,9 @@ namespace PollyDemos.Sync
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses, Color.Green),
             new Statistic("Retries made to help achieve success", retries, Color.Yellow),
-            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking, Color.Magenta),
+            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking,
+                Color.Magenta),
             new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
-        
     }
 }

@@ -22,7 +22,8 @@ namespace PollyDemos.Sync
         private int retries;
         private int eventualFailures;
 
-        public override string Description => "Compared to previous demo, this adds enough waiting and retrying to always ensure success.";
+        public override string Description =>
+            "Compared to previous demo, this adds enough waiting and retrying to always ensure success.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -38,28 +39,27 @@ namespace PollyDemos.Sync
 
             progress.Report(ProgressWithMessage(typeof(Demo03_WaitAndRetryNTimes_WithEnoughRetries).Name));
             progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(String.Empty));
+            progress.Report(ProgressWithMessage(string.Empty));
 
             // Let's call a web api service to make repeated requests to a server. 
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             // Define our policy:
             var policy = Policy.Handle<Exception>().WaitAndRetry(
-                retryCount: 20, // Retry up to 20 times! - should be enough that we eventually succeed.
-                sleepDurationProvider: attempt => TimeSpan.FromMilliseconds(200), // Wait 200ms between each try.
-                onRetry: (exception, calculatedWaitDuration) => // Capture some info for logging!
-            {
-                // This is your new exception handler! 
-                // Tell the user what they've won!
-                progress.Report(ProgressWithMessage("Policy logging: " + exception.Message, Color.Yellow));
-                retries++;
-
-            });
+                20, // Retry up to 20 times! - should be enough that we eventually succeed.
+                attempt => TimeSpan.FromMilliseconds(200), // Wait 200ms between each try.
+                (exception, calculatedWaitDuration) => // Capture some info for logging!
+                {
+                    // This is your new exception handler! 
+                    // Tell the user what they've won!
+                    progress.Report(ProgressWithMessage("Policy logging: " + exception.Message, Color.Yellow));
+                    retries++;
+                });
 
             using (var client = new WebClient())
             {
                 totalRequests = 0;
-                bool internalCancel = false;
+                var internalCancel = false;
 
                 // Do the following until a key is pressed
                 while (!internalCancel && !cancellationToken.IsCancellationRequested)
@@ -71,22 +71,24 @@ namespace PollyDemos.Sync
                         // Retry the following call according to the policy - 20 times.
                         policy.Execute(
                             ct => // The Execute() overload takes a CancellationToken, but it happens the executed code does not honour it.
-                        {
-                            // This code is executed within the Policy 
+                            {
+                                // This code is executed within the Policy 
 
-                            // Make a request and get a response
-                            var response = client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                                // Make a request and get a response
+                                var response =
+                                    client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
 
-                            // Display the response message on the console
-                            progress.Report(ProgressWithMessage("Response : " + response, Color.Green));
-                            eventualSuccesses++;
-                        }
-                        , cancellationToken // The cancellationToken passed in to Execute() enables the policy instance to cancel retries, when the token is signalled.
+                                // Display the response message on the console
+                                progress.Report(ProgressWithMessage("Response : " + response, Color.Green));
+                                eventualSuccesses++;
+                            }
+                            , cancellationToken // The cancellationToken passed in to Execute() enables the policy instance to cancel retries, when the token is signalled.
                         );
                     }
                     catch (Exception e)
                     {
-                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
+                        progress.Report(ProgressWithMessage(
+                            "Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
                         eventualFailures++;
                     }
 

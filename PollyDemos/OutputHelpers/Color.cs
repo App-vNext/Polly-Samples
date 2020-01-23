@@ -15,5 +15,4 @@ namespace PollyDemos.OutputHelpers
         Magenta,
         White
     }
-
 }

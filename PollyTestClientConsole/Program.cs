@@ -8,11 +8,11 @@ using PollyDemos.Async;
 
 namespace PollyTestClientConsole
 {
-    class Program
+    internal class Program
     {
         private static readonly object lockObject = new object();
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Statistic[] statistics = new Statistic[0];
 
@@ -20,14 +20,12 @@ namespace PollyTestClientConsole
             progress.ProgressChanged += (sender, progressArgs) =>
             {
                 foreach (var message in progressArgs.Messages)
-                {
                     WriteLineInColor(message.Message, message.Color.ToConsoleColor());
-                }
                 statistics = progressArgs.Statistics;
             };
 
-            CancellationTokenSource cancellationSource = new CancellationTokenSource();
-            CancellationToken cancellationToken = cancellationSource.Token;
+            var cancellationSource = new CancellationTokenSource();
+            var cancellationToken = cancellationSource.Token;
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Uncomment the samples you wish to run:
@@ -88,9 +86,8 @@ namespace PollyTestClientConsole
             // Output statistics.
             int longestDescription = statistics.Max(s => s.Description.Length);
             foreach (Statistic stat in statistics)
-            {
-                WriteLineInColor(stat.Description.PadRight(longestDescription) + ": " + stat.Value, stat.Color.ToConsoleColor());
-            }
+                WriteLineInColor(stat.Description.PadRight(longestDescription) + ": " + stat.Value,
+                    stat.Color.ToConsoleColor());
 
             // Keep the console open.
             Console.ReadKey();
@@ -105,6 +102,5 @@ namespace PollyTestClientConsole
                 Console.ResetColor();
             }
         }
-
     }
 }
