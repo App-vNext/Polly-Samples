@@ -1,0 +1,199 @@
+﻿{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Polly test API",
+    "version": "1.0.0",
+    "contact": {
+      "url": "https://www.thepollyproject.org"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://pollytestapp.azurewebsites.net"
+    },
+    {
+      "url": "https://localhost:44307"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Values": {
+        "type": "array",
+        "items":  {"type": "string" }
+      },
+      "Value": {
+        "type": "string"
+      }
+ }
+  },
+  "tags": [
+    {
+      "name": "Values",
+      "description": "These are throttled to 3 requests pr 5 seconds"
+    },
+    {
+      "name": "NonThrottledGood",
+      "description": "These are not throttled and fast"
+    },
+    {
+      "name": "NonThrottledFaulting",
+      "description": "These are not throttled but very slow"
+    }
+  ],
+  "paths": {
+    "/api/values/": {
+      "get": {
+        "operationId": "getValues",
+        "summary": "Returns a simple string array of values.",
+        "tags": [ "Values" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Values"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttled"
+          }
+        }
+      }
+    },
+    "/api/values/{id}": {
+      "get": {
+        "operationId": "getValue",
+        "summary": "Accepts a simple integer which is written back to the response in the form of a simple message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The number of the request",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "tags": [ "Values" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Value"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Throttled"
+          }
+        }
+      }
+    },
+    "/api/NonThrottledGood/": {
+      "get": {
+        "operationId": "getValues",
+        "summary": "Returns a simple string array of values.",
+        "tags": [ "NonThrottledGood" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Values"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/NonThrottledGood/{id}": {
+      "get": {
+        "operationId": "getValue",
+        "summary": "Accepts a simple integer which is written back to the response in the form of a simple message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The number of the request",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "tags": [ "NonThrottledGood" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Value"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/NonThrottledFaulting/": {
+      "get": {
+        "operationId": "getValues",
+        "summary": "Returns a simple string array of values.",
+        "tags": [ "NonThrottledFaulting" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Values"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+     "/api/NonThrottledFaulting/{id}": {
+      "get": {
+        "operationId": "getValue",
+        "summary": "Accepts a simple integer which is written back to the response in the form of a simple message",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The number of the request",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "tags": [ "NonThrottledFaulting" ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Value"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+ 
+   }
+}  
