@@ -8,13 +8,13 @@ using Microsoft.Extensions.Logging;
 namespace PollyTestWebApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("/")]
     public class DocumentationController : ControllerBase
     {
         [HttpGet]
-        public string Get()
+        public RedirectResult Get()
         {
-            return "";
+            return Redirect("/index.html");
         }
     }
 }
