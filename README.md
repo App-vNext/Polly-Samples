@@ -46,6 +46,11 @@ In both bulkhead demos, the upstream system makes a random mixture of calls to t
 
 ## To start the dummy faulting server (PollyTestApp)
 
+If there are problems with https and ssl trust, try running
+```
+dotnet dev-certs https --trust
+```
+
 + Start the dummy server, by starting `PollyTestWebApi`.  
 ```
 dotnet run --project PollyTestWebApi/PollyTestWebApi.csproj
