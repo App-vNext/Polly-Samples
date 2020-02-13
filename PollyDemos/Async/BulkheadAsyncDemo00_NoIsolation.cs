@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Threading.Tasks.Schedulers;
 using Polly;
 using Polly.Bulkhead;
 using Polly.Timeout;
@@ -30,32 +29,33 @@ namespace PollyDemos.Async
     /// </summary>
     public class BulkheadAsyncDemo00_NoIsolation : AsyncDemo
     {
-
         // Track the number of 'good' and 'faulting' requests made, succeeded and failed.
         // At any time, requests pending = made - succeeded - failed.
-        int totalRequests = 0;
-        int goodRequestsMade = 0;
-        int goodRequestsSucceeded = 0;
-        int goodRequestsFailed = 0;
-        int faultingRequestsMade = 0;
-        int faultingRequestsSucceeded = 0;
-        int faultingRequestsFailed = 0;
+        private int totalRequests = 0;
+        private int goodRequestsMade = 0;
+        private int goodRequestsSucceeded = 0;
+        private int goodRequestsFailed = 0;
+        private int faultingRequestsMade = 0;
+        private int faultingRequestsSucceeded = 0;
+        private int faultingRequestsFailed = 0;
 
-        public override string Description => "Demonstrates a good call stream and faulting call stream sharing resources.  Good call stream throughput is blocked by the faulting call stream.";
+        public override string Description =>
+            "Demonstrates a good call stream and faulting call stream sharing resources.  Good call stream throughput is blocked by the faulting call stream.";
 
-        public override async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken externalCancellationToken,
+            IProgress<DemoProgress> progress)
         {
             if (externalCancellationToken == null) throw new ArgumentNullException(nameof(externalCancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
 
             progress.Report(ProgressWithMessage(typeof(BulkheadAsyncDemo00_NoIsolation).Name));
             progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(String.Empty));
+            progress.Report(ProgressWithMessage(string.Empty));
 
             // Let's imagine this caller has some theoretically limited capacity, so that *it* will suffer capacity-starvation, if the downstream system is faulting.
             const int callerParallelCapacity = 8; // (artificially low - but easier to follow, to illustrate principle)
             // In demo 00, all calls share the same bulkhead.
-            BulkheadPolicy sharedBulkhead = Policy.BulkheadAsync(callerParallelCapacity, 1);
+            var sharedBulkhead = Policy.BulkheadAsync(callerParallelCapacity, 1);
 
             var rand = new Random();
             totalRequests = 0;
@@ -63,19 +63,20 @@ namespace PollyDemos.Async
             await Task.FromResult(true).ConfigureAwait(false); // Ensure none of what follows runs synchronously.
 
             IList<Task> tasks = new List<Task>();
-            CancellationTokenSource internalCancellationTokenSource = new CancellationTokenSource();
-            CancellationToken combinedToken = CancellationTokenSource.CreateLinkedTokenSource(externalCancellationToken, internalCancellationTokenSource.Token).Token;
+            var internalCancellationTokenSource = new CancellationTokenSource();
+            var combinedToken = CancellationTokenSource
+                .CreateLinkedTokenSource(externalCancellationToken, internalCancellationTokenSource.Token).Token;
 
-            ConcurrentQueue<ColoredMessage> messages = new ConcurrentQueue<ColoredMessage>();
+            var messages = new ConcurrentQueue<ColoredMessage>();
 
             using (var client = new HttpClient())
             {
-                bool internalCancel = false;
+                var internalCancel = false;
                 while (!internalCancel && !externalCancellationToken.IsCancellationRequested)
                 {
                     totalRequests++;
 
-                    int thisRequest = totalRequests;
+                    var thisRequest = totalRequests;
 
                     // Randomly make either 'good' or 'faulting' calls.
                     if (rand.Next(0, 2) == 0)
@@ -87,21 +88,31 @@ namespace PollyDemos.Async
                                 try
                                 {
                                     // Make a request and get a response, from the good endpoint
-                                    string msg = await (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledgood/" + totalRequests, ct).ConfigureAwait(false)).Content.ReadAsStringAsync().ConfigureAwait(false);
-                                    if (!ct.IsCancellationRequested) messages.Enqueue(new ColoredMessage($"Response: {msg}", Color.Green));
+                                    var msg = await (await client
+                                            .GetAsync(
+                                                Configuration.WEB_API_ROOT + "/api/nonthrottledgood/" + totalRequests,
+                                                ct).ConfigureAwait(false)).Content.ReadAsStringAsync()
+                                        .ConfigureAwait(false);
+                                    if (!ct.IsCancellationRequested)
+                                        messages.Enqueue(new ColoredMessage($"Response: {msg}", Color.Green));
 
                                     goodRequestsSucceeded++;
                                 }
                                 catch (Exception e)
                                 {
-                                    if (!ct.IsCancellationRequested) messages.Enqueue(new ColoredMessage($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
+                                    if (!ct.IsCancellationRequested)
+                                        messages.Enqueue(new ColoredMessage(
+                                            $"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
 
                                     goodRequestsFailed++;
                                 }
                             }, combinedToken)
                             .ContinueWith((t, k) =>
                             {
-                                if (t.IsFaulted) messages.Enqueue(new ColoredMessage($"Request {k} failed with: {t.Exception.Flatten().InnerExceptions.First().Message}", Color.Red));
+                                if (t.IsFaulted)
+                                    messages.Enqueue(new ColoredMessage(
+                                        $"Request {k} failed with: {t.Exception.Flatten().InnerExceptions.First().Message}",
+                                        Color.Red));
 
                                 goodRequestsFailed++;
                             }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion)
@@ -116,40 +127,60 @@ namespace PollyDemos.Async
                                 try
                                 {
                                     // Make a request and get a response, from the faulting endpoint
-                                    string msg = await (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledfaulting/" + totalRequests, ct).ConfigureAwait(false)).Content.ReadAsStringAsync().ConfigureAwait(false);
-                                    if (!combinedToken.IsCancellationRequested)  messages.Enqueue(new ColoredMessage($"Response: {msg}", Color.Green));
+                                    var msg = await (await client
+                                            .GetAsync(
+                                                Configuration.WEB_API_ROOT + "/api/nonthrottledfaulting/" +
+                                                totalRequests,
+                                                ct).ConfigureAwait(false)).Content.ReadAsStringAsync()
+                                        .ConfigureAwait(false);
+                                    if (!combinedToken.IsCancellationRequested)
+                                        messages.Enqueue(new ColoredMessage($"Response: {msg}", Color.Green));
 
                                     faultingRequestsSucceeded++;
                                 }
                                 catch (Exception e)
                                 {
-                                    if (!ct.IsCancellationRequested) messages.Enqueue(new ColoredMessage($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
+                                    if (!ct.IsCancellationRequested)
+                                        messages.Enqueue(new ColoredMessage(
+                                            $"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
 
                                     faultingRequestsFailed++;
                                 }
                             }, combinedToken)
                             .ContinueWith((t, k) =>
                             {
-                                if (t.IsFaulted) messages.Enqueue(new ColoredMessage($"Request {k} failed with: {t.Exception.Flatten().InnerExceptions.First().Message}", Color.Red));
+                                if (t.IsFaulted)
+                                    messages.Enqueue(new ColoredMessage(
+                                        $"Request {k} failed with: {t.Exception.Flatten().InnerExceptions.First().Message}",
+                                        Color.Red));
 
                                 faultingRequestsFailed++;
                             }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion)
                         );
-
                     }
 
-                    messages.Enqueue(new ColoredMessage($"Total requests: requested {totalRequests:00}, ", Color.White));
-                    messages.Enqueue(new ColoredMessage($"Good endpoint: requested {goodRequestsMade:00}, ", Color.White));
-                    messages.Enqueue(new ColoredMessage($"Good endpoint:succeeded {goodRequestsSucceeded:00}, ", Color.Green));
-                    messages.Enqueue(new ColoredMessage($"Good endpoint:pending {goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed:00}, ", Color.Yellow));
+                    messages.Enqueue(new ColoredMessage($"Total requests: requested {totalRequests:00}, ",
+                        Color.White));
+                    messages.Enqueue(new ColoredMessage($"Good endpoint: requested {goodRequestsMade:00}, ",
+                        Color.White));
+                    messages.Enqueue(new ColoredMessage($"Good endpoint:succeeded {goodRequestsSucceeded:00}, ",
+                        Color.Green));
+                    messages.Enqueue(new ColoredMessage(
+                        $"Good endpoint:pending {goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed:00}, ",
+                        Color.Yellow));
                     messages.Enqueue(new ColoredMessage($"Good endpoint:failed {goodRequestsFailed:00}.", Color.Red));
 
-                    messages.Enqueue(new ColoredMessage(String.Empty));
-                    messages.Enqueue(new ColoredMessage($"Faulting endpoint: requested {faultingRequestsMade:00}, ", Color.White));
-                    messages.Enqueue(new ColoredMessage($"Faulting endpoint:succeeded {faultingRequestsSucceeded:00}, ", Color.Green));
-                    messages.Enqueue(new ColoredMessage($"Faulting endpoint:pending {faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed:00}, ", Color.Yellow));
-                    messages.Enqueue(new ColoredMessage($"Faulting endpoint:failed {faultingRequestsFailed:00}.", Color.Red));
-                    messages.Enqueue(new ColoredMessage(String.Empty));
+                    messages.Enqueue(new ColoredMessage(string.Empty));
+                    messages.Enqueue(new ColoredMessage($"Faulting endpoint: requested {faultingRequestsMade:00}, ",
+                        Color.White));
+                    messages.Enqueue(new ColoredMessage($"Faulting endpoint:succeeded {faultingRequestsSucceeded:00}, ",
+                        Color.Green));
+                    messages.Enqueue(new ColoredMessage(
+                        $"Faulting endpoint:pending {faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed:00}, ",
+                        Color.Yellow));
+                    messages.Enqueue(new ColoredMessage($"Faulting endpoint:failed {faultingRequestsFailed:00}.",
+                        Color.Red));
+                    messages.Enqueue(new ColoredMessage(string.Empty));
 
                     // Output all messages available right now, in one go.
                     progress.Report(ProgressWithMessages(ConsumeAsEnumerable(messages)));
@@ -161,10 +192,11 @@ namespace PollyDemos.Async
                     {
                         internalCancel = Console.KeyAvailable;
                     }
-                    catch { }
+                    catch
+                    {
+                    }
                 }
-                
-            }   
+            }
 
             // Cancel any unstarted and running tasks.
             internalCancellationTokenSource.Cancel();
@@ -182,10 +214,7 @@ namespace PollyDemos.Async
 
         public static IEnumerable<T> ConsumeAsEnumerable<T>(ConcurrentQueue<T> concurrentQueue)
         {
-            while (concurrentQueue.TryDequeue(out T got))
-            {
-                yield return got;
-            }
+            while (concurrentQueue.TryDequeue(out var got)) yield return got;
         }
 
         public override Statistic[] LatestStatistics => new[]
@@ -193,13 +222,14 @@ namespace PollyDemos.Async
             new Statistic("Total requests made", totalRequests, Color.Default),
             new Statistic("Good endpoint: requested", goodRequestsMade, Color.Default),
             new Statistic("Good endpoint: succeeded", goodRequestsSucceeded, Color.Green),
-            new Statistic("Good endpoint: pending", goodRequestsMade-goodRequestsSucceeded-goodRequestsFailed, Color.Yellow),
+            new Statistic("Good endpoint: pending", goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed,
+                Color.Yellow),
             new Statistic("Good endpoint: failed", goodRequestsFailed, Color.Red),
             new Statistic("Faulting endpoint: requested", faultingRequestsMade, Color.Default),
             new Statistic("Faulting endpoint: succeeded", faultingRequestsSucceeded, Color.Green),
-            new Statistic("Faulting endpoint: pending", faultingRequestsMade-faultingRequestsSucceeded-faultingRequestsFailed, Color.Yellow),
+            new Statistic("Faulting endpoint: pending",
+                faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed, Color.Yellow),
             new Statistic("Faulting endpoint: failed", faultingRequestsFailed, Color.Red),
         };
-        
     }
 }

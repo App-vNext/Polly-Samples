@@ -1,98 +1,20 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{69789838-8A79-4D0D-9723-8C0A8435E802}</ProjectGuid>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PollyDemos</RootNamespace>
-    <AssemblyName>PollyDemos</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ParallelExtensionsExtras, Version=1.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSFT.ParallelExtensionsExtras.1.2.0\lib\ParallelExtensionsExtras.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Polly, Version=5.5.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Polly.5.5.0\lib\net45\Polly.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Async\AsyncDemo.cs" />
-    <Compile Include="Configuration.cs" />
-    <Compile Include="DemoBase.cs" />
-    <Compile Include="OutputHelpers\Color.cs" />
-    <Compile Include="OutputHelpers\ColoredMessage.cs" />
-    <Compile Include="OutputHelpers\DemoProgress.cs" />
-    <Compile Include="OutputHelpers\Statistic.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Async\AsyncDemo00_NoPolicy.cs" />
-    <Compile Include="Async\AsyncDemo01_RetryNTimes.cs" />
-    <Compile Include="Async\AsyncDemo02_WaitAndRetryNTimes.cs" />
-    <Compile Include="Async\AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries.cs" />
-    <Compile Include="Async\AsyncDemo04_WaitAndRetryForever.cs" />
-    <Compile Include="Async\AsyncDemo05_WaitAndRetryWithExponentialBackoff.cs" />
-    <Compile Include="Async\AsyncDemo06_WaitAndRetryNestingCircuitBreaker.cs" />
-    <Compile Include="Async\AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
-    <Compile Include="Async\AsyncDemo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
-    <Compile Include="Async\AsyncDemo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
-    <Compile Include="Async\BulkheadAsyncDemo00_NoIsolation.cs" />
-    <Compile Include="Async\BulkheadAsyncDemo01_WithBulkheads.cs" />
-    <Compile Include="Sync\Demo00_NoPolicy.cs" />
-    <Compile Include="Sync\Demo01_RetryNTimes.cs" />
-    <Compile Include="Sync\Demo02_WaitAndRetryNTimes.cs" />
-    <Compile Include="Sync\Demo03_WaitAndRetryNTimes_WithEnoughRetries.cs" />
-    <Compile Include="Sync\Demo04_WaitAndRetryForever.cs" />
-    <Compile Include="Sync\Demo05_WaitAndRetryWithExponentialBackoff.cs" />
-    <Compile Include="Sync\Demo06_WaitAndRetryNestingCircuitBreaker.cs" />
-    <Compile Include="Sync\Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.cs" />
-    <Compile Include="Sync\Demo08_Wrap-Fallback-WaitAndRetry-CircuitBreaker.cs" />
-    <Compile Include="Sync\Demo09_Wrap-Fallback-Timeout-WaitAndRetry.cs" />
-    <Compile Include="Sync\SyncDemo.cs" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <PackageReference Include="Polly" Version="5.5.0" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

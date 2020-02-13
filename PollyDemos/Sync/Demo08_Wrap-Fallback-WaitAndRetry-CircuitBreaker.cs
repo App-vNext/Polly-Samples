@@ -32,7 +32,8 @@ namespace PollyDemos.Sync
         private int eventualFailuresDueToCircuitBreaking;
         private int eventualFailuresForOtherReasons;
 
-        public override string Description => "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
+        public override string Description =>
+            "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -49,64 +50,78 @@ namespace PollyDemos.Sync
 
             progress.Report(ProgressWithMessage(typeof(Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker).Name));
             progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(String.Empty));
+            progress.Report(ProgressWithMessage(string.Empty));
 
             Stopwatch watch = null;
 
             // Define our waitAndRetry policy: keep retrying with 200ms gaps.
-            RetryPolicy waitAndRetryPolicy = Policy
-                .Handle<Exception>(e => !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
+            var waitAndRetryPolicy = Policy
+                .Handle<Exception
+                >(e =>
+                    !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
                 .WaitAndRetryForever(
-                attempt => TimeSpan.FromMilliseconds(200),
-                (exception, calculatedWaitDuration) =>
-                {
-                    progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
-                    retries++;
-                });
+                    attempt => TimeSpan.FromMilliseconds(200),
+                    (exception, calculatedWaitDuration) =>
+                    {
+                        progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
+                        retries++;
+                    });
 
             // Define our CircuitBreaker policy: Break if the action fails 4 times in a row.
-            CircuitBreakerPolicy circuitBreakerPolicy = Policy
+            var circuitBreakerPolicy = Policy
                 .Handle<Exception>()
                 .CircuitBreaker(
-                    exceptionsAllowedBeforeBreaking: 4,
-                    durationOfBreak: TimeSpan.FromSeconds(3),
-                    onBreak: (ex, breakDelay) =>
+                    4,
+                    TimeSpan.FromSeconds(3),
+                    (ex, breakDelay) =>
                     {
-                        progress.Report(ProgressWithMessage(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!", Color.Magenta));
+                        progress.Report(ProgressWithMessage(
+                            ".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!",
+                            Color.Magenta));
                         progress.Report(ProgressWithMessage("..due to: " + ex.Message, Color.Magenta));
                     },
-                    onReset: () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!", Color.Magenta)),
-                    onHalfOpen: () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta))
+                    () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!",
+                        Color.Magenta)),
+                    () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!",
+                        Color.Magenta))
                 );
 
 
             // Define a fallback policy: provide a nice substitute message to the user, if we found the circuit was broken.
-            FallbackPolicy<String> fallbackForCircuitBreaker = Policy<String>
+            var fallbackForCircuitBreaker = Policy<string>
                 .Handle<BrokenCircuitException>()
                 .Fallback(
-                    fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [message substituted by fallback policy]",  
-                    onFallback: b =>
+                    /* Demonstrates fallback value syntax */
+                    "Please try again later [message substituted by fallback policy]",
+                    b =>
                     {
                         watch.Stop();
 
                         progress.Report(ProgressWithMessage("Fallback catches failed with: " + b.Exception.Message
-                            + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+                                                                                             + " (after " +
+                                                                                             watch.ElapsedMilliseconds +
+                                                                                             "ms)", Color.Red));
 
                         eventualFailuresDueToCircuitBreaking++;
                     }
                 );
 
             // Define a fallback policy: provide a substitute string to the user, for any exception.
-            FallbackPolicy<String> fallbackForAnyException = Policy<String>
+            var fallbackForAnyException = Policy<string>
                 .Handle<Exception>()
                 .Fallback(
-                    fallbackAction: /* Demonstrates fallback action/func syntax */ () => { return "Please try again later [Fallback for any exception]"; }, 
-                    onFallback: e =>
+                    /* Demonstrates fallback action/func syntax */ () =>
+                    {
+                        return "Please try again later [Fallback for any exception]";
+                    },
+                    e =>
                     {
                         watch.Stop();
 
-                        progress.Report(ProgressWithMessage("Fallback catches eventually failed with: " + e.Exception.Message
-                            + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+                        progress.Report(ProgressWithMessage(
+                            "Fallback catches eventually failed with: " + e.Exception.Message
+                                                                        + " (after " + watch.ElapsedMilliseconds +
+                                                                        "ms)", Color.Red));
 
                         eventualFailuresForOtherReasons++;
                     }
@@ -114,16 +129,16 @@ namespace PollyDemos.Sync
 
 
             // As demo07: we combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap, using the *static* Policy.Wrap syntax.
-            PolicyWrap myResilienceStrategy = Policy.Wrap(waitAndRetryPolicy, circuitBreakerPolicy);
+            var myResilienceStrategy = Policy.Wrap(waitAndRetryPolicy, circuitBreakerPolicy);
 
             // Added in demo08: we wrap the two fallback policies onto the front of the existing wrap too.  Demonstrates the *instance* wrap syntax. And the fact that the PolicyWrap myResilienceStrategy from above is just another Policy, which can be onward-wrapped too.  
             // With this pattern, you can build an overall resilience strategy programmatically, reusing some common parts (eg PolicyWrap myResilienceStrategy) but varying other parts (eg Fallback) individually for different calls.
-            PolicyWrap<String> policyWrap = fallbackForAnyException.Wrap(fallbackForCircuitBreaker.Wrap(myResilienceStrategy));
+            var policyWrap = fallbackForAnyException.Wrap(fallbackForCircuitBreaker.Wrap(myResilienceStrategy));
             // For info: Equivalent to: PolicyWrap<String> policyWrap = Policy.Wrap(fallbackForAnyException, fallbackForCircuitBreaker, waitAndRetryPolicy, circuitBreakerPolicy);
 
             using (var client = new WebClient())
             {
-                bool internalCancel = false;
+                var internalCancel = false;
                 totalRequests = 0;
                 // Do the following until a key is pressed
                 while (!internalCancel && !cancellationToken.IsCancellationRequested)
@@ -135,19 +150,25 @@ namespace PollyDemos.Sync
                     try
                     {
                         // Manage the call according to the whole policy wrap.
-                        string response =
-                            policyWrap.Execute(ct => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests), cancellationToken);
+                        var response =
+                            policyWrap.Execute(
+                                ct => client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" +
+                                                            totalRequests), cancellationToken);
 
                         watch.Stop();
 
                         // Display the response message on the console
-                        progress.Report(ProgressWithMessage("Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                        progress.Report(ProgressWithMessage(
+                            "Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
 
                         eventualSuccesses++;
                     }
-                    catch (Exception e) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
+                    catch (Exception e
+                    ) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
                     {
-                        throw new InvalidOperationException("Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.", e);
+                        throw new InvalidOperationException(
+                            "Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.",
+                            e);
                     }
 
                     // Wait half second
@@ -156,7 +177,6 @@ namespace PollyDemos.Sync
                     internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
                 }
             }
-
         }
 
         public override Statistic[] LatestStatistics => new[]
@@ -164,9 +184,9 @@ namespace PollyDemos.Sync
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses, Color.Green),
             new Statistic("Retries made to help achieve success", retries, Color.Yellow),
-            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking, Color.Magenta),
+            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking,
+                Color.Magenta),
             new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
-
     }
 }

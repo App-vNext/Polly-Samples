@@ -18,7 +18,8 @@ namespace PollyDemos.Async
         private int retries;
         private int eventualFailures;
 
-        public override string Description => "This demo demonstrates how our faulting server behaves, with no Polly policies in use.";
+        public override string Description =>
+            "This demo demonstrates how our faulting server behaves, with no Polly policies in use.";
 
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -31,11 +32,11 @@ namespace PollyDemos.Async
 
             progress.Report(ProgressWithMessage(typeof(AsyncDemo00_NoPolicy).Name));
             progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(String.Empty));
+            progress.Report(ProgressWithMessage(string.Empty));
 
             using (var client = new HttpClient())
             {
-                bool internalCancel = false;
+                var internalCancel = false;
                 totalRequests = 0;
                 // Do the following until a key is pressed
                 while (!internalCancel && !cancellationToken.IsCancellationRequested)
@@ -45,7 +46,8 @@ namespace PollyDemos.Async
                     try
                     {
                         // Make a request and get a response
-                        string msg = await client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
+                        var msg = await client.GetStringAsync(
+                            Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
 
                         // Display the response message on the console
                         progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
@@ -53,7 +55,8 @@ namespace PollyDemos.Async
                     }
                     catch (Exception e)
                     {
-                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
+                        progress.Report(ProgressWithMessage(
+                            "Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
                         eventualFailures++;
                     }
 
@@ -72,6 +75,5 @@ namespace PollyDemos.Async
             new Statistic("Retries made to help achieve success", retries, Color.Yellow),
             new Statistic("Requests which eventually failed", eventualFailures, Color.Red),
         };
-
     }
 }

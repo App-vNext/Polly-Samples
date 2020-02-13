@@ -5,20 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PollyTestClientWpf"
         mc:Ignorable="d"
-        Title="PollyDemos" Background="#002C46" d:DesignWidth="1600.304" d:DesignHeight="910.529" >
-    <Grid  HorizontalAlignment="Left">
+        Title="PollyDemos" Background="#002C46" d:DesignWidth="1600.304" d:DesignHeight="910.529">
+    <Grid HorizontalAlignment="Left">
         <!--<Grid.ColumnDefinitions>
             <ColumnDefinition Width="77*"/>
             <ColumnDefinition Width="75*"/>
         </Grid.ColumnDefinitions>-->
-        <Label Name="Heading" Content="Polly Demos" HorizontalAlignment="Left" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Padding="10,0,0,0" Margin="0,8,0,0" VerticalAlignment="Top" FontSize="28" Foreground="#FFFFFF" Width="315" />
-        <Button Name="PlayButton" Content="Start" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left" Margin="191,7,0,0" VerticalAlignment="Top" Width="56" Height="38"/>
-        <Button Name="StopButton" Content="Stop" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left" Margin="261,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
-        <Button x:Name="ClearButton" Content="Clear" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left" Margin="331,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
+        <Label Name="Heading" Content="Polly Demos" HorizontalAlignment="Left" HorizontalContentAlignment="Left"
+               VerticalContentAlignment="Center" Padding="10,0,0,0" Margin="0,8,0,0" VerticalAlignment="Top"
+               FontSize="28" Foreground="#FFFFFF" Width="315" />
+        <Button Name="PlayButton" Content="Start" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left"
+                Margin="191,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
+        <Button Name="StopButton" Content="Stop" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left"
+                Margin="261,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
+        <Button x:Name="ClearButton" Content="Clear" FontSize="14" Foreground="#002C46" HorizontalAlignment="Left"
+                Margin="331,7,0,0" VerticalAlignment="Top" Width="56" Height="38" />
 
-        <Label Content="Choose demo" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="135" Height="30"  FontSize="12" Padding="10,0,0,0" Margin="0,50,0,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
+        <Label Content="Choose demo" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="135"
+               Height="30" FontSize="12" Padding="10,0,0,0" Margin="0,50,0,0" VerticalAlignment="Top"
+               Foreground="#FFFFFF" />
 
-        <ComboBox Name="Demo" HorizontalAlignment="Left" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" Width="417" Height="30" Margin="191,50,-223,0" VerticalAlignment="Top" FontSize="16" Foreground="#002C46"  Background="#FFFFFF" FontWeight="Normal" SelectionChanged="Demo_OnSelectionChanged">
+        <ComboBox Name="Demo" HorizontalAlignment="Left" HorizontalContentAlignment="Left"
+                  VerticalContentAlignment="Center" Width="417" Height="30" Margin="191,50,-223,0"
+                  VerticalAlignment="Top" FontSize="16" Foreground="#002C46" Background="#FFFFFF" FontWeight="Normal"
+                  SelectionChanged="Demo_OnSelectionChanged">
             <ComboBoxItem Name="AsyncDemo00_NoPolicy">Async demo 00: No policies</ComboBoxItem>
             <ComboBoxItem Name="AsyncDemo01_RetryNTimes">Async demo 01: Retry N times</ComboBoxItem>
             <ComboBoxItem Name="AsyncDemo02_WaitAndRetryNTimes">Async demo 02: WaitAndRetry N times</ComboBoxItem>
@@ -43,35 +53,88 @@
             <ComboBoxItem Name="Demo09_Wrap_Fallback_Timeout_WaitAndRetry">Sync Demo 09: Fallback, Timeout and WaitAndRetry, in a PolicyWrap</ComboBoxItem>
         </ComboBox>
 
-        <Label Content="Description" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="135" Height="30"  FontSize="12" Padding="10,0,0,0" Margin="0,85,0,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Auto" Name="Description" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="191,85,-223,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="100" Width="417" FontSize="14"  FontFamily="Consolas" />
+        <Label Content="Description" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="135"
+               Height="30" FontSize="12" Padding="10,0,0,0" Margin="0,85,0,0" VerticalAlignment="Top"
+               Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Auto" Name="Description" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="191,85,-223,0" TextWrapping="Wrap"
+                 VerticalAlignment="Top" Height="100" Width="417" FontSize="14" FontFamily="Consolas" />
 
-        <Label Content="Output" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="135" Height="30"  FontSize="12" Padding="10,0,0,0" Margin="0,222,0,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <RichTextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" x:Name="Output" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="10,190,-686,0" VerticalAlignment="Top" Height="440" Width="1061" FontSize="14"  FontFamily="Consolas">
+        <Label Content="Output" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="135" Height="30"
+               FontSize="12" Padding="10,0,0,0" Margin="0,222,0,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <RichTextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" x:Name="Output"
+                     HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"
+                     Margin="10,190,-686,0" VerticalAlignment="Top" Height="440" Width="1061" FontSize="14"
+                     FontFamily="Consolas">
             <RichTextBox.Resources>
                 <Style TargetType="{x:Type Paragraph}">
-                    <Setter Property="Margin" Value="0"/>
+                    <Setter Property="Margin" Value="0" />
                 </Style>
             </RichTextBox.Resources>
         </RichTextBox>
 
-        <Label Content="Statistic" x:Name="StatisticLabel00" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,190,-1121,0" VerticalAlignment="Top" VerticalContentAlignment="Center" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic00" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,190,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas"/>
-        <Label Content="" x:Name="StatisticLabel01" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,240,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic01" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,240,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
-        <Label Content="" x:Name="StatisticLabel02" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,290,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic02" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,290,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
-        <Label Content="" x:Name="StatisticLabel03" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,340,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic03" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,340,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
-        <Label Content="" x:Name="StatisticLabel04" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,390,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic04" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,390,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
-        <Label Content="" x:Name="StatisticLabel05" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,440,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic05" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,440,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
-        <Label Content="" x:Name="StatisticLabel06" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,490,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic06" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,490,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
-        <Label Content="" x:Name="StatisticLabel07" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,540,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic07" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,540,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
-        <Label Content="" x:Name="StatisticLabel08" HorizontalAlignment="Left" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" Width="400" Height="40"  FontSize="18" Padding="10,0,0,0" Margin="1108,590,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF"/>
-        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic08" HorizontalAlignment="Left" Padding="8" Foreground="#002C46" Background="#FFFFFF"  Margin="1522,590,-1195,0" TextWrapping="Wrap" HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"  FontFamily="Consolas" />
+        <Label Content="Statistic" x:Name="StatisticLabel00" HorizontalAlignment="Left"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,190,-1121,0" VerticalAlignment="Top" VerticalContentAlignment="Center" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic00" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,190,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel01" HorizontalAlignment="Left" VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,240,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic01" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,240,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel02" HorizontalAlignment="Left" VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,290,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic02" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,290,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel03" HorizontalAlignment="Left" VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,340,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic03" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,340,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel04" HorizontalAlignment="Left" HorizontalContentAlignment="Right"
+               Width="400" Height="40" FontSize="18" Padding="10,0,0,0" Margin="1108,390,-1121,0"
+               VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic04" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,390,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel05" HorizontalAlignment="Left" VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,440,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic05" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,440,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel06" HorizontalAlignment="Left" VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,490,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic06" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,490,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel07" HorizontalAlignment="Left" VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,540,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic07" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,540,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
+        <Label Content="" x:Name="StatisticLabel08" HorizontalAlignment="Left" VerticalContentAlignment="Center"
+               HorizontalContentAlignment="Right" Width="400" Height="40" FontSize="18" Padding="10,0,0,0"
+               Margin="1108,590,-1121,0" VerticalAlignment="Top" Foreground="#FFFFFF" />
+        <TextBox ScrollViewer.VerticalScrollBarVisibility="Disabled" x:Name="Statistic08" HorizontalAlignment="Left"
+                 Padding="8" Foreground="#002C46" Background="#FFFFFF" Margin="1522,590,-1195,0" TextWrapping="Wrap"
+                 HorizontalContentAlignment="Right" VerticalAlignment="Top" Height="40" Width="60" FontSize="18"
+                 FontFamily="Consolas" />
     </Grid>
 </Window>

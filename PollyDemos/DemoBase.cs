@@ -7,12 +7,11 @@ namespace PollyDemos
 {
     public abstract class DemoBase
     {
-        protected bool TerminateDemosByKeyPress { get; } = ( ConfigurationManager.AppSettings["TerminateDemosByKeyPress"] ?? String.Empty).Equals(Boolean.TrueString, StringComparison.InvariantCultureIgnoreCase);
+        protected bool TerminateDemosByKeyPress { get; } =
+            (ConfigurationManager.AppSettings["TerminateDemosByKeyPress"] ?? string.Empty).Equals(bool.TrueString,
+                StringComparison.InvariantCultureIgnoreCase);
 
-        public virtual string Description
-        {
-            get { return $"[Description for demo {GetType().Name} not yet provided.]"; }
-        }
+        public virtual string Description => $"[Description for demo {GetType().Name} not yet provided.]";
 
         public abstract Statistic[] LatestStatistics { get; }
 

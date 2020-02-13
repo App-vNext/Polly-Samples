@@ -32,7 +32,8 @@ namespace PollyDemos.Async
         private int eventualFailuresDueToCircuitBreaking;
         private int eventualFailuresForOtherReasons;
 
-        public override string Description => "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
+        public override string Description =>
+            "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
 
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -49,84 +50,96 @@ namespace PollyDemos.Async
 
             progress.Report(ProgressWithMessage(typeof(AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker).Name));
             progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(String.Empty));
+            progress.Report(ProgressWithMessage(string.Empty));
 
             Stopwatch watch = null;
 
             // Define our waitAndRetry policy: keep retrying with 200ms gaps.
             var waitAndRetryPolicy = Policy
-                .Handle<Exception>(e => !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
+                .Handle<Exception
+                >(e =>
+                    !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
                 .WaitAndRetryForeverAsync(
-                attempt => TimeSpan.FromMilliseconds(200),
-                (exception, calculatedWaitDuration) =>
-                {
-                    progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
-                    retries++;
-                });
+                    attempt => TimeSpan.FromMilliseconds(200),
+                    (exception, calculatedWaitDuration) =>
+                    {
+                        progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
+                        retries++;
+                    });
 
             // Define our CircuitBreaker policy: Break if the action fails 4 times in a row.
             var circuitBreakerPolicy = Policy
                 .Handle<Exception>()
                 .CircuitBreakerAsync(
-                    exceptionsAllowedBeforeBreaking: 4,
-                    durationOfBreak: TimeSpan.FromSeconds(3),
-                    onBreak: (ex, breakDelay) =>
+                    4,
+                    TimeSpan.FromSeconds(3),
+                    (ex, breakDelay) =>
                     {
-                        progress.Report(ProgressWithMessage(".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!", Color.Magenta));
+                        progress.Report(ProgressWithMessage(
+                            ".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!",
+                            Color.Magenta));
                         progress.Report(ProgressWithMessage("..due to: " + ex.Message, Color.Magenta));
                     },
-                    onReset: () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!", Color.Magenta)),
-                    onHalfOpen: () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta))
+                    () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!",
+                        Color.Magenta)),
+                    () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!",
+                        Color.Magenta))
                 );
 
             // Define a fallback policy: provide a nice substitute message to the user, if we found the circuit was broken.
-            FallbackPolicy<String> fallbackForCircuitBreaker = Policy<String>
+            var fallbackForCircuitBreaker = Policy<string>
                 .Handle<BrokenCircuitException>()
                 .FallbackAsync(
-                    fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [message substituted by fallback policy]",
-                    onFallbackAsync: async b =>
+                    /* Demonstrates fallback value syntax */
+                    "Please try again later [message substituted by fallback policy]",
+                    async b =>
                     {
                         await Task.FromResult(true);
                         watch.Stop();
                         progress.Report(ProgressWithMessage("Fallback catches failed with: " + b.Exception.Message
-                            + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+                                                                                             + " (after " +
+                                                                                             watch.ElapsedMilliseconds +
+                                                                                             "ms)", Color.Red));
                         eventualFailuresDueToCircuitBreaking++;
                     }
                 );
 
             // Define a fallback policy: provide a substitute string to the user, for any exception.
-            FallbackPolicy<String> fallbackForAnyException = Policy<String>
+            var fallbackForAnyException = Policy<string>
                 .Handle<Exception>()
                 .FallbackAsync(
-                    fallbackAction: /* Demonstrates fallback action/func syntax */ async ct =>
+                    /* Demonstrates fallback action/func syntax */ async ct =>
                     {
                         await Task.FromResult(true);
                         /* do something else async if desired */
                         return "Please try again later [Fallback for any exception]";
                     },
-                    onFallbackAsync: async e =>
+                    async e =>
                     {
                         await Task.FromResult(true);
                         watch.Stop();
-                        progress.Report(ProgressWithMessage("Fallback catches eventually failed with: " + e.Exception.Message
-                            + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Red));
+                        progress.Report(ProgressWithMessage(
+                            "Fallback catches eventually failed with: " + e.Exception.Message
+                                                                        + " (after " + watch.ElapsedMilliseconds +
+                                                                        "ms)", Color.Red));
                         eventualFailuresForOtherReasons++;
                     }
                 );
 
             // As demo07: we combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap, using the *static* Policy.Wrap syntax.
-            PolicyWrap myResilienceStrategy = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
+            var myResilienceStrategy = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
 
             // Added in demo08: we wrap the two fallback policies onto the front of the existing wrap too.  Demonstrates the *instance* wrap syntax. And the fact that the PolicyWrap myResilienceStrategy from above is just another Policy, which can be onward-wrapped too.  
             // With this pattern, you can build an overall resilience strategy programmatically, reusing some common parts (eg PolicyWrap myResilienceStrategy) but varying other parts (eg Fallback) individually for different calls.
-            PolicyWrap<String> policyWrap = fallbackForAnyException.WrapAsync(fallbackForCircuitBreaker.WrapAsync(myResilienceStrategy));
+            var policyWrap =
+                fallbackForAnyException.WrapAsync(fallbackForCircuitBreaker.WrapAsync(myResilienceStrategy));
             // For info: Equivalent to: PolicyWrap<String> policyWrap = Policy.WrapAsync(fallbackForAnyException, fallbackForCircuitBreaker, waitAndRetryPolicy, circuitBreakerPolicy);
 
             totalRequests = 0;
 
             using (var client = new HttpClient())
             {
-                bool internalCancel = false;
+                var internalCancel = false;
                 // Do the following until a key is pressed
                 while (!internalCancel && !cancellationToken.IsCancellationRequested)
                 {
@@ -137,19 +150,24 @@ namespace PollyDemos.Async
                     try
                     {
                         // Manage the call according to the whole policy wrap
-                        string response = await policyWrap.ExecuteAsync(ct =>
-                                        client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests), cancellationToken);
+                        var response = await policyWrap.ExecuteAsync(ct =>
+                                client.GetStringAsync(Configuration.WEB_API_ROOT + "/api/values/" + totalRequests),
+                            cancellationToken);
 
                         watch.Stop();
 
                         // Display the response message on the console
-                        progress.Report(ProgressWithMessage("Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
+                        progress.Report(ProgressWithMessage(
+                            "Response : " + response + " (after " + watch.ElapsedMilliseconds + "ms)", Color.Green));
 
                         eventualSuccesses++;
                     }
-                    catch (Exception e) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
+                    catch (Exception e
+                    ) // try-catch not needed, now that we have a Fallback.Handle<Exception>.  It's only been left in to *demonstrate* it should never get hit.
                     {
-                        throw new InvalidOperationException("Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.", e);
+                        throw new InvalidOperationException(
+                            "Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.",
+                            e);
                     }
 
                     // Wait half second
@@ -165,9 +183,9 @@ namespace PollyDemos.Async
             new Statistic("Total requests made", totalRequests),
             new Statistic("Requests which eventually succeeded", eventualSuccesses, Color.Green),
             new Statistic("Retries made to help achieve success", retries, Color.Yellow),
-            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking, Color.Magenta),
+            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking,
+                Color.Magenta),
             new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
-
     }
 }

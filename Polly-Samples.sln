@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyTestApp", "PollyTestApp\PollyTestApp.csproj", "{A0C3DAF0-4F18-4DAB-8A16-8A5C5F6CAEC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PollyDemos", "PollyDemos\PollyDemos.csproj", "{69789838-8A79-4D0D-9723-8C0A8435E802}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyDemos", "PollyDemos\PollyDemos.csproj", "{69789838-8A79-4D0D-9723-8C0A8435E802}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PollyTestClientConsole", "PollyTestClientConsole\PollyTestClientConsole.csproj", "{A724DE86-8F09-4EF6-BF26-289C28189C53}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyTestClientConsole", "PollyTestClientConsole\PollyTestClientConsole.csproj", "{A724DE86-8F09-4EF6-BF26-289C28189C53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PollyTestClientWpf", "PollyTestClientWpf\PollyTestClientWpf.csproj", "{89432E40-AEB5-4020-AC43-E8BB9CAC6AD6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PollyTestClientWpf", "PollyTestClientWpf\PollyTestClientWpf.csproj", "{89432E40-AEB5-4020-AC43-E8BB9CAC6AD6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PollyTestWebApi", "PollyTestWebApi\PollyTestWebApi.csproj", "{ACA3DD92-9D4E-4BDF-ACFE-79822882103E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A0C3DAF0-4F18-4DAB-8A16-8A5C5F6CAEC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A0C3DAF0-4F18-4DAB-8A16-8A5C5F6CAEC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A0C3DAF0-4F18-4DAB-8A16-8A5C5F6CAEC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A0C3DAF0-4F18-4DAB-8A16-8A5C5F6CAEC1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{69789838-8A79-4D0D-9723-8C0A8435E802}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69789838-8A79-4D0D-9723-8C0A8435E802}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69789838-8A79-4D0D-9723-8C0A8435E802}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,8 +29,15 @@ Global
 		{89432E40-AEB5-4020-AC43-E8BB9CAC6AD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89432E40-AEB5-4020-AC43-E8BB9CAC6AD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89432E40-AEB5-4020-AC43-E8BB9CAC6AD6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACA3DD92-9D4E-4BDF-ACFE-79822882103E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACA3DD92-9D4E-4BDF-ACFE-79822882103E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACA3DD92-9D4E-4BDF-ACFE-79822882103E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACA3DD92-9D4E-4BDF-ACFE-79822882103E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44656A22-596C-4DD3-8B4A-7FACE51846DA}
 	EndGlobalSection
 EndGlobal

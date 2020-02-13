@@ -27,15 +27,15 @@ namespace PollyTestClientWpf
     /// </summary>
     public partial class MainWindow : Window
     {
+        private CancellationTokenSource cancellationSource;
+        private CancellationToken cancellationToken;
 
-        CancellationTokenSource cancellationSource;
-        CancellationToken cancellationToken;
+        private static readonly Type[] availableDemoTypes = Assembly.GetAssembly(typeof(DemoBase)).GetTypes()
+            .Where(t => t.IsSubclassOf(typeof(DemoBase)) && !t.IsAbstract).ToArray();
 
-        private static readonly Type[] availableDemoTypes = Assembly.GetAssembly(typeof(DemoBase)).GetTypes().Where(t => t.IsSubclassOf(typeof(DemoBase)) && !t.IsAbstract).ToArray();
+        private readonly object lockObject = new object();
 
-        readonly object lockObject = new object();
-
-        Statistic[] closingStatistics = new Statistic[0];
+        private Statistic[] closingStatistics = new Statistic[0];
 
         private const int MaxStatisticsToShow = 9;
         private const string StatisticBoxPrefix = "Statistic";
@@ -65,7 +65,6 @@ namespace PollyTestClientWpf
 
                 closingStatistics = progressArgs.Statistics;
             };
-
         }
 
         private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -99,7 +98,7 @@ namespace PollyTestClientWpf
 
             cancellationToken = cancellationSource.Token;
 
-            ComboBoxItem selectedItem = Demo.SelectedItem as ComboBoxItem;
+            var selectedItem = Demo.SelectedItem as ComboBoxItem;
             if (selectedItem == null)
             {
                 WriteLineInColor("No demo selected.", Color.Red);
@@ -107,8 +106,8 @@ namespace PollyTestClientWpf
                 return;
             }
 
-            string demoName = selectedItem.Name;
-            Type demoType = GetDemoType(demoName);
+            var demoName = selectedItem.Name;
+            var demoType = GetDemoType(demoName);
             if (demoType == null)
             {
                 WriteLineInColor($"Unable to identify demo: {demoName}", Color.Red);
@@ -125,6 +124,7 @@ namespace PollyTestClientWpf
                 {
                     demoInstance = null;
                 }
+
                 if (demoInstance == null)
                 {
                     WriteLineInColor($"Unable to instantiate demo: {demoName}", Color.Red);
@@ -134,17 +134,15 @@ namespace PollyTestClientWpf
 
                 try
                 {
-                    Task.Factory.StartNew(() => demoInstance.Execute(cancellationToken, progress), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                    Task.Factory.StartNew(() => demoInstance.Execute(cancellationToken, progress), cancellationToken,
+                            TaskCreationOptions.LongRunning, TaskScheduler.Default)
                         .ContinueWith(t =>
                         {
                             if (t.IsCanceled)
-                            {
                                 WriteLineInColor($"Demo was canceled: {demoName}", Color.Red);
-                            }
                             else if (t.IsFaulted)
-                            {
-                                WriteLineInColor($"Demo {demoName} threw exception: {t.Exception.ToString()}", Color.Red);
-                            }
+                                WriteLineInColor($"Demo {demoName} threw exception: {t.Exception.ToString()}",
+                                    Color.Red);
                         }, CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.Default);
                 }
                 catch (Exception e)
@@ -163,6 +161,7 @@ namespace PollyTestClientWpf
                 {
                     demoInstance = null;
                 }
+
                 if (demoInstance == null)
                 {
                     WriteLineInColor($"Unable to instantiate demo: {demoName}", Color.Red);
@@ -170,18 +169,15 @@ namespace PollyTestClientWpf
                     return;
                 }
 
-                Task.Factory.StartNew(() => demoInstance.ExecuteAsync(cancellationToken, progress), cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                Task.Factory.StartNew(() => demoInstance.ExecuteAsync(cancellationToken, progress), cancellationToken,
+                        TaskCreationOptions.LongRunning, TaskScheduler.Default)
                     .Unwrap()
                     .ContinueWith(t =>
                     {
                         if (t.IsCanceled)
-                        {
                             WriteLineInColor($"Demo was canceled: {demoName}", Color.Red);
-                        }
                         else if (t.IsFaulted)
-                        {
                             WriteLineInColor($"Demo {demoName} threw exception: {t.Exception.ToString()}", Color.Red);
-                        }
                     }, CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.Default);
             }
             else
@@ -217,9 +213,7 @@ namespace PollyTestClientWpf
             {
                 int longestDescription = closingStatistics.Max(s => s.Description.Length);
                 foreach (Statistic stat in closingStatistics)
-                {
                     WriteLineInColor(stat.Description.PadRight(longestDescription) + ": " + stat.Value, stat.Color);
-                }
             }
 
             cancellationSource.Dispose();
@@ -229,13 +223,14 @@ namespace PollyTestClientWpf
         {
             var comboBox = sender as ComboBox;
 
-            string demoName = (comboBox.SelectedItem as ComboBoxItem).Name;
-            Type demoType = GetDemoType(demoName);
+            var demoName = (comboBox.SelectedItem as ComboBoxItem).Name;
+            var demoType = GetDemoType(demoName);
             if (demoType == null)
             {
                 Description.Text = string.Empty;
                 return;
             }
+
             DemoBase demoInstance;
             try
             {
@@ -245,11 +240,13 @@ namespace PollyTestClientWpf
             {
                 demoInstance = null;
             }
+
             if (demoInstance == null)
             {
                 Description.Text = string.Empty;
                 return;
             }
+
             Description.Text = demoInstance.Description;
         }
 
@@ -258,16 +255,16 @@ namespace PollyTestClientWpf
             Output.Dispatcher.Invoke(() =>
             {
                 foreach (ColoredMessage message in messages)
-                {
-                    lock (lockObject) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
+                    lock (lockObject
+                    ) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
                     {
-                        TextRange newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
+                        var newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
                         {
                             Text = message.Message + "\n"
                         };
                         newText.ApplyPropertyValue(TextElement.ForegroundProperty, message.Color.ToBrushColor());
                     }
-                }
+
                 Output.ScrollToEnd();
             });
         }
@@ -276,9 +273,10 @@ namespace PollyTestClientWpf
         {
             Output.Dispatcher.Invoke(() =>
             {
-                lock (lockObject) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
+                lock (lockObject
+                ) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
                 {
-                    TextRange newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
+                    var newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
                     {
                         Text = msg + "\n"
                     };
@@ -292,12 +290,12 @@ namespace PollyTestClientWpf
         {
             Output.Dispatcher.Invoke(() =>
             {
-                int statisticsToShow = stats.Length;
-                for (int i = 0; i < MaxStatisticsToShow; i++)
+                var statisticsToShow = stats.Length;
+                for (var i = 0; i < MaxStatisticsToShow; i++)
                 {
-                    string statSuffix = $"{i:00}";
-                    Label label = (Label) this.FindName(StatisticLabelPrefix + statSuffix);
-                    TextBox statBox = (TextBox) this.FindName(StatisticBoxPrefix + statSuffix);
+                    var statSuffix = $"{i:00}";
+                    var label = (Label) FindName(StatisticLabelPrefix + statSuffix);
+                    var statBox = (TextBox) FindName(StatisticBoxPrefix + statSuffix);
 
                     if (i < statisticsToShow)
                     {
