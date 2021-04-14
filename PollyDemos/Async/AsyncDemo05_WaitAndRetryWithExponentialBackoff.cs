@@ -32,7 +32,6 @@ namespace PollyDemos.Async
 
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
 
             // Let's call a web api service to make repeated requests to a server. 
@@ -42,7 +41,7 @@ namespace PollyDemos.Async
             retries = 0;
             eventualFailures = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo05_WaitAndRetryWithExponentialBackoff).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo05_WaitAndRetryWithExponentialBackoff)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

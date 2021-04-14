@@ -23,14 +23,13 @@ namespace PollyDemos.Async
 
         public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
 
             eventualSuccesses = 0;
             retries = 0;
             eventualFailures = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo00_NoPolicy).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo00_NoPolicy)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 
