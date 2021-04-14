@@ -45,7 +45,6 @@ namespace PollyDemos.Async
         public override async Task ExecuteAsync(CancellationToken externalCancellationToken,
             IProgress<DemoProgress> progress)
         {
-            if (externalCancellationToken == null) throw new ArgumentNullException(nameof(externalCancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
 
             progress.Report(ProgressWithMessage(typeof(BulkheadAsyncDemo00_NoIsolation).Name));
