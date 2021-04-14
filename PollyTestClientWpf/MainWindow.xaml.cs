@@ -65,6 +65,10 @@ namespace PollyTestClientWpf
 
                 closingStatistics = progressArgs.Statistics;
             };
+
+            Demo.SelectedIndex = 0;
+
+            ClearButton_Click();
         }
 
         private void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
@@ -254,9 +258,8 @@ namespace PollyTestClientWpf
         {
             Output.Dispatcher.Invoke(() =>
             {
-                foreach (ColoredMessage message in messages)
-                    lock (lockObject
-                    ) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
+                lock (lockObject) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
+                    foreach (ColoredMessage message in messages)
                     {
                         var newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
                         {
@@ -273,8 +276,7 @@ namespace PollyTestClientWpf
         {
             Output.Dispatcher.Invoke(() =>
             {
-                lock (lockObject
-                ) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
+                lock (lockObject) // Locking helps avoid the color of one message leaking onto another, in multi-threaded callbacks.
                 {
                     var newText = new TextRange(Output.Document.ContentEnd, Output.Document.ContentEnd)
                     {
@@ -294,8 +296,8 @@ namespace PollyTestClientWpf
                 for (var i = 0; i < MaxStatisticsToShow; i++)
                 {
                     var statSuffix = $"{i:00}";
-                    var label = (Label) FindName(StatisticLabelPrefix + statSuffix);
-                    var statBox = (TextBox) FindName(StatisticBoxPrefix + statSuffix);
+                    var label = (Label)FindName(StatisticLabelPrefix + statSuffix);
+                    var statBox = (TextBox)FindName(StatisticBoxPrefix + statSuffix);
 
                     if (i < statisticsToShow)
                     {
