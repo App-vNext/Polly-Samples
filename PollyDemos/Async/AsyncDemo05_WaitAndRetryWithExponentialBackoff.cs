@@ -41,7 +41,7 @@ namespace PollyDemos.Async
             retries = 0;
             eventualFailures = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo05_WaitAndRetryWithExponentialBackoff).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo05_WaitAndRetryWithExponentialBackoff)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

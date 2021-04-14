@@ -51,7 +51,7 @@ namespace PollyDemos.Async
             eventualFailuresDueToCircuitBreaking = 0;
             eventualFailuresForOtherReasons = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo06_WaitAndRetryNestingCircuitBreaker).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo06_WaitAndRetryNestingCircuitBreaker)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

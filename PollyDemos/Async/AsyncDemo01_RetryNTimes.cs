@@ -33,7 +33,7 @@ namespace PollyDemos.Async
             retries = 0;
             eventualFailures = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo01_RetryNTimes).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo01_RetryNTimes)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

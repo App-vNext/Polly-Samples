@@ -37,7 +37,7 @@ namespace PollyDemos.Async
             retries = 0;
             eventualFailures = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

@@ -45,7 +45,7 @@ namespace PollyDemos.Async
             eventualFailuresForOtherReasons = 0;
 
             progress.Report(
-                ProgressWithMessage(typeof(AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap).Name));
+                ProgressWithMessage(nameof(AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

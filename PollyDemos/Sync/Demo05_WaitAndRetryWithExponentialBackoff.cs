@@ -27,11 +27,10 @@ namespace PollyDemos.Sync
         private int eventualFailures;
 
         public override string Description =>
-            "This demonstrates exponential backoff.  We have enough retries to ensure success.  But we don't hammer the server so hard: we increase the delay between each try.";
+            "This demonstrates exponential back-off.  We have enough retries to ensure success.  But we don't hammer the server so hard: we increase the delay between each try.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
 
             // Let's call a web api service to make repeated requests to a server. 
@@ -41,7 +40,7 @@ namespace PollyDemos.Sync
             retries = 0;
             eventualFailures = 0;
 
-            progress.Report(ProgressWithMessage(typeof(Demo05_WaitAndRetryWithExponentialBackoff).Name));
+            progress.Report(ProgressWithMessage(nameof(Demo05_WaitAndRetryWithExponentialBackoff)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

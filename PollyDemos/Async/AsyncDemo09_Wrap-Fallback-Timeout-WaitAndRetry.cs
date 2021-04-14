@@ -48,7 +48,7 @@ namespace PollyDemos.Async
             eventualFailuresDueToTimeout = 0;
             eventualFailuresForOtherReasons = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

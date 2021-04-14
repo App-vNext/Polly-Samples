@@ -47,7 +47,7 @@ namespace PollyDemos.Async
             eventualFailuresDueToCircuitBreaking = 0;
             eventualFailuresForOtherReasons = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

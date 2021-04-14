@@ -49,7 +49,7 @@ namespace PollyDemos.Async
         {
             if (progress == null) throw new ArgumentNullException(nameof(progress));
 
-            progress.Report(ProgressWithMessage(typeof(BulkheadAsyncDemo01_WithBulkheads).Name));
+            progress.Report(ProgressWithMessage(nameof(BulkheadAsyncDemo01_WithBulkheads)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

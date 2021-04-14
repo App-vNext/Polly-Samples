@@ -29,7 +29,7 @@ namespace PollyDemos.Async
             retries = 0;
             eventualFailures = 0;
 
-            progress.Report(ProgressWithMessage(typeof(AsyncDemo00_NoPolicy).Name));
+            progress.Report(ProgressWithMessage(nameof(AsyncDemo00_NoPolicy)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 

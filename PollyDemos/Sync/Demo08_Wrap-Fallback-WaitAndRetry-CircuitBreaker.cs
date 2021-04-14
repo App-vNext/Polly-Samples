@@ -37,7 +37,6 @@ namespace PollyDemos.Sync
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            if (cancellationToken == null) throw new ArgumentNullException(nameof(cancellationToken));
             if (progress == null) throw new ArgumentNullException(nameof(progress));
 
             // Let's call a web api service to make repeated requests to a server. 
@@ -48,7 +47,7 @@ namespace PollyDemos.Sync
             eventualFailuresDueToCircuitBreaking = 0;
             eventualFailuresForOtherReasons = 0;
 
-            progress.Report(ProgressWithMessage(typeof(Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker).Name));
+            progress.Report(ProgressWithMessage(nameof(Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 
