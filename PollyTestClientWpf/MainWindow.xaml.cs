@@ -254,7 +254,7 @@ namespace PollyTestClientWpf
             Description.Text = demoInstance.Description;
         }
 
-        public void WriteMultiLineInColor(ColoredMessage[] messages)
+        public void WriteMultiLineInColor(IEnumerable<ColoredMessage> messages)
         {
             Output.Dispatcher.Invoke(() =>
             {

@@ -11,18 +11,12 @@ namespace PollyDemos
         public abstract Statistic[] LatestStatistics { get; }
 
         public DemoProgress ProgressWithMessage(string message)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, Color.Default));
-        }
+            => new(LatestStatistics, new ColoredMessage(message));
 
         public DemoProgress ProgressWithMessage(string message, Color color)
-        {
-            return new DemoProgress(LatestStatistics, new ColoredMessage(message, color));
-        }
+            => new(LatestStatistics, new ColoredMessage(message, color));
 
         public DemoProgress ProgressWithMessages(IEnumerable<ColoredMessage> messages)
-        {
-            return new DemoProgress(LatestStatistics, messages);
-        }
+            => new (LatestStatistics, messages);
     }
 }

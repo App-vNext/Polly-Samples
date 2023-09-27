@@ -1,17 +1,9 @@
 ﻿namespace PollyDemos.OutputHelpers
 {
-    public struct ColoredMessage
+    public record struct ColoredMessage(string Message, Color Color)
     {
-        public Color Color { get; }
-        public string Message { get; }
-
-        public ColoredMessage(string message, Color color)
-        {
-            Message = message;
-            Color = color;
-        }
-
-        public ColoredMessage(string message) : this(message, Color.Default)
+        public ColoredMessage(string message)
+            : this(message, Color.Default)
         {
         }
     }
