@@ -1,7 +1,4 @@
-﻿using Polly;
-using System;
-using System.Net;
-using System.Threading;
+﻿using System.Net;
 using PollyDemos.OutputHelpers;
 
 namespace PollyDemos.Sync

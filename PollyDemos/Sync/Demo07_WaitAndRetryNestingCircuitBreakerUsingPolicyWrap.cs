@@ -1,11 +1,6 @@
-﻿using Polly;
-using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
-using System.Threading;
 using Polly.CircuitBreaker;
-using Polly.Retry;
-using Polly.Wrap;
 using PollyDemos.OutputHelpers;
 
 namespace PollyDemos.Sync
