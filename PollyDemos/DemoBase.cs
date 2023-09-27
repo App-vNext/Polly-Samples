@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using PollyDemos.OutputHelpers;
+﻿using PollyDemos.OutputHelpers;
 
 namespace PollyDemos
 {
     public abstract class DemoBase
     {
-        protected bool TerminateDemosByKeyPress { get; } =
-            (ConfigurationManager.AppSettings["TerminateDemosByKeyPress"] ?? string.Empty).Equals(bool.TrueString,
-                StringComparison.InvariantCultureIgnoreCase);
+        protected bool TerminateDemosByKeyPress { get; } = true;
 
         public virtual string Description => $"[Description for demo {GetType().Name} not yet provided.]";
 

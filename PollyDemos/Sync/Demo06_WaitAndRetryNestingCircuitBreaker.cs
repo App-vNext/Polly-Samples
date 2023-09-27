@@ -1,8 +1,5 @@
-﻿using Polly;
-using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
-using System.Threading;
 using Polly.CircuitBreaker;
 using PollyDemos.OutputHelpers;
 

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollyDemos.OutputHelpers
+﻿namespace PollyDemos.OutputHelpers
 {
     public struct ColoredMessage
     {

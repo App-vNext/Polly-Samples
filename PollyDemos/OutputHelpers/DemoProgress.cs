@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-
-namespace PollyDemos.OutputHelpers
+﻿namespace PollyDemos.OutputHelpers
 {
     public struct DemoProgress
     {
