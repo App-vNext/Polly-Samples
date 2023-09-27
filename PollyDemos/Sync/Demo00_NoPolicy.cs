@@ -1,5 +1,4 @@
-﻿using System.Net;
-using PollyDemos.OutputHelpers;
+﻿using PollyDemos.OutputHelpers;
 
 namespace PollyDemos.Sync
 {
@@ -12,7 +11,6 @@ namespace PollyDemos.Sync
     {
         private int totalRequests;
         private int eventualSuccesses;
-        private int retries;
         private int eventualFailures;
 
         public override string Description =>
@@ -20,59 +18,50 @@ namespace PollyDemos.Sync
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            if (progress == null) throw new ArgumentNullException(nameof(progress));
+            ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web api service to make repeated requests to a server. 
+            // Let's call a web api service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
-
-            eventualSuccesses = 0;
-            retries = 0;
-            eventualFailures = 0;
-
             progress.Report(ProgressWithMessage(nameof(Demo00_NoPolicy)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 
-            using (var client = new WebClient())
+            var client = new HttpClient();
+            var internalCancel = false;
+            // Do the following until a key is pressed
+            while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
-                totalRequests = 0;
-                var internalCancel = false;
-                // Do the following until a key is pressed
-                while (!internalCancel && !cancellationToken.IsCancellationRequested)
+                totalRequests++;
+
+                try
                 {
-                    totalRequests++;
+                    // Make a request and get a response
+                    var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
+                    var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url));
 
-                    try
-                    {
-                        // Make a request and get a response
-                        var msg = client.DownloadString(Configuration.WEB_API_ROOT + "/api/values/" +
-                                                        totalRequests.ToString());
-
-                        // Display the response message on the console
-                        progress.Report(ProgressWithMessage("Response : " + msg, Color.Green));
-                        eventualSuccesses++;
-                    }
-                    catch (Exception e)
-                    {
-                        progress.Report(ProgressWithMessage(
-                            "Request " + totalRequests + " eventually failed with: " + e.Message, Color.Red));
-                        eventualFailures++;
-                    }
-
-                    // Wait half second
-                    Thread.Sleep(500);
-
-                    internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
+                    // Display the response message on the console
+                    using var stream = response.Content.ReadAsStream();
+                    using var streamReader = new StreamReader(stream);
+                    progress.Report(ProgressWithMessage($"Response : {streamReader.ReadToEnd()}", Color.Green));
+                    eventualSuccesses++;
                 }
+                catch (Exception e)
+                {
+                    progress.Report(ProgressWithMessage($"Request {totalRequests} eventually failed with: {e.Message}", Color.Red));
+                    eventualFailures++;
+                }
+
+                Thread.Sleep(500);
+                internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
             }
         }
 
-        public override Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new Statistic("Total requests made", totalRequests),
-            new Statistic("Requests which eventually succeeded", eventualSuccesses, Color.Green),
-            new Statistic("Retries made to help achieve success", retries, Color.Yellow),
-            new Statistic("Requests which eventually failed", eventualFailures, Color.Red),
+            new("Total requests made", totalRequests),
+            new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
+            new("Retries made to help achieve success", 0, Color.Yellow),
+            new("Requests which eventually failed", eventualFailures, Color.Red),
         };
     }
 }
