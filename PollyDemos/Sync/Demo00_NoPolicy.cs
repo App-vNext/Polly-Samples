@@ -18,10 +18,7 @@ namespace PollyDemos.Sync
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            if (progress is null)
-            {
-                throw new ArgumentNullException(nameof(progress));
-            }
+            ArgumentNullException.ThrowIfNull(progress);
 
             // Let's call a web api service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
