@@ -4,7 +4,7 @@ namespace PollyDemos.Sync
 {
     /// <summary>
     /// Uses no strategy.  Demonstrates behavior of 'faulting server' we are testing against.
-    /// Loops through a series of Http requests, keeping track of each requested
+    /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// </summary>
     public class Demo00_NoStrategy : SyncDemo
@@ -20,7 +20,7 @@ namespace PollyDemos.Sync
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web api service to make repeated requests to a server.
+            // Let's call a web API service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;

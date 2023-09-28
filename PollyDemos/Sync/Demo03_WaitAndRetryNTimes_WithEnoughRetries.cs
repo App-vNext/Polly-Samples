@@ -4,7 +4,7 @@ namespace PollyDemos.Sync
 {
     /// <summary>
     /// Demonstrates the Retry strategy with delays between retry attempts.
-    /// Loops through a series of Http requests, keeping track of each requested
+    /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
     /// Observations: We now have waits and enough retries: all calls now succeed!  Yay!
@@ -25,7 +25,7 @@ namespace PollyDemos.Sync
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web api service to make repeated requests to a server.
+            // Let's call a web API service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
@@ -36,9 +36,6 @@ namespace PollyDemos.Sync
             progress.Report(ProgressWithMessage(nameof(Demo03_WaitAndRetryNTimes_WithEnoughRetries)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
-
-            // Let's call a web api service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
 
             // Define our strategy:
             var strategy = new ResiliencePipelineBuilder().AddRetry(new()
@@ -53,7 +50,7 @@ namespace PollyDemos.Sync
                     var exception = args.Outcome.Exception!; //The Exception property is nullable
 
                     // Tell the user what happened
-                    progress.Report(ProgressWithMessage("Strategy logging: " + exception.Message, Color.Yellow));
+                    progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;
                 }

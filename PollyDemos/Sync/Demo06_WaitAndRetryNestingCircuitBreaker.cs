@@ -1,25 +1,24 @@
 ﻿using System.Diagnostics;
-using System.Net;
 using Polly.CircuitBreaker;
 using PollyDemos.OutputHelpers;
 
 namespace PollyDemos.Sync
 {
     /// <summary>
-    /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.
-    /// Loops through a series of Http requests, keeping track of each requested
+    /// Demonstrates using the Retry strategy nesting CircuitBreaker.
+    /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
-    /// 
-    /// Discussion:  What if the underlying system was completely down?  
+    ///
+    /// Discussion:  What if the underlying system was completely down?
     /// Keeping retrying would be pointless...
     /// ... and would leave the client hanging, retrying for successes which never come.
-    /// 
-    /// Enter circuit-breaker: 
+    ///
+    /// Enter circuit-breaker:
     /// After too many failures, breaks the circuit for a period, during which it blocks calls + fails fast.
     /// - protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover)
-    /// - allows the client to get a fail response _fast, not wait for ages, if downstream is awol.
-    /// 
-    /// Obervations from this demo:
+    /// - allows the client to get a fail response fast, not wait for ages, if downstream is AWOL.
+    ///
+    /// Observations:
     /// Note how after the circuit decides to break, subsequent calls fail faster.
     /// Note how breaker gives underlying system time to recover ...
     /// ... by the time circuit closes again, underlying system has recovered!
@@ -37,135 +36,136 @@ namespace PollyDemos.Sync
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
-            if (progress == null) throw new ArgumentNullException(nameof(progress));
+            ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web api service to make repeated requests to a server. 
+            // Let's call a web API service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             retries = 0;
             eventualFailuresDueToCircuitBreaking = 0;
             eventualFailuresForOtherReasons = 0;
+            totalRequests = 0;
 
             progress.Report(ProgressWithMessage(nameof(Demo06_WaitAndRetryNestingCircuitBreaker)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 
-            // Define our waitAndRetry policy: keep retrying with 200ms gaps.
-            var waitAndRetryPolicy = Policy
-                .Handle<Exception
-                >(e =>
-                    !(e is BrokenCircuitException)) // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission!
-                .WaitAndRetryForever(
-                    attempt => TimeSpan.FromMilliseconds(200),
-                    (exception, calculatedWaitDuration) =>
-                    {
-                        // This is your new exception handler! 
-                        // Tell the user what they've won!
-                        progress.Report(ProgressWithMessage(".Log,then retry: " + exception.Message, Color.Yellow));
-                        retries++;
-                    });
-
-            // Define our CircuitBreaker policy: Break if the action fails 4 times in a row.
-            var circuitBreakerPolicy = Policy
-                .Handle<Exception>()
-                .CircuitBreaker(
-                    4,
-                    TimeSpan.FromSeconds(3),
-                    (ex, breakDelay) =>
-                    {
-                        progress.Report(ProgressWithMessage(
-                            ".Breaker logging: Breaking the circuit for " + breakDelay.TotalMilliseconds + "ms!",
-                            Color.Magenta));
-                        progress.Report(ProgressWithMessage("..due to: " + ex.Message, Color.Magenta));
-                    },
-                    () => progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!",
-                        Color.Magenta)),
-                    () => progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!",
-                        Color.Magenta))
-                );
-
-            using (var client = new WebClient())
+            // Define our retry strategy:
+            var retryStrategy = new ResiliencePipelineBuilder().AddRetry(new()
             {
-                var internalCancel = false;
-                totalRequests = 0;
-                // Do the following until a key is pressed
-                while (!internalCancel && !cancellationToken.IsCancellationRequested)
+                // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
+                MaxRetryAttempts = int.MaxValue, // Retry indefinitely
+                Delay = TimeSpan.FromMilliseconds(200),  // Wait 200ms between each try
+                OnRetry = args =>
                 {
-                    totalRequests++;
-                    var watch = new Stopwatch();
-                    watch.Start();
+                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
+                    // Note the ! sign (null-forgiving operator) at the end of the command.
+                    var exception = args.Outcome.Exception!; //The Exception property is nullable
 
-                    try
-                    {
-                        // Retry the following call according to the policy - 3 times.
-                        waitAndRetryPolicy.Execute(
-                            ct => // The Execute() overload takes a CancellationToken, but it happens the executed code does not honour it.
-                            {
-                                // This code is executed within the waitAndRetryPolicy 
-
-                                var response = circuitBreakerPolicy.Execute<string>(
-                                    () => // Note how we can also Execute() a Func<TResult> and pass back the value.
-                                    {
-                                        // This code is executed within the circuitBreakerPolicy 
-
-                                        // Make a request and get a response
-                                        return client.DownloadString(
-                                            Configuration.WEB_API_ROOT + "/api/values/" + totalRequests);
-                                    });
-
-                                watch.Stop();
-
-                                // Display the response message on the console
-                                progress.Report(ProgressWithMessage("Response : " + response
-                                                                                  + " (after " +
-                                                                                  watch.ElapsedMilliseconds + "ms)",
-                                    Color.Green));
-
-                                eventualSuccesses++;
-                            }
-                            , cancellationToken // The cancellationToken passed in to Execute() enables the policy instance to cancel retries, when the token is signalled.
-                        );
-                    }
-                    catch (BrokenCircuitException b)
-                    {
-                        watch.Stop();
-
-                        progress.Report(ProgressWithMessage("Request " + totalRequests + " failed with: " +
-                                                            b.GetType().Name
-                                                            + " (after " + watch.ElapsedMilliseconds + "ms)",
-                            Color.Red));
-
-                        eventualFailuresDueToCircuitBreaking++;
-                    }
-                    catch (Exception e)
-                    {
-                        watch.Stop();
-
-                        progress.Report(ProgressWithMessage("Request " + totalRequests + " eventually failed with: " +
-                                                            e.Message
-                                                            + " (after " + watch.ElapsedMilliseconds + "ms)",
-                            Color.Red));
-
-                        eventualFailuresForOtherReasons++;
-                    }
-
-                    // Wait half second
-                    Thread.Sleep(500);
-
-                    internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
+                    // Tell the user what happened
+                    progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
+                    retries++;
+                    return default;
                 }
+            }).Build();
+
+            // Define our circuit breaker strategy: break if the action fails 4 times in a row.
+            var circuitBreakerStrategy = new ResiliencePipelineBuilder().AddCircuitBreaker(new()
+            {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                FailureRatio = 1.0,
+                MinimumThroughput = 4,
+                BreakDuration = TimeSpan.FromSeconds(3),
+                OnOpened = args =>
+                {
+                    progress.Report(ProgressWithMessage(
+                            $".Breaker logging: Breaking the circuit for {args.BreakDuration.TotalMilliseconds}ms!",
+                            Color.Magenta));
+
+                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
+                    // Note the ! sign (null-forgiving operator) at the end of the command.
+                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    progress.Report(ProgressWithMessage($"..due to: {exception.Message}", Color.Magenta));
+                    return default;
+                },
+                OnClosed = args =>
+                {
+                    progress.Report(ProgressWithMessage(".Breaker logging: Call OK! Closed the circuit again!", Color.Magenta));
+                    return default;
+                },
+                OnHalfOpened = args =>
+                {
+                    progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta));
+                    return default;
+                }
+            }).Build();
+
+            var client = new HttpClient();
+            var internalCancel = false;
+
+            // Do the following until a key is pressed
+            while (!(internalCancel || cancellationToken.IsCancellationRequested))
+            {
+                totalRequests++;
+                var watch = Stopwatch.StartNew();
+
+                try
+                {
+                    // Retry the following call according to the strategy.
+                    retryStrategy.Execute(ct =>
+                    {
+                        // This code is executed within the retry strategy.
+
+                        // Note how we can also Execute() a Func<TResult> and pass back the value.
+                        var response = circuitBreakerStrategy.Execute(innerCt =>
+                        {
+                            // This code is executed within the circuit breaker strategy.
+
+                            // Make a request and get a response
+                            var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
+                            var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), innerCt);
+
+                            using var stream = response.Content.ReadAsStream(innerCt);
+                            using var streamReader = new StreamReader(stream);
+                            return streamReader.ReadToEnd();
+                        }, ct);
+
+                        watch.Stop();
+
+                        // Display the response message on the console
+                        progress.Report(ProgressWithMessage($"Response : {response} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
+                        eventualSuccesses++;
+                    }, cancellationToken);
+                }
+                catch (BrokenCircuitException bce)
+                {
+                    watch.Stop();
+                    var logMessage = $"Request {totalRequests} failed with: {bce.GetType().Name} (after {watch.ElapsedMilliseconds}ms)";
+                    progress.Report(ProgressWithMessage(logMessage,Color.Red));
+                    eventualFailuresDueToCircuitBreaking++;
+                }
+                catch (Exception e)
+                {
+                    watch.Stop();
+                    var logMessage = $"Request {totalRequests} eventually failed with: {e.Message} (after {watch.ElapsedMilliseconds}ms)";
+                    progress.Report(ProgressWithMessage(logMessage,Color.Red));
+                    eventualFailuresForOtherReasons++;
+                }
+
+                Thread.Sleep(500);
+                internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
             }
         }
 
-        public override Statistic[] LatestStatistics => new[]
+        public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new Statistic("Total requests made", totalRequests),
-            new Statistic("Requests which eventually succeeded", eventualSuccesses, Color.Green),
-            new Statistic("Retries made to help achieve success", retries, Color.Yellow),
-            new Statistic("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking,
-                Color.Magenta),
-            new Statistic("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
+            new("Total requests made", totalRequests),
+            new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
+            new("Retries made to help achieve success", retries, Color.Yellow),
+            new("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking, Color.Magenta),
+            new("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
     }
 }
