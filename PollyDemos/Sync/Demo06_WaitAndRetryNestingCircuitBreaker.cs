@@ -6,7 +6,7 @@ namespace PollyDemos.Sync
 {
     /// <summary>
     /// Demonstrates using the Retry strategy nesting CircuitBreaker.
-    /// Loops through a series of Http requests, keeping track of each requested
+    /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
     /// Discussion:  What if the underlying system was completely down?
@@ -16,7 +16,7 @@ namespace PollyDemos.Sync
     /// Enter circuit-breaker:
     /// After too many failures, breaks the circuit for a period, during which it blocks calls + fails fast.
     /// - protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover)
-    /// - allows the client to get a fail response _fast, not wait for ages, if downstream is awol.
+    /// - allows the client to get a fail response fast, not wait for ages, if downstream is AWOL.
     ///
     /// Observations:
     /// Note how after the circuit decides to break, subsequent calls fail faster.
@@ -38,7 +38,7 @@ namespace PollyDemos.Sync
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web api service to make repeated requests to a server.
+            // Let's call a web API service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
@@ -54,7 +54,7 @@ namespace PollyDemos.Sync
             // Define our retry strategy:
             var retryStrategy = new ResiliencePipelineBuilder().AddRetry(new()
             {
-                // Exception filtering!  We don't retry if the inner circuit-breaker judges the underlying system is out of commission.
+                // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
                 MaxRetryAttempts = int.MaxValue, // Retry indefinitely
                 Delay = TimeSpan.FromMilliseconds(200),  // Wait 200ms between each try
@@ -71,7 +71,7 @@ namespace PollyDemos.Sync
                 }
             }).Build();
 
-            // Define our circuit breaker strategy: Break if the action fails 4 times in a row.
+            // Define our circuit breaker strategy: break if the action fails 4 times in a row.
             var circuitBreakerStrategy = new ResiliencePipelineBuilder().AddCircuitBreaker(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
@@ -92,7 +92,7 @@ namespace PollyDemos.Sync
                 },
                 OnClosed = args =>
                 {
-                    progress.Report(ProgressWithMessage(".Breaker logging: Call ok! Closed the circuit again!", Color.Magenta));
+                    progress.Report(ProgressWithMessage(".Breaker logging: Call OK! Closed the circuit again!", Color.Magenta));
                     return default;
                 },
                 OnHalfOpened = args =>
