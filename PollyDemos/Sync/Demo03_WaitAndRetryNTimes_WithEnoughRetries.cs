@@ -53,7 +53,7 @@ namespace PollyDemos.Sync
                     var exception = args.Outcome.Exception!; //The Exception property is nullable
 
                     // Tell the user what happened
-                    progress.Report(ProgressWithMessage("Strategy logging: " + exception.Message, Color.Yellow));
+                    progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;
                 }
