@@ -8,7 +8,7 @@ Provides sample implementations using the [Polly library](https://www.github.com
 > **Sample code migration to V8 is in progress!**
 >
 > As **Polly v8** has reached **feature-complete** state it's time to update the `Polly-Samples` as well.
-> The migration process happens gradually so, we are asking for your patience while we get everything updated..
+> The migration process happens gradually so, we are asking for your patience while we get everything updated.
 
 ## About the numbered demos
 
