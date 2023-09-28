@@ -3,11 +3,11 @@
 namespace PollyDemos.Sync
 {
     /// <summary>
-    /// Uses no policy.  Demonstrates behaviour of 'faulting server' we are testing against.
+    /// Uses no strategy.  Demonstrates behavior of 'faulting server' we are testing against.
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// </summary>
-    public class Demo00_NoPolicy : SyncDemo
+    public class Demo00_NoStrategy : SyncDemo
     {
         private int totalRequests;
         private int eventualSuccesses;
@@ -22,7 +22,12 @@ namespace PollyDemos.Sync
 
             // Let's call a web api service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
-            progress.Report(ProgressWithMessage(nameof(Demo00_NoPolicy)));
+
+            eventualSuccesses = 0;
+            eventualFailures = 0;
+            totalRequests = 0;
+
+            progress.Report(ProgressWithMessage(nameof(Demo00_NoStrategy)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 
