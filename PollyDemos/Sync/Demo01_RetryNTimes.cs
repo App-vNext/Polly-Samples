@@ -46,8 +46,8 @@ namespace PollyDemos.Sync
                 MaxRetryAttempts = 3, // Retry up to 3 times
                 OnRetry = args =>
                 {
-                    // Due to fact how we have defined the ShouldHandle this delegate is called only if an exception occurred.
-                    // Please note the ! sign (null-forgiving operator) at the end of the command.
+                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
+                    // Note the ! sign (null-forgiving operator) at the end of the command.
                     var exception = args.Outcome.Exception!; //The Exception property is nullable
 
                     // Tell the user what happened
@@ -67,24 +67,22 @@ namespace PollyDemos.Sync
                 try
                 {
                     // Retry the following call according to the strategy - 3 times.
-                    // the Execute() overload takes a CancellationToken, but the decorated code does not honour it.
+                    // The cancellationToken passed in to Execute() enables the strategy to cancel retries, when the token is signalled.
                     strategy.Execute(ct =>
-                        {
-                            // This code is executed within the strategy
+                    {
+                        // This code is executed within the strategy
 
-                            // Make a request and get a response
-                            var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                            // Please note that the cancellation token is not used here.
-                            var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url));
+                        // Make a request and get a response
+                        var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
+                        var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), ct);
 
-                            // Display the response message on the console
-                            // Please note that the cancellation token is not used here.
-                            using var stream = response.Content.ReadAsStream();
-                            using var streamReader = new StreamReader(stream);
-                            progress.Report(ProgressWithMessage($"Response : {streamReader.ReadToEnd()}", Color.Green));
-                            eventualSuccesses++;
+                        // Display the response message on the console
+                        using var stream = response.Content.ReadAsStream(ct);
+                        using var streamReader = new StreamReader(stream);
+                        progress.Report(ProgressWithMessage($"Response : {streamReader.ReadToEnd()}", Color.Green));
+                        eventualSuccesses++;
 
-                        }, cancellationToken); // The cancellationToken passed in to Execute() enables the strategy to cancel retries, when the token is signalled.
+                    }, cancellationToken);
                 }
                 catch (Exception e)
                 {
