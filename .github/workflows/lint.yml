@@ -2,13 +2,13 @@ name: lint
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths-ignore:
       - '**/*.gitattributes'
       - '**/*.gitignore'
       - '**/*.md'
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
