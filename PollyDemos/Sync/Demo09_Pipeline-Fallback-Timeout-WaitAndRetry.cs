@@ -54,7 +54,7 @@ namespace PollyDemos.Sync
                 Timeout = TimeSpan.FromSeconds(2),
                 OnTimeout = args =>
                 {
-                    var logMessage = $".The task was terminated because it run out of time. Time cap was {args.Timeout.TotalSeconds}s";
+                    var logMessage = $".The task was terminated because it ran out of time. Time cap was {args.Timeout.TotalSeconds}s";
                     progress.Report(ProgressWithMessage(logMessage, Color.Yellow));
                     return default;
                 }
