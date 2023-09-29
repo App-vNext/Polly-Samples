@@ -25,14 +25,11 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo06_WaitAndRetryNestingCircuitBreaker : SyncDemo
     {
-        private int totalRequests;
-        private int eventualSuccesses;
-        private int retries;
         private int eventualFailuresDueToCircuitBreaking;
         private int eventualFailuresForOtherReasons;
 
         public override string Description =>
-            "This demonstrates CircuitBreaker.  When an underlying system is completely down or seriously struggling, it can be better to fail fast and not put calls through.";
+            "This demonstrates CircuitBreaker. When an underlying system is completely down or seriously struggling, it can be better to fail fast and not put calls through.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -47,9 +44,7 @@ namespace PollyDemos.Sync
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo06_WaitAndRetryNestingCircuitBreaker)));
-            progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(string.Empty));
+            PrintHeader(progress, nameof(Demo06_WaitAndRetryNestingCircuitBreaker));
 
             // Define our retry strategy:
             var retryStrategy = new ResiliencePipelineBuilder().AddRetry(new()
@@ -62,7 +57,7 @@ namespace PollyDemos.Sync
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
 
                     // Tell the user what happened
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
@@ -86,7 +81,7 @@ namespace PollyDemos.Sync
 
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
                     progress.Report(ProgressWithMessage($"..due to: {exception.Message}", Color.Magenta));
                     return default;
                 },
@@ -114,29 +109,25 @@ namespace PollyDemos.Sync
                 try
                 {
                     // Retry the following call according to the strategy.
-                    retryStrategy.Execute(ct =>
+                    retryStrategy.Execute(outerToken =>
                     {
                         // This code is executed within the retry strategy.
 
                         // Note how we can also Execute() a Func<TResult> and pass back the value.
-                        var response = circuitBreakerStrategy.Execute(innerCt =>
+                        var responseBody = circuitBreakerStrategy.Execute(innerToken =>
                         {
                             // This code is executed within the circuit breaker strategy.
 
-                            // Make a request and get a response
-                            var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                            var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), innerCt);
+                            return IssueRequestAndProcessResponse(client, innerToken);
 
-                            using var stream = response.Content.ReadAsStream(innerCt);
-                            using var streamReader = new StreamReader(stream);
-                            return streamReader.ReadToEnd();
-                        }, ct);
+                        }, outerToken);
 
                         watch.Stop();
 
                         // Display the response message on the console
-                        progress.Report(ProgressWithMessage($"Response : {response} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
+                        progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
                         eventualSuccesses++;
+
                     }, cancellationToken);
                 }
                 catch (BrokenCircuitException bce)

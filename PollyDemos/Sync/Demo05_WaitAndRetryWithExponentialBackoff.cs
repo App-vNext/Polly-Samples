@@ -7,7 +7,7 @@ namespace PollyDemos.Sync
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
-    /// Observations: All calls still succeed!  Yay!
+    /// Observations: All calls still succeed! Yay!
     /// But we didn't hammer the underlying server so hard - we backed off.
     /// That's healthier for it, if it might be struggling ...
     /// ... and if a lot of clients might be doing this simultaneously.
@@ -17,13 +17,8 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo05_WaitAndRetryWithExponentialBackoff : SyncDemo
     {
-        private int totalRequests;
-        private int eventualSuccesses;
-        private int retries;
-        private int eventualFailures;
-
         public override string Description =>
-            "This demonstrates exponential back-off.  We have enough retries to ensure success.  But we don't hammer the server so hard: we increase the delay between each try.";
+            "This demonstrates exponential back-off. We have enough retries to ensure success. But we don't hammer the server so hard: we increase the delay between each try.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -37,21 +32,19 @@ namespace PollyDemos.Sync
             eventualFailures = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo05_WaitAndRetryWithExponentialBackoff)));
-            progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(string.Empty));
+            PrintHeader(progress, nameof(Demo05_WaitAndRetryWithExponentialBackoff));
 
             // Define our strategy:
             var strategy = new ResiliencePipelineBuilder().AddRetry(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-                MaxRetryAttempts = 6, // We could also retry indefinitely... but chose six times instead.
+                MaxRetryAttempts = 6, // We could also retry indefinitely, but chose six times instead.
                 BackoffType = DelayBackoffType.Exponential,
                 OnRetry = args =>
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
 
                     // Tell the user what happened
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
@@ -73,19 +66,14 @@ namespace PollyDemos.Sync
                 {
                     // Retry the following call according to the strategy.
                     // The cancellationToken passed in to Execute() enables the strategy to cancel retries, when the token is signalled.
-                    strategy.Execute(ct =>
+                    strategy.Execute(token =>
                     {
                         // This code is executed within the strategy
 
-                        // Make a request and get a response
-                        var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                        var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), ct);
-
-                        // Display the response message on the console
-                        using var stream = response.Content.ReadAsStream(ct);
-                        using var streamReader = new StreamReader(stream);
-                        progress.Report(ProgressWithMessage($"Response : {streamReader.ReadToEnd()}", Color.Green));
+                        var responseBody = IssueRequestAndProcessResponse(client, token);
+                        progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
                         eventualSuccesses++;
+
                     }, cancellationToken);
                 }
                 catch (Exception e)

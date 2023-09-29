@@ -3,16 +3,12 @@
 namespace PollyDemos.Sync
 {
     /// <summary>
-    /// Uses no strategy.  Demonstrates behavior of 'faulting server' we are testing against.
+    /// Uses no strategy. Demonstrates behavior of 'faulting server' we are testing against.
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     /// </summary>
     public class Demo00_NoStrategy : SyncDemo
     {
-        private int totalRequests;
-        private int eventualSuccesses;
-        private int eventualFailures;
-
         public override string Description =>
             "This demo demonstrates how our faulting server behaves, with no Polly policies in use.";
 
@@ -27,12 +23,11 @@ namespace PollyDemos.Sync
             eventualFailures = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo00_NoStrategy)));
-            progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(string.Empty));
+            PrintHeader(progress, nameof(Demo00_NoStrategy));
 
             var client = new HttpClient();
             var internalCancel = false;
+
             // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
@@ -40,14 +35,8 @@ namespace PollyDemos.Sync
 
                 try
                 {
-                    // Make a request and get a response
-                    var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                    var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url));
-
-                    // Display the response message on the console
-                    using var stream = response.Content.ReadAsStream();
-                    using var streamReader = new StreamReader(stream);
-                    progress.Report(ProgressWithMessage($"Response : {streamReader.ReadToEnd()}", Color.Green));
+                    var responseBody = IssueRequestAndProcessResponse(client);
+                    progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
                     eventualSuccesses++;
                 }
                 catch (Exception e)

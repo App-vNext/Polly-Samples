@@ -18,5 +18,12 @@ namespace PollyDemos
 
         public DemoProgress ProgressWithMessages(IEnumerable<ColoredMessage> messages)
             => new (LatestStatistics, messages);
+
+        public void PrintHeader(IProgress<DemoProgress> progress, string demoName)
+        {
+            progress.Report(ProgressWithMessage(demoName));
+            progress.Report(ProgressWithMessage("======"));
+            progress.Report(ProgressWithMessage(string.Empty));
+        }
     }
 }
