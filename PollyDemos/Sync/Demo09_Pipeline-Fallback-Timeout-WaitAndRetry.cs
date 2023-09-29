@@ -1,32 +1,32 @@
 ﻿using System.Diagnostics;
-using Polly.CircuitBreaker;
+using Polly.Timeout;
 using PollyDemos.OutputHelpers;
 
 namespace PollyDemos.Sync
 {
     /// <summary>
-    /// Demonstrates using a Retry, a CircuitBreaker and two Fallback strategies.
-    /// Same as Demo07 but now uses Fallback strategies to provide substitute values, when the call still fails overall.
+    /// Demonstrates using a Retry, a Timeout and two Fallback strategies.
+    /// In this demo, the delay in the retry is deliberately so long that the timeout wrapping it will time it out
+    /// (in lieu for now of a demo server endpoint responding slowly).
     ///
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
     /// Observations:
-    /// - operation is identical to Demo06 and Demo07
-    /// - except fallback strategies provide nice substitute messages, if still fails overall
-    /// - OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
-    /// - also demonstrates how you can use the same kind of strategy (Fallback in this case) twice (or more) in a pipeline.
+    /// - though the console logs that a retry will be made, the 4-second wait before the retry is pre-emptively timed-out by the two-second timeout
+    /// - a fallback strategy then provides substitute message for the user
+    /// - otherwise similar to demo08.
     /// </summary>
-    public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
+    public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : SyncDemo
     {
         private int totalRequests;
         private int eventualSuccesses;
         private int retries;
-        private int eventualFailuresDueToCircuitBreaking;
+        private int eventualFailuresDueToTimeout;
         private int eventualFailuresForOtherReasons;
 
         public override string Description =>
-            "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces Fallbacks: we can provide graceful fallback messages, on overall failure.";
+            "Demonstrates introducing a Timeout strategy. The timeout will eventually time-out on the retries. When we timeout, we again use a Fallback to substitute a more graceful message.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -37,77 +37,51 @@ namespace PollyDemos.Sync
 
             eventualSuccesses = 0;
             retries = 0;
-            eventualFailuresDueToCircuitBreaking = 0;
+            eventualFailuresDueToTimeout = 0;
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker)));
+            progress.Report(ProgressWithMessage(nameof(Demo09_Pipeline_Fallback_Timeout_WaitAndRetry)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 
             Stopwatch? watch = null;
-
-            // New for demo08: we had to provide the return type (string) to be able to use Fallback.
             var pipelineBuilder = new ResiliencePipelineBuilder<string>();
 
-            // Define our circuit breaker strategy:
-            pipelineBuilder.AddCircuitBreaker(new()
+            // Define our timeout strategy: time out after 2 seconds.
+            pipelineBuilder.AddTimeout(new TimeoutStrategyOptions()
             {
-                // New for demo08: since pipeline is aware of the return type that's why the PredicateBuilder has to be as well.
-                ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
-                FailureRatio = 1.0,
-                MinimumThroughput = 4,
-                BreakDuration = TimeSpan.FromSeconds(3),
-                OnOpened = args =>
+                Timeout = TimeSpan.FromSeconds(2),
+                OnTimeout = args =>
                 {
-                    progress.Report(ProgressWithMessage(
-                            $".Breaker logging: Breaking the circuit for {args.BreakDuration.TotalMilliseconds}ms!",
-                            Color.Magenta));
-
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
-                    progress.Report(ProgressWithMessage($"..due to: {exception.Message}", Color.Magenta));
-                    return default;
-                },
-                OnClosed = args =>
-                {
-                    progress.Report(ProgressWithMessage(".Breaker logging: Call OK! Closed the circuit again!", Color.Magenta));
-                    return default;
-                },
-                OnHalfOpened = args =>
-                {
-                    progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta));
+                    var logMessage = $".The task was terminated because it run out of time. Time cap was {args.Timeout.TotalSeconds}s";
+                    progress.Report(ProgressWithMessage(logMessage, Color.Yellow));
                     return default;
                 }
             });
 
-            // Define our retry strategy:
+            // Define our retry strategy: keep retrying with 4 second gaps. This is (intentionally) too long: to demonstrate that the timeout strategy will time out on this before waiting for the retry.
             pipelineBuilder.AddRetry(new()
             {
-                // New for demo08: since pipeline is aware of the return type that's why the PredicateBuilder has to be as well.
-                // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
-                ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(ex => ex is not BrokenCircuitException),
-                MaxRetryAttempts = int.MaxValue, // Retry indefinitely
-                Delay = TimeSpan.FromMilliseconds(200),  // Wait 200ms between each try
+                ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
+                Delay = TimeSpan.FromSeconds(4),
+                MaxRetryAttempts = int.MaxValue,
                 OnRetry = args =>
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
                     var exception = args.Outcome.Exception!; //The Exception property is nullable
-
-                    // Tell the user what happened
-                    progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
+                    progress.Report(ProgressWithMessage($".Log,then retry: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;
                 }
             });
 
-            // Define a fallback strategy: provide a substitute message to the user, if we found the circuit was broken.
+            // Define a fallback strategy: provide a substitute message to the user, if we found the call was rejected due to timeout.
             pipelineBuilder.AddFallback(new()
             {
-                ShouldHandle = new PredicateBuilder<string>().Handle<BrokenCircuitException>(),
-                FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [message substituted by fallback strategy]"),
+                ShouldHandle = new PredicateBuilder<string>().Handle<TimeoutRejectedException>(),
+                FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for timeout]"),
                 OnFallback = args =>
                 {
                     watch!.Stop();
@@ -117,7 +91,7 @@ namespace PollyDemos.Sync
                     var exception = args.Outcome.Exception!; //The Exception property is nullable
 
                     progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
-                    eventualFailuresDueToCircuitBreaking++;
+                        eventualFailuresDueToTimeout++;
                     return default;
                 }
             });
@@ -143,9 +117,9 @@ namespace PollyDemos.Sync
             });
 
             // Build the pipeline which now composes four strategies (from inner to outer):
-            // Circuit Breaker
+            // Timeout
             // Retry
-            // Fallback for open circuit
+            // Fallback for timeout
             // Fallback for any other exception
             var pipeline = pipelineBuilder.Build();
 
@@ -195,7 +169,7 @@ namespace PollyDemos.Sync
             new("Total requests made", totalRequests),
             new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
             new("Retries made to help achieve success", retries, Color.Yellow),
-            new("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking, Color.Magenta),
+            new("Requests timed out by timeout strategy", eventualFailuresDueToTimeout, Color.Magenta),
             new("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
     }
