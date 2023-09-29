@@ -13,11 +13,6 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo02_WaitAndRetryNTimes : SyncDemo
     {
-        private int totalRequests;
-        private int eventualSuccesses;
-        private int retries;
-        private int eventualFailures;
-
         public override string Description =>
             "Compared to previous demo, this demo adds waits between the retry attempts. Not always enough wait to ensure success, tho.";
 
@@ -33,9 +28,7 @@ namespace PollyDemos.Sync
             eventualFailures = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo02_WaitAndRetryNTimes)));
-            progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(string.Empty));
+            PrintHeader(progress, nameof(Demo02_WaitAndRetryNTimes));
 
             // Define our strategy:
             var strategy = new ResiliencePipelineBuilder().AddRetry(new()
@@ -47,7 +40,7 @@ namespace PollyDemos.Sync
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
 
                     // Tell the user what happened
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
@@ -58,6 +51,7 @@ namespace PollyDemos.Sync
 
             var client = new HttpClient();
             var internalCancel = false;
+
             // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
@@ -65,21 +59,16 @@ namespace PollyDemos.Sync
 
                 try
                 {
-                    // Retry the following call according to the strategy - 3 times.
+                    // Retry the following call according to the strategy.
                     // The cancellationToken passed in to Execute() enables the strategy to cancel retries, when the token is signalled.
-                    strategy.Execute(ct =>
+                    strategy.Execute(token =>
                     {
                         // This code is executed within the strategy
 
-                        // Make a request and get a response
-                        var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                        var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), ct);
-
-                        // Display the response message on the console
-                        using var stream = response.Content.ReadAsStream(ct);
-                        using var streamReader = new StreamReader(stream);
-                        progress.Report(ProgressWithMessage($"Response : {streamReader.ReadToEnd()}", Color.Green));
+                        var responseBody = IssueRequestAndProcessResponse(client, token);
+                        progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
                         eventualSuccesses++;
+
                     }, cancellationToken);
                 }
                 catch (Exception e)

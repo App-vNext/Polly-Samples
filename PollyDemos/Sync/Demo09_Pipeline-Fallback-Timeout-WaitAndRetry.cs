@@ -19,9 +19,6 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : SyncDemo
     {
-        private int totalRequests;
-        private int eventualSuccesses;
-        private int retries;
         private int eventualFailuresDueToTimeout;
         private int eventualFailuresForOtherReasons;
 
@@ -41,9 +38,7 @@ namespace PollyDemos.Sync
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo09_Pipeline_Fallback_Timeout_WaitAndRetry)));
-            progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(string.Empty));
+            PrintHeader(progress, nameof(Demo09_Pipeline_Fallback_Timeout_WaitAndRetry));
 
             Stopwatch? watch = null;
             var pipelineBuilder = new ResiliencePipelineBuilder<string>();
@@ -70,7 +65,7 @@ namespace PollyDemos.Sync
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
                     progress.Report(ProgressWithMessage($".Log,then retry: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;
@@ -88,7 +83,7 @@ namespace PollyDemos.Sync
 
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
 
                     progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
                         eventualFailuresDueToTimeout++;
@@ -107,7 +102,7 @@ namespace PollyDemos.Sync
 
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
 
                     progress.Report(ProgressWithMessage($"Fallback catches eventually failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
 
@@ -125,6 +120,7 @@ namespace PollyDemos.Sync
 
             var client = new HttpClient();
             var internalCancel = false;
+
             // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
@@ -134,21 +130,12 @@ namespace PollyDemos.Sync
                 try
                 {
                     // Manage the call according to the pipeline.
-                    var response = pipeline.Execute(ct =>
-                    {
-                        // Make a request and get a response
-                        var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                        var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), ct);
-
-                        using var stream = response.Content.ReadAsStream(ct);
-                        using var streamReader = new StreamReader(stream);
-                        return streamReader.ReadToEnd();
-                    }, cancellationToken);
+                    var responseBody = pipeline.Execute(token => IssueRequestAndProcessResponse(client, token), cancellationToken);
 
                     watch.Stop();
 
                     // Display the response message on the console
-                    progress.Report(ProgressWithMessage($"Response : {response} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
+                    progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
                     eventualSuccesses++;
                 }
                 // This try-catch is not needed, since we have a Fallback for any Exceptions.

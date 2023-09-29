@@ -7,18 +7,13 @@ namespace PollyDemos.Sync
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
-    /// Observations: There's no wait among these retries.  Can be appropriate sometimes.
+    /// Observations: There's no wait among these retries. It can be appropriate sometimes.
     /// In this case, no wait hasn't given underlying system time to recover, so calls still fail despite retries.
     /// </summary>
     public class Demo01_RetryNTimes : SyncDemo
     {
-        private int totalRequests;
-        private int eventualSuccesses;
-        private int retries;
-        private int eventualFailures;
-
         public override string Description =>
-            "This demo demonstrates a first Retry.  It retries three times, immediately.";
+            "This demo demonstrates a first Retry. It retries three times, immediately.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -32,9 +27,7 @@ namespace PollyDemos.Sync
             eventualFailures = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo01_RetryNTimes)));
-            progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(string.Empty));
+            PrintHeader(progress, nameof(Demo01_RetryNTimes));
 
             // Define our strategy:
             var strategy = new ResiliencePipelineBuilder().AddRetry(new()
@@ -45,7 +38,7 @@ namespace PollyDemos.Sync
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
 
                     // Tell the user what happened
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
@@ -56,6 +49,7 @@ namespace PollyDemos.Sync
 
             var client = new HttpClient();
             var internalCancel = false;
+
             // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
@@ -63,20 +57,14 @@ namespace PollyDemos.Sync
 
                 try
                 {
-                    // Retry the following call according to the strategy - 3 times.
+                    // Retry the following call according to the strategy.
                     // The cancellationToken passed in to Execute() enables the strategy to cancel retries, when the token is signalled.
-                    strategy.Execute(ct =>
+                    strategy.Execute(token =>
                     {
                         // This code is executed within the strategy
 
-                        // Make a request and get a response
-                        var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                        var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), ct);
-
-                        // Display the response message on the console
-                        using var stream = response.Content.ReadAsStream(ct);
-                        using var streamReader = new StreamReader(stream);
-                        progress.Report(ProgressWithMessage($"Response : {streamReader.ReadToEnd()}", Color.Green));
+                        var responseBody = IssueRequestAndProcessResponse(client, token);
+                        progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
                         eventualSuccesses++;
 
                     }, cancellationToken);

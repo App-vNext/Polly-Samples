@@ -17,9 +17,6 @@ namespace PollyDemos.Sync
     /// </summary>
     public class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : SyncDemo
     {
-        private int totalRequests;
-        private int eventualSuccesses;
-        private int retries;
         private int eventualFailuresDueToCircuitBreaking;
         private int eventualFailuresForOtherReasons;
 
@@ -39,9 +36,7 @@ namespace PollyDemos.Sync
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline)));
-            progress.Report(ProgressWithMessage("======"));
-            progress.Report(ProgressWithMessage(string.Empty));
+            PrintHeader(progress, nameof(Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline));
 
             // New for demo07: here we define a pipeline builder which will be used to compose strategies gradually.
             var pipelineBuilder = new ResiliencePipelineBuilder();
@@ -65,7 +60,7 @@ namespace PollyDemos.Sync
 
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
                     progress.Report(ProgressWithMessage($"..due to: {exception.Message}", Color.Magenta));
                     return default;
                 },
@@ -92,7 +87,7 @@ namespace PollyDemos.Sync
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
                     // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+                    var exception = args.Outcome.Exception!; // The Exception property is nullable
 
                     // Tell the user what happened
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
@@ -106,6 +101,7 @@ namespace PollyDemos.Sync
 
             var client = new HttpClient();
             var internalCancel = false;
+
             // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
@@ -115,25 +111,20 @@ namespace PollyDemos.Sync
                 try
                 {
                     // Manage the call according to the pipeline.
-                    var response = pipeline.Execute(ct =>
+                    var responseBody = pipeline.Execute(token =>
                     {
                         // This code is executed through both strategies in the pipeline:
                         // Retry is the outer, and circuit breaker is the inner.
                         // Demo 06 shows a broken-out version of what this is equivalent to.
 
-                        // Make a request and get a response
-                        var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
-                        var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), ct);
+                        return IssueRequestAndProcessResponse(client, token);
 
-                        using var stream = response.Content.ReadAsStream(ct);
-                        using var streamReader = new StreamReader(stream);
-                        return streamReader.ReadToEnd();
                     }, cancellationToken);
 
                     watch.Stop();
 
                     // Display the response message on the console
-                    progress.Report(ProgressWithMessage($"Response : {response} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
+                    progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
                     eventualSuccesses++;
                 }
                 catch (BrokenCircuitException bce)
