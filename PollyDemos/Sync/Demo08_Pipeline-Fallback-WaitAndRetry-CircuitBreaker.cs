@@ -5,17 +5,19 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos.Sync
 {
     /// <summary>
-    /// Demonstrates using the Retry and CircuitBreaker strategies.
-    /// Same as Demo06 but this time combines the strategies by using ResiliencePipelineBuilder.
+    /// Demonstrates using a Retry, a CircuitBreaker and two Fallback strategies.
+    /// Same as Demo07 but now uses Fallback strategies to provide substitute values, when the call still fails overall.
     ///
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
     /// Observations:
-    /// The operation is identical to Demo06.
-    /// The code demonstrates how using the ResiliencePipelineBuilder makes your combined pipeline more concise, at the point of execution.
+    /// - operation is identical to Demo06 and Demo07
+    /// - except fallback strategies provide nice substitute messages, if still fails overall
+    /// - OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
+    /// - also demonstrates how you can use the same kind of strategy (Fallback in this case) twice (or more) in a pipeline.
     /// </summary>
-    public class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : SyncDemo
+    public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
     {
         private int totalRequests;
         private int eventualSuccesses;
@@ -24,7 +26,7 @@ namespace PollyDemos.Sync
         private int eventualFailuresForOtherReasons;
 
         public override string Description =>
-            "This demonstrates CircuitBreaker (see Demo06), but uses the ResiliencePipelineBuilder to compose the strategies. Only the underlying code differs.";
+            "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces Fallbacks: we can provide graceful fallback messages, on overall failure.";
 
         public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
@@ -39,21 +41,20 @@ namespace PollyDemos.Sync
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            progress.Report(ProgressWithMessage(nameof(Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline)));
+            progress.Report(ProgressWithMessage(nameof(Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker)));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
 
-            // New for demo07: here we define a pipeline builder which will be used to compose strategies gradually.
-            var pipelineBuilder = new ResiliencePipelineBuilder();
+            Stopwatch? watch = null;
 
-            // New for demo07: the order of strategy definitions has changed.
-            // Circuit breaker comes first because that will be the inner strategy.
-            // Retry comes second because that will be the outer strategy.
+            // New for demo08: we had to provide the return type (string) to be able to use Fallback.
+            var pipelineBuilder = new ResiliencePipelineBuilder<string>();
 
             // Define our circuit breaker strategy:
             pipelineBuilder.AddCircuitBreaker(new()
             {
-                ShouldHandle = new PredicateBuilder().Handle<Exception>(),
+                // New for demo08: since pipeline is aware of the return type that's why the PredicateBuilder has to be as well.
+                ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
                 FailureRatio = 1.0,
                 MinimumThroughput = 4,
                 BreakDuration = TimeSpan.FromSeconds(3),
@@ -79,13 +80,14 @@ namespace PollyDemos.Sync
                     progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta));
                     return default;
                 }
-            }); // New for demo07: here we are not calling the Build method because we want to add one more strategy to the pipeline.
+            });
 
             // Define our retry strategy:
             pipelineBuilder.AddRetry(new()
             {
+                // New for demo08: since pipeline is aware of the return type that's why the PredicateBuilder has to be as well.
                 // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
-                ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
+                ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(ex => ex is not BrokenCircuitException),
                 MaxRetryAttempts = int.MaxValue, // Retry indefinitely
                 Delay = TimeSpan.FromMilliseconds(200),  // Wait 200ms between each try
                 OnRetry = args =>
@@ -99,9 +101,52 @@ namespace PollyDemos.Sync
                     retries++;
                     return default;
                 }
-            }); // New for demo07: here we are not calling the Build method because we will do it as a separate step to make the code cleaner.
+            });
 
-            // New for demo07: here we build the pipeline since we have added all the necessary strategies to it.
+            // Define a fallback policy: provide a substitute message to the user, if we found the circuit was broken.
+            pipelineBuilder.AddFallback(new()
+            {
+                ShouldHandle = new PredicateBuilder<string>().Handle<BrokenCircuitException>(),
+                FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [message substituted by fallback policy]"),
+                OnFallback = args =>
+                {
+                    watch!.Stop();
+
+                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
+                    // Note the ! sign (null-forgiving operator) at the end of the command.
+                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+
+                    progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
+                    eventualFailuresDueToCircuitBreaking++;
+                    return default;
+                }
+            });
+
+            // Define a fallback policy: provide a substitute message to the user, for any exception.
+            pipelineBuilder.AddFallback(new()
+            {
+                ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
+                FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for any exception]"),
+                OnFallback = args =>
+                {
+                    watch!.Stop();
+
+                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
+                    // Note the ! sign (null-forgiving operator) at the end of the command.
+                    var exception = args.Outcome.Exception!; //The Exception property is nullable
+
+                    progress.Report(ProgressWithMessage($"Fallback catches eventually failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
+
+                    eventualFailuresForOtherReasons++;
+                    return default;
+                }
+            });
+
+            // Build the pipeline which now composes four strategies (from inner to outer):
+            // Circuit Breaker
+            // Retry
+            // Fallback for open circuit
+            // Fallback for any other exception
             var pipeline = pipelineBuilder.Build();
 
             var client = new HttpClient();
@@ -110,17 +155,13 @@ namespace PollyDemos.Sync
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
                 totalRequests++;
-                var watch = Stopwatch.StartNew();
+                watch = Stopwatch.StartNew();
 
                 try
                 {
                     // Manage the call according to the pipeline.
                     var response = pipeline.Execute(ct =>
                     {
-                        // This code is executed through both strategies in the pipeline:
-                        // Retry is the outer, and circuit breaker is the inner.
-                        // Demo 06 shows a broken-out version of what this is equivalent to.
-
                         // Make a request and get a response
                         var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
                         var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), ct);
@@ -136,19 +177,12 @@ namespace PollyDemos.Sync
                     progress.Report(ProgressWithMessage($"Response : {response} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
                     eventualSuccesses++;
                 }
-                catch (BrokenCircuitException bce)
-                {
-                    watch.Stop();
-                    var logMessage = $"Request {totalRequests} failed with: {bce.GetType().Name} (after {watch.ElapsedMilliseconds}ms)";
-                    progress.Report(ProgressWithMessage(logMessage, Color.Red));
-                    eventualFailuresDueToCircuitBreaking++;
-                }
+                // This try-catch is not needed, since we have a Fallback.Handle<Exception>.
+                // It's only been left in to *demonstrate* it should never get hit.
                 catch (Exception e)
                 {
-                    watch.Stop();
-                    var logMessage = $"Request {totalRequests} eventually failed with: {e.Message} (after {watch.ElapsedMilliseconds}ms)";
-                    progress.Report(ProgressWithMessage(logMessage, Color.Red));
-                    eventualFailuresForOtherReasons++;
+                    var errorMessage = "Should never arrive here.  Use of fallback for any Exception should have provided nice fallback value for exceptions.";
+                    throw new InvalidOperationException(errorMessage, e);
                 }
 
                 Thread.Sleep(500);
