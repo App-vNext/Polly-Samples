@@ -63,10 +63,10 @@ namespace PollyDemos.Async
                     {
                         // This code is executed within the strategy
 
-                        var msg = await IssueRequestAndProcessResponseAsync(client, token);
-
-                        progress.Report(ProgressWithMessage($"Response : {msg}", Color.Green));
+                        var responseBody = await IssueRequestAndProcessResponseAsync(client, token);
+                        progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
                         eventualSuccesses++;
+
                     }, cancellationToken);
                 }
                 catch (Exception e)
