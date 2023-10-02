@@ -4,11 +4,6 @@ namespace PollyDemos.Sync
 {
     public abstract class SyncDemo : DemoBase
     {
-        protected int totalRequests = 0;
-        protected int retries = 0;
-        protected int eventualSuccesses;
-        protected int eventualFailures;
-
         public abstract void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress);
 
         protected string IssueRequestAndProcessResponse(HttpClient client, CancellationToken cancellationToken = default)
