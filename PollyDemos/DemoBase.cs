@@ -4,6 +4,11 @@ namespace PollyDemos
 {
     public abstract class DemoBase
     {
+        protected int totalRequests;
+        protected int eventualSuccesses;
+        protected int eventualFailures;
+        protected int retries;
+
         protected bool TerminateDemosByKeyPress { get; } = true;
 
         public virtual string Description => $"[Description for demo {GetType().Name} not yet provided.]";
