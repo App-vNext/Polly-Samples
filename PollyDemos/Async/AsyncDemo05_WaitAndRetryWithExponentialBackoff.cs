@@ -38,7 +38,7 @@ namespace PollyDemos.Async
             var strategy = new ResiliencePipelineBuilder().AddRetry(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-                MaxRetryAttempts = 6, // We could also retry indefinitely by using {whatever the value to do that is}
+                MaxRetryAttempts = 6, // We could also retry indefinitely by using int.MaxValue
                 BackoffType = DelayBackoffType.Exponential,
                 OnRetry = args =>
                 {
