@@ -20,7 +20,7 @@ namespace PollyDemos.Async
             ArgumentNullException.ThrowIfNull(progress);
 
             // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             retries = 0;
@@ -58,7 +58,7 @@ namespace PollyDemos.Async
                 try
                 {
                     // Retry the following call according to the strategy.
-                    // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries, when the token is signalled.
+                    // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries when the token is signalled.
                     await strategy.ExecuteAsync(async token =>
                     {
                         // This code is executed within the strategy

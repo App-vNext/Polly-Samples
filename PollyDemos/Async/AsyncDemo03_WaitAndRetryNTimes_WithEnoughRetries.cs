@@ -21,7 +21,7 @@ namespace PollyDemos.Async
             ArgumentNullException.ThrowIfNull(progress);
 
             // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             retries = 0;
@@ -35,7 +35,7 @@ namespace PollyDemos.Async
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                 MaxRetryAttempts = 20, // Retry up to 20 times - this should be enough that we eventually succeed.
-                Delay = TimeSpan.FromMilliseconds(200),  // Wait 200ms between each try
+                Delay = TimeSpan.FromMilliseconds(200), // Wait between each try
                 OnRetry = args =>
                 {
                     // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
@@ -60,7 +60,7 @@ namespace PollyDemos.Async
                 try
                 {
                     // Retry the following call according to the strategy.
-                    // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries, when the token is signalled.
+                    // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries when the token is signalled.
                     await strategy.ExecuteAsync(async token =>
                     {
                         // This code is executed within the strategy

@@ -24,8 +24,8 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web api service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            // Let's call a web API service to make repeated requests to a server.
+            // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             retries = 0;
@@ -38,7 +38,7 @@ namespace PollyDemos.Async
             var strategy = new ResiliencePipelineBuilder().AddRetry(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-                MaxRetryAttempts = 6, // We could also retry indefinitely, but chose six times instead.
+                MaxRetryAttempts = 6, // We could also retry indefinitely by using {whatever the value to do that is}
                 BackoffType = DelayBackoffType.Exponential,
                 OnRetry = args =>
                 {
@@ -65,7 +65,7 @@ namespace PollyDemos.Async
                 try
                 {
                     // Retry the following call according to the strategy.
-                    // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries, when the token is signalled.
+                    // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries when the token is signalled.
                     await strategy.ExecuteAsync(async token =>
                     {
                         // This code is executed within the strategy

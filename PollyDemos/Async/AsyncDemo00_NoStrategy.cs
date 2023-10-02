@@ -17,7 +17,7 @@ namespace PollyDemos.Async
             ArgumentNullException.ThrowIfNull(progress);
 
             // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             eventualFailures = 0;
