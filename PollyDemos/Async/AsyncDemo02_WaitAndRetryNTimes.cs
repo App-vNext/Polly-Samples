@@ -61,7 +61,7 @@ namespace PollyDemos.Async
                 try
                 {
                     // Retry the following call according to the strategy.
-                    // The cancellationToken passed in to Execute() enables the strategy to cancel retries, when the token is signalled.
+                    // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries, when the token is signalled.
                     await strategy.ExecuteAsync(async token =>
                     {
                         // This code is executed within the strategy
