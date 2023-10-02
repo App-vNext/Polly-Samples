@@ -12,7 +12,7 @@ namespace PollyTestClientConsole
     {
         private static readonly object lockObject = new object();
 
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
             Statistic[] statistics = new Statistic[0];
 
@@ -57,7 +57,7 @@ namespace PollyTestClientConsole
 
             // These async demos use .Wait() (rather than await) with the async calls, only for the purposes of allowing the demos still to remain the primary execution thread and own the Console output.
 
-            new AsyncDemo00_NoPolicy().ExecuteAsync(cancellationToken, progress).Wait();
+            await new AsyncDemo00_NoStrategy().ExecuteAsync(cancellationToken, progress);
             //new AsyncDemo01_RetryNTimes().ExecuteAsync(cancellationToken, progress).Wait();
             //new AsyncDemo02_WaitAndRetryNTimes().ExecuteAsync(cancellationToken, progress).Wait();
             //new AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries().ExecuteAsync(cancellationToken, progress).Wait();
