@@ -8,23 +8,23 @@ namespace PollyDemos.Async
     /// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
     /// Imagine the _caller_ has limited capacity (all single instances of upstream services/webapps eventually hit some capacity limit).
     ///
-    /// This demo 00 does not separate call streams into separate bulkheads.
+    /// This demo 10 does not separate call streams into separate concurrency limiters.
     /// A random combination of calls to the 'good' and 'faulting' endpoint are made.
     ///
     /// Observations:
-    /// Because bulkheads do not isolate the separate streams of calls,
+    /// Because concurrency limiters do not isolate the separate streams of calls,
     /// eventually all the caller's capacity is taken up waiting on the 'faulting' downstream calls.
     /// So the performance of 'good' calls is starved of resource, and starts suffering too.
     /// Watch how the number of pending and failing calls to the good endpoint also climbs,
     /// as the faulting calls saturate all resource in the caller.
     /// </summary>
-    public class AsyncDemo10_SharedConcurrencyLimiter : AsyncBulkheadDemo
+    public class AsyncDemo10_SharedConcurrencyLimiter : AsyncConcurrencyLimiterDemo
     {
-        // Let's imagine this caller has some theoretically limited capacity, so that *it* will suffer capacity-starvation, if the downstream system is faulting.
-        // In demo 00, all calls share the same bulkhead.
-        private readonly ResiliencePipeline sharedBulkhead = new ResiliencePipelineBuilder()
+        // Let's imagine this caller has some theoretically limited capacity so that *it* will suffer capacity-starvation if the downstream system is faulting.
+        // In demo 10, all calls share the same concurrency limiter.
+        private readonly ResiliencePipeline sharedLimiter = new ResiliencePipelineBuilder()
                 .AddConcurrencyLimiter(
-                    permitLimit: 8,  // (artificially low - but easier to follow, to illustrate principle)
+                    permitLimit: 8,  // (artificially low - but easier to follow to illustrate the principle)
                     queueLimit: 1)
                 .Build();
 
@@ -49,7 +49,6 @@ namespace PollyDemos.Async
             var messages = new ConcurrentQueue<(string Message, Color Color)>();
             var client = new HttpClient();
             var internalCancel = false;
-            var rand = new Random();
 
             while (!(internalCancel || externalCancellationToken.IsCancellationRequested))
             {
@@ -57,7 +56,7 @@ namespace PollyDemos.Async
                 var thisRequest = totalRequests;
 
                 // Randomly make either 'good' or 'faulting' calls.
-                if (rand.Next(0, 2) == 0)
+                if (Random.Shared.Next(0, 2) == 0)
                 {
                     goodRequestsMade++;
                     tasks.Add(CallGoodEndpoint(client, messages, thisRequest, combinedToken));
@@ -118,7 +117,7 @@ namespace PollyDemos.Async
 
         private Task CallFaultingEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
         {
-            ValueTask issueRequest = sharedBulkhead.ExecuteAsync(async token =>
+            ValueTask issueRequest = sharedLimiter.ExecuteAsync(async token =>
             {
                 try
                 {
@@ -157,7 +156,7 @@ namespace PollyDemos.Async
 
         private Task CallGoodEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
         {
-            ValueTask issueRequest = sharedBulkhead.ExecuteAsync(async token =>
+            ValueTask issueRequest = sharedLimiter.ExecuteAsync(async token =>
             {
                 try
                 {
