@@ -63,9 +63,7 @@ namespace PollyDemos.Sync
                 MaxRetryAttempts = int.MaxValue,
                 OnRetry = args =>
                 {
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($".Log,then retry: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;
@@ -80,13 +78,9 @@ namespace PollyDemos.Sync
                 OnFallback = args =>
                 {
                     watch!.Stop();
-
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
-
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
-                        eventualFailuresDueToTimeout++;
+                    eventualFailuresDueToTimeout++;
                     return default;
                 }
             });
@@ -99,13 +93,8 @@ namespace PollyDemos.Sync
                 OnFallback = args =>
                 {
                     watch!.Stop();
-
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
-
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Fallback catches eventually failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
-
                     eventualFailuresForOtherReasons++;
                     return default;
                 }
