@@ -35,10 +35,10 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            PrintHeader(progress, nameof(AsyncDemo10_SharedConcurrencyLimiter));
-            totalRequests = 0;
+            PrintHeader(progress);
+            TotalRequests = 0;
 
-            await Task.FromResult(true).ConfigureAwait(false); // Ensure none of what follows runs synchronously.
+            await ValueTask.FromResult(true); // Ensure none of what follows runs synchronously.
 
             var tasks = new List<Task>();
             var internalCancellationTokenSource = new CancellationTokenSource();
@@ -52,18 +52,17 @@ namespace PollyDemos.Async
 
             while (!(internalCancel || externalCancellationToken.IsCancellationRequested))
             {
-                totalRequests++;
-                var thisRequest = totalRequests;
+                TotalRequests++;
+                var thisRequest = TotalRequests;
 
-                // Randomly make either 'good' or 'faulting' calls.
                 if (Random.Shared.Next(0, 2) == 0)
                 {
-                    goodRequestsMade++;
+                    GoodRequestsMade++;
                     tasks.Add(CallGoodEndpoint(client, messages, thisRequest, combinedToken));
                 }
                 else
                 {
-                    faultingRequestsMade++;
+                    FaultingRequestsMade++;
                     tasks.Add(CallFaultingEndpoint(client, messages, thisRequest, combinedToken));
                 }
 
@@ -101,17 +100,17 @@ namespace PollyDemos.Async
 
         private void AddSummary(ConcurrentQueue<(string Message, Color Color)> messages)
         {
-            messages.Enqueue(($"Total requests: requested {totalRequests:00}, ", Color.White));
-            messages.Enqueue(($"Good endpoint: requested {goodRequestsMade:00}, ", Color.White));
-            messages.Enqueue(($"Good endpoint:succeeded {goodRequestsSucceeded:00}, ", Color.Green));
-            messages.Enqueue(($"Good endpoint:pending {goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed:00}, ", Color.Yellow));
-            messages.Enqueue(($"Good endpoint:failed {goodRequestsFailed:00}.", Color.Red));
+            messages.Enqueue(($"Total requests: requested {TotalRequests:00}, ", Color.White));
+            messages.Enqueue(($"Good endpoint: requested {GoodRequestsMade:00}, ", Color.White));
+            messages.Enqueue(($"Good endpoint:succeeded {GoodRequestsSucceeded:00}, ", Color.Green));
+            messages.Enqueue(($"Good endpoint:pending {GoodRequestsMade - GoodRequestsSucceeded - GoodRequestsFailed:00}, ", Color.Yellow));
+            messages.Enqueue(($"Good endpoint:failed {GoodRequestsFailed:00}.", Color.Red));
             messages.Enqueue((string.Empty, Color.Default));
 
-            messages.Enqueue(($"Faulting endpoint: requested {faultingRequestsMade:00}, ", Color.White));
-            messages.Enqueue(($"Faulting endpoint:succeeded {faultingRequestsSucceeded:00}, ", Color.Green));
-            messages.Enqueue(($"Faulting endpoint:pending {faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed:00}, ", Color.Yellow));
-            messages.Enqueue(($"Faulting endpoint:failed {faultingRequestsFailed:00}.", Color.Red));
+            messages.Enqueue(($"Faulting endpoint: requested {FaultingRequestsMade:00}, ", Color.White));
+            messages.Enqueue(($"Faulting endpoint:succeeded {FaultingRequestsSucceeded:00}, ", Color.Green));
+            messages.Enqueue(($"Faulting endpoint:pending {FaultingRequestsMade - FaultingRequestsSucceeded - FaultingRequestsFailed:00}, ", Color.Yellow));
+            messages.Enqueue(($"Faulting endpoint:failed {FaultingRequestsFailed:00}.", Color.Red));
             messages.Enqueue((string.Empty, Color.Default));
         }
 
@@ -127,7 +126,7 @@ namespace PollyDemos.Async
                     {
                         messages.Enqueue(($"Response: {responseBody}", Color.Green));
                     }
-                    faultingRequestsSucceeded++;
+                    FaultingRequestsSucceeded++;
                 }
                 catch (Exception e)
                 {
@@ -135,7 +134,7 @@ namespace PollyDemos.Async
                     {
                         messages.Enqueue(($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
                     }
-                    faultingRequestsFailed++;
+                    FaultingRequestsFailed++;
                 }
             }, cancellationToken);
 
@@ -148,7 +147,7 @@ namespace PollyDemos.Async
                         var message = $"Request {state} failed with: {failedTask.Exception!.Flatten().InnerExceptions.First().Message}";
                         messages.Enqueue((message, Color.Red));
                     }
-                    faultingRequestsFailed++;
+                    FaultingRequestsFailed++;
                 }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion);
 
             return handleFailure;
@@ -166,7 +165,7 @@ namespace PollyDemos.Async
                     {
                         messages.Enqueue(($"Response: {responseBody}", Color.Green));
                     }
-                    goodRequestsSucceeded++;
+                    GoodRequestsSucceeded++;
                 }
                 catch (Exception e)
                 {
@@ -174,7 +173,7 @@ namespace PollyDemos.Async
                     {
                         messages.Enqueue(($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
                     }
-                    goodRequestsFailed++;
+                    GoodRequestsFailed++;
                 }
             }, cancellationToken);
 
@@ -187,7 +186,7 @@ namespace PollyDemos.Async
                         var message = $"Request {state} failed with: {failedTask.Exception!.Flatten().InnerExceptions.First().Message}";
                         messages.Enqueue((message, Color.Red));
                     }
-                    goodRequestsFailed++;
+                    GoodRequestsFailed++;
                 }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion);
 
             return handleFailure;
@@ -195,15 +194,15 @@ namespace PollyDemos.Async
 
         public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new("Total requests made", totalRequests, Color.Default),
-            new("Good endpoint: requested", goodRequestsMade, Color.Default),
-            new("Good endpoint: succeeded", goodRequestsSucceeded, Color.Green),
-            new("Good endpoint: pending", goodRequestsMade - goodRequestsSucceeded - goodRequestsFailed, Color.Yellow),
-            new("Good endpoint: failed", goodRequestsFailed, Color.Red),
-            new("Faulting endpoint: requested", faultingRequestsMade, Color.Default),
-            new("Faulting endpoint: succeeded", faultingRequestsSucceeded, Color.Green),
-            new("Faulting endpoint: pending", faultingRequestsMade - faultingRequestsSucceeded - faultingRequestsFailed, Color.Yellow),
-            new("Faulting endpoint: failed", faultingRequestsFailed, Color.Red),
+            new("Total requests made", TotalRequests, Color.Default),
+            new("Good endpoint: requested", GoodRequestsMade, Color.Default),
+            new("Good endpoint: succeeded", GoodRequestsSucceeded, Color.Green),
+            new("Good endpoint: pending", GoodRequestsMade - GoodRequestsSucceeded - GoodRequestsFailed, Color.Yellow),
+            new("Good endpoint: failed", GoodRequestsFailed, Color.Red),
+            new("Faulting endpoint: requested", FaultingRequestsMade, Color.Default),
+            new("Faulting endpoint: succeeded", FaultingRequestsSucceeded, Color.Green),
+            new("Faulting endpoint: pending", FaultingRequestsMade - FaultingRequestsSucceeded - FaultingRequestsFailed, Color.Yellow),
+            new("Faulting endpoint: failed", FaultingRequestsFailed, Color.Red),
         };
     }
 }

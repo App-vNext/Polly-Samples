@@ -16,14 +16,11 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web API service to make repeated requests to a server.
-            // The service is configured to fail after 3 requests in 5 seconds.
+            EventualSuccesses = 0;
+            EventualFailures = 0;
+            TotalRequests = 0;
 
-            eventualSuccesses = 0;
-            eventualFailures = 0;
-            totalRequests = 0;
-
-            PrintHeader(progress, nameof(AsyncDemo00_NoStrategy));
+            PrintHeader(progress);
 
             var client = new HttpClient();
             var internalCancel = false;
@@ -31,7 +28,7 @@ namespace PollyDemos.Async
             // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
-                totalRequests++;
+                TotalRequests++;
 
                 try
                 {
@@ -40,12 +37,12 @@ namespace PollyDemos.Async
 
                     // Display the response message on the console
                     progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
-                    eventualSuccesses++;
+                    EventualSuccesses++;
                 }
                 catch (Exception e)
                 {
-                    progress.Report(ProgressWithMessage($"Request {totalRequests} eventually failed with: {e.Message}", Color.Red));
-                    eventualFailures++;
+                    progress.Report(ProgressWithMessage($"Request {TotalRequests} eventually failed with: {e.Message}", Color.Red));
+                    EventualFailures++;
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
@@ -55,10 +52,10 @@ namespace PollyDemos.Async
 
         public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new("Total requests made", totalRequests),
-            new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
-            new("Retries made to help achieve success", retries, Color.Yellow),
-            new("Requests which eventually failed", eventualFailures, Color.Red),
+            new("Total requests made", TotalRequests),
+            new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
+            new("Retries made to help achieve success", Retries, Color.Yellow),
+            new("Requests which eventually failed", EventualFailures, Color.Red),
         };
     }
 }

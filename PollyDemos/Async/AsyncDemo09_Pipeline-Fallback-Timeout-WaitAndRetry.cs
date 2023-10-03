@@ -29,16 +29,13 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web API service to make repeated requests to a server.
-            // The service is configured to fail after 3 requests in 5 seconds.
-
-            eventualSuccesses = 0;
-            retries = 0;
+            EventualSuccesses = 0;
+            Retries = 0;
             eventualFailuresDueToTimeout = 0;
             eventualFailuresForOtherReasons = 0;
-            totalRequests = 0;
+            TotalRequests = 0;
 
-            PrintHeader(progress, nameof(AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry));
+            PrintHeader(progress);
 
             Stopwatch? watch = null;
             var pipelineBuilder = new ResiliencePipelineBuilder<string>();
@@ -65,7 +62,7 @@ namespace PollyDemos.Async
                 {
                     var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($".Log,then retry: {exception.Message}", Color.Yellow));
-                    retries++;
+                    Retries++;
                     return default;
                 }
             });
@@ -112,21 +109,18 @@ namespace PollyDemos.Async
 
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
-                totalRequests++;
+                TotalRequests++;
                 watch = Stopwatch.StartNew();
 
                 try
                 {
-                    // Manage the call according to the pipeline.
                     var responseBody = await pipeline.ExecuteAsync(async token =>
                         await IssueRequestAndProcessResponseAsync(client, token), cancellationToken);
 
                     watch.Stop();
                     progress.Report(ProgressWithMessage($"Response: {responseBody}(after {watch.ElapsedMilliseconds}ms)", Color.Green));
-                    eventualSuccesses++;
+                    EventualSuccesses++;
                 }
-                // This try-catch is not needed, since we have a Fallback for any Exceptions.
-                // It's only been left in to *demonstrate* it should never get hit.
                 catch (Exception e)
                 {
                     var errorMessage = "Should never arrive here. Use of fallback for any Exception should have provided nice fallback value for exceptions.";
@@ -140,9 +134,9 @@ namespace PollyDemos.Async
 
         public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new("Total requests made", totalRequests),
-            new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
-            new("Retries made to help achieve success", retries, Color.Yellow),
+            new("Total requests made", TotalRequests),
+            new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
+            new("Retries made to help achieve success", Retries, Color.Yellow),
             new("Requests timed out by timeout policy", eventualFailuresDueToTimeout, Color.Magenta),
             new("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
