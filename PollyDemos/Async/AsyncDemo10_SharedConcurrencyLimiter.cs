@@ -5,7 +5,7 @@ namespace PollyDemos.Async
 {
     /// <summary>
     /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
-    /// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
+    /// The 'good' endpoint responds quickly.  The 'faulting' endpoint either faults or responds slowly.
     /// Imagine the _caller_ has limited capacity (all single instances of upstream services/webapps eventually hit some capacity limit).
     ///
     /// This demo 10 does not separate call streams into separate concurrency limiters.
@@ -16,7 +16,7 @@ namespace PollyDemos.Async
     /// eventually all the caller's capacity is taken up waiting on the 'faulting' downstream calls.
     /// So the performance of 'good' calls is starved of resource, and starts suffering too.
     /// Watch how the number of pending and failing calls to the good endpoint also climbs,
-    /// as the faulting calls saturate all resource in the caller.
+    /// as the faulting calls saturate all resources in the caller.
     /// </summary>
     public class AsyncDemo10_SharedConcurrencyLimiter : AsyncConcurrencyLimiterDemo
     {
