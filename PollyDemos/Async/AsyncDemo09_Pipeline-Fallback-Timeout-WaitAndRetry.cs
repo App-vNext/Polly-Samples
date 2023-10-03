@@ -2,11 +2,11 @@
 using Polly.Timeout;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Sync
+namespace PollyDemos.Async
 {
     /// <summary>
     /// Demonstrates using a Retry, a Timeout and two Fallback strategies.
-    /// In this demo, the delay in the retry is deliberately so long that the timeout wrapping it will time it out
+    /// In this demo, the wait in the wait-and-retry is deliberately so long that the timeout policy wrapping it will time it out
     /// (in lieu for now of a demo server endpoint responding slowly).
     ///
     /// Loops through a series of HTTP requests, keeping track of each requested
@@ -17,20 +17,20 @@ namespace PollyDemos.Sync
     /// - a fallback strategy then provides substitute message for the user
     /// - otherwise similar to demo08.
     /// </summary>
-    public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : SyncDemo
+    public class AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry : AsyncDemo
     {
         private int eventualFailuresDueToTimeout;
         private int eventualFailuresForOtherReasons;
 
         public override string Description =>
-            "Demonstrates introducing a Timeout strategy. The timeout will eventually time-out on the retries. When we timeout, we again use a Fallback to substitute a more graceful message.";
+            "Demonstrates introducing a Timeout strategy. The timeout will eventually time-out on the retries. When we timeout, we again use a Fallback strategy to substitute a more graceful message.";
 
-        public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             ArgumentNullException.ThrowIfNull(progress);
 
             // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             retries = 0;
@@ -38,7 +38,7 @@ namespace PollyDemos.Sync
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            PrintHeader(progress, nameof(Demo09_Pipeline_Fallback_Timeout_WaitAndRetry));
+            PrintHeader(progress, nameof(AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry));
 
             Stopwatch? watch = null;
             var pipelineBuilder = new ResiliencePipelineBuilder<string>();
@@ -110,7 +110,6 @@ namespace PollyDemos.Sync
             var client = new HttpClient();
             var internalCancel = false;
 
-            // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
                 totalRequests++;
@@ -119,12 +118,11 @@ namespace PollyDemos.Sync
                 try
                 {
                     // Manage the call according to the pipeline.
-                    var responseBody = pipeline.Execute(token => IssueRequestAndProcessResponse(client, token), cancellationToken);
+                    var responseBody = await pipeline.ExecuteAsync(async token =>
+                        await IssueRequestAndProcessResponseAsync(client, token), cancellationToken);
 
                     watch.Stop();
-
-                    // Display the response message on the console
-                    progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
+                    progress.Report(ProgressWithMessage($"Response: {responseBody}(after {watch.ElapsedMilliseconds}ms)", Color.Green));
                     eventualSuccesses++;
                 }
                 // This try-catch is not needed, since we have a Fallback for any Exceptions.
@@ -135,7 +133,7 @@ namespace PollyDemos.Sync
                     throw new UnreachableException(errorMessage, e);
                 }
 
-                Thread.Sleep(500);
+                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                 internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
             }
         }
@@ -145,7 +143,7 @@ namespace PollyDemos.Sync
             new("Total requests made", totalRequests),
             new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
             new("Retries made to help achieve success", retries, Color.Yellow),
-            new("Requests timed out by timeout strategy", eventualFailuresDueToTimeout, Color.Magenta),
+            new("Requests timed out by timeout policy", eventualFailuresDueToTimeout, Color.Magenta),
             new("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
     }

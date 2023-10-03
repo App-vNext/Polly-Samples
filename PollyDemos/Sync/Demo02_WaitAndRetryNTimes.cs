@@ -35,14 +35,10 @@ namespace PollyDemos.Sync
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                 MaxRetryAttempts = 3,
-                Delay = TimeSpan.FromMilliseconds(200),  // Wait 200ms between each try
+                Delay = TimeSpan.FromMilliseconds(200), // Wait between each try
                 OnRetry = args =>
                 {
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
-
-                    // Tell the user what happened
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;

@@ -2,7 +2,7 @@
 using Polly.CircuitBreaker;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Sync
+namespace PollyDemos.Async
 {
     /// <summary>
     /// Demonstrates using a Retry, a CircuitBreaker and two Fallback strategies.
@@ -13,24 +13,24 @@ namespace PollyDemos.Sync
     ///
     /// Observations:
     /// - operation is identical to Demo06 and Demo07
-    /// - except fallback strategies provide nice substitute messages, if still fails overall
+    /// - except fallback policies provide nice substitute messages, if still fails overall
     /// - OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
     /// - also demonstrates how you can use the same kind of strategy (Fallback in this case) twice (or more) in a pipeline.
     /// </summary>
-    public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
+    public class AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : AsyncDemo
     {
         private int eventualFailuresDueToCircuitBreaking;
         private int eventualFailuresForOtherReasons;
 
         public override string Description =>
-            "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces Fallbacks: we can provide graceful fallback messages, on overall failure.";
+            "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
 
-        public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             ArgumentNullException.ThrowIfNull(progress);
 
             // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             retries = 0;
@@ -38,7 +38,7 @@ namespace PollyDemos.Sync
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            PrintHeader(progress, nameof(Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker));
+            PrintHeader(progress, nameof(AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker));
 
             Stopwatch? watch = null;
 
@@ -131,7 +131,6 @@ namespace PollyDemos.Sync
 
             var client = new HttpClient();
             var internalCancel = false;
-
             // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
@@ -141,11 +140,10 @@ namespace PollyDemos.Sync
                 try
                 {
                     // Manage the call according to the pipeline.
-                    var responseBody = pipeline.Execute(token => IssueRequestAndProcessResponse(client, token), cancellationToken);
+                    var responseBody = await pipeline.ExecuteAsync(async token =>
+                        await IssueRequestAndProcessResponseAsync(client, token), cancellationToken);
 
                     watch.Stop();
-
-                    // Display the response message on the console
                     progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
                     eventualSuccesses++;
                 }
@@ -153,11 +151,11 @@ namespace PollyDemos.Sync
                 // It's only been left in to *demonstrate* it should never get hit.
                 catch (Exception e)
                 {
-                    var errorMessage = "Should never arrive here. Use of fallback for any Exception should have provided nice fallback value for exceptions.";
+                    var errorMessage = "Should never arrive here. Use of fallbackForAnyException should have provided nice fallback value for any exceptions.";
                     throw new UnreachableException(errorMessage, e);
                 }
 
-                Thread.Sleep(500);
+                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                 internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
             }
         }

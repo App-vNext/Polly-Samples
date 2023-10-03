@@ -2,7 +2,7 @@
 using Polly.CircuitBreaker;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Sync
+namespace PollyDemos.Async
 {
     /// <summary>
     /// Demonstrates using the Retry and CircuitBreaker strategies.
@@ -11,11 +11,11 @@ namespace PollyDemos.Sync
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
-    /// Observations:
+    /// Observations from this demo:
     /// The operation is identical to Demo06.
     /// The code demonstrates how using the ResiliencePipelineBuilder makes your combined pipeline more concise, at the point of execution.
     /// </summary>
-    public class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : SyncDemo
+    public class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : AsyncDemo
     {
         private int eventualFailuresDueToCircuitBreaking;
         private int eventualFailuresForOtherReasons;
@@ -23,12 +23,12 @@ namespace PollyDemos.Sync
         public override string Description =>
             "This demonstrates CircuitBreaker (see Demo06), but uses the ResiliencePipelineBuilder to compose the strategies. Only the underlying code differs.";
 
-        public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
         {
             ArgumentNullException.ThrowIfNull(progress);
 
             // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
             retries = 0;
@@ -36,7 +36,7 @@ namespace PollyDemos.Sync
             eventualFailuresForOtherReasons = 0;
             totalRequests = 0;
 
-            PrintHeader(progress, nameof(Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline));
+            PrintHeader(progress, nameof(AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline));
 
             // New for demo07: here we define a pipeline builder which will be used to compose strategies incrementally.
             var pipelineBuilder = new ResiliencePipelineBuilder();
@@ -100,19 +100,19 @@ namespace PollyDemos.Sync
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
                 totalRequests++;
-                var watch = Stopwatch.StartNew();
+                var watch = new Stopwatch();
+                watch.Start();
 
                 try
                 {
                     // Manage the call according to the pipeline.
-                    var responseBody = pipeline.Execute(token =>
+                    var responseBody = await pipeline.ExecuteAsync(async token =>
                     {
                         // This code is executed through both strategies in the pipeline:
                         // Retry is the outer, and circuit breaker is the inner.
                         // Demo 06 shows a decomposed version of what this is equivalent to.
 
-                        return IssueRequestAndProcessResponse(client, token);
-
+                        return await IssueRequestAndProcessResponseAsync(client, token);
                     }, cancellationToken);
 
                     watch.Stop();
@@ -136,7 +136,7 @@ namespace PollyDemos.Sync
                     eventualFailuresForOtherReasons++;
                 }
 
-                Thread.Sleep(500);
+                await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
                 internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
             }
         }
