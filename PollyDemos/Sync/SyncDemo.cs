@@ -9,7 +9,7 @@ namespace PollyDemos.Sync
         protected string IssueRequestAndProcessResponse(HttpClient client, CancellationToken cancellationToken = default)
         {
             // Make a request and get a response
-            var url = $"{Configuration.WEB_API_ROOT}/api/values/{totalRequests}";
+            var url = $"{Configuration.WEB_API_ROOT}/api/values/{TotalRequests}";
             var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), cancellationToken);
 
             // Read response's body

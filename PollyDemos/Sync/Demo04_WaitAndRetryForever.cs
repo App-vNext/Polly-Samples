@@ -22,17 +22,13 @@ namespace PollyDemos.Sync
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
+            EventualSuccesses = 0;
+            Retries = 0;
+            EventualFailures = 0;
+            TotalRequests = 0;
 
-            eventualSuccesses = 0;
-            retries = 0;
-            eventualFailures = 0;
-            totalRequests = 0;
+            PrintHeader(progress);
 
-            PrintHeader(progress, nameof(Demo04_WaitAndRetryForever));
-
-            // Define our strategy:
             var strategy = new ResiliencePipelineBuilder().AddRetry(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
@@ -42,7 +38,7 @@ namespace PollyDemos.Sync
                 {
                     var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
-                    retries++;
+                    Retries++;
                     return default;
                 }
             }).Build();
@@ -50,29 +46,24 @@ namespace PollyDemos.Sync
             var client = new HttpClient();
             var internalCancel = false;
 
-            // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
-                totalRequests++;
+                TotalRequests++;
 
                 try
                 {
-                    // Retry the following call according to the strategy.
-                    // The cancellationToken passed in to Execute() enables the strategy to cancel retries, when the token is signalled.
                     strategy.Execute(token =>
                     {
-                        // This code is executed within the strategy
-
                         var responseBody = IssueRequestAndProcessResponse(client, token);
                         progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
-                        eventualSuccesses++;
+                        EventualSuccesses++;
 
                     }, cancellationToken);
                 }
                 catch (Exception e)
                 {
-                    progress.Report(ProgressWithMessage($"Request {totalRequests} eventually failed with: {e.Message}", Color.Red));
-                    eventualFailures++;
+                    progress.Report(ProgressWithMessage($"Request {TotalRequests} eventually failed with: {e.Message}", Color.Red));
+                    EventualFailures++;
                 }
 
                 Thread.Sleep(500);
@@ -82,10 +73,10 @@ namespace PollyDemos.Sync
 
         public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new("Total requests made", totalRequests),
-            new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
-            new("Retries made to help achieve success", retries, Color.Yellow),
-            new("Requests which eventually failed", eventualFailures, Color.Red),
+            new("Total requests made", TotalRequests),
+            new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
+            new("Retries made to help achieve success", Retries, Color.Yellow),
+            new("Requests which eventually failed", EventualFailures, Color.Red),
         };
     }
 }

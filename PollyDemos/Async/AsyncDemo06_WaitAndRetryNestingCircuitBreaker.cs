@@ -35,29 +35,25 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web API service to make repeated requests to a server.
-            // The service is configured to fail after 3 requests in 5 seconds.
-
-            eventualSuccesses = 0;
-            retries = 0;
+            EventualSuccesses = 0;
+            Retries = 0;
             eventualFailuresDueToCircuitBreaking = 0;
             eventualFailuresForOtherReasons = 0;
-            totalRequests = 0;
+            TotalRequests = 0;
 
-            PrintHeader(progress, nameof(AsyncDemo06_WaitAndRetryNestingCircuitBreaker));
+            PrintHeader(progress);
 
-            // Define our retry strategy:
             var retryStrategy = new ResiliencePipelineBuilder().AddRetry(new()
             {
                 // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
-                MaxRetryAttempts = int.MaxValue, // Retry indefinitely
+                MaxRetryAttempts = int.MaxValue,
                 Delay = TimeSpan.FromMilliseconds(200),
                 OnRetry = args =>
                 {
                     var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
-                    retries++;
+                    Retries++;
                     return default;
                 }
             }).Build();
@@ -94,10 +90,9 @@ namespace PollyDemos.Async
             var client = new HttpClient();
             var internalCancel = false;
 
-            // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
-                totalRequests++;
+                TotalRequests++;
                 var watch = Stopwatch.StartNew();
 
                 try
@@ -116,24 +111,22 @@ namespace PollyDemos.Async
                         }, outerToken);
 
                         watch.Stop();
-
-                        // Display the response message on the console
                         progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
-                        eventualSuccesses++;
+                        EventualSuccesses++;
 
                     }, cancellationToken);
                 }
                 catch (BrokenCircuitException bce)
                 {
                     watch.Stop();
-                    var logMessage = $"Request {totalRequests} failed with: {bce.GetType().Name} (after {watch.ElapsedMilliseconds}ms)";
+                    var logMessage = $"Request {TotalRequests} failed with: {bce.GetType().Name} (after {watch.ElapsedMilliseconds}ms)";
                     progress.Report(ProgressWithMessage(logMessage, Color.Red));
                     eventualFailuresDueToCircuitBreaking++;
                 }
                 catch (Exception e)
                 {
                     watch.Stop();
-                    var logMessage = $"Request {totalRequests} eventually failed with: {e.Message} (after {watch.ElapsedMilliseconds}ms)";
+                    var logMessage = $"Request {TotalRequests} eventually failed with: {e.Message} (after {watch.ElapsedMilliseconds}ms)";
                     progress.Report(ProgressWithMessage(logMessage, Color.Red));
                     eventualFailuresForOtherReasons++;
                 }
@@ -145,9 +138,9 @@ namespace PollyDemos.Async
 
         public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new("Total requests made", totalRequests),
-            new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
-            new("Retries made to help achieve success", retries, Color.Yellow),
+            new("Total requests made", TotalRequests),
+            new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
+            new("Retries made to help achieve success", Retries, Color.Yellow),
             new("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking, Color.Magenta),
             new("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };

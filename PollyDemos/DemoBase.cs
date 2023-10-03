@@ -4,10 +4,10 @@ namespace PollyDemos
 {
     public abstract class DemoBase
     {
-        protected int totalRequests;
-        protected int eventualSuccesses;
-        protected int eventualFailures;
-        protected int retries;
+        protected int TotalRequests;
+        protected int EventualSuccesses;
+        protected int EventualFailures;
+        protected int Retries;
 
         protected bool TerminateDemosByKeyPress { get; } = true;
 
@@ -24,9 +24,9 @@ namespace PollyDemos
         public DemoProgress ProgressWithMessages(IEnumerable<ColoredMessage> messages)
             => new (LatestStatistics, messages);
 
-        public void PrintHeader(IProgress<DemoProgress> progress, string demoName)
+        public void PrintHeader(IProgress<DemoProgress> progress)
         {
-            progress.Report(ProgressWithMessage(demoName));
+            progress.Report(ProgressWithMessage(GetType().Name));
             progress.Report(ProgressWithMessage("======"));
             progress.Report(ProgressWithMessage(string.Empty));
         }

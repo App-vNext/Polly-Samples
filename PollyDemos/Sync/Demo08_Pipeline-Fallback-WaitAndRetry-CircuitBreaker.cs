@@ -29,26 +29,22 @@ namespace PollyDemos.Sync
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web API service to make repeated requests to a server.
-            // The service is programmed to fail after 3 requests in 5 seconds.
-
-            eventualSuccesses = 0;
-            retries = 0;
+            EventualSuccesses = 0;
+            Retries = 0;
             eventualFailuresDueToCircuitBreaking = 0;
             eventualFailuresForOtherReasons = 0;
-            totalRequests = 0;
+            TotalRequests = 0;
 
-            PrintHeader(progress, nameof(Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker));
+            PrintHeader(progress);
 
             Stopwatch? watch = null;
 
-            // New for demo08: we had to provide the return type (string) to be able to use Fallback.
+            // Provide the return type (string) to be able to use Fallback.
             var pipelineBuilder = new ResiliencePipelineBuilder<string>();
 
-            // Define our circuit breaker strategy:
             pipelineBuilder.AddCircuitBreaker(new()
             {
-                // New for demo08: since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
+                // Since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
                 ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
                 FailureRatio = 1.0,
                 MinimumThroughput = 4,
@@ -75,11 +71,9 @@ namespace PollyDemos.Sync
                 }
             });
 
-            // Define our retry strategy:
             pipelineBuilder.AddRetry(new()
             {
-                // New for demo08: since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
-                // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
+                // Since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
                 ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(ex => ex is not BrokenCircuitException),
                 MaxRetryAttempts = int.MaxValue, // Retry indefinitely
                 Delay = TimeSpan.FromMilliseconds(200),
@@ -87,7 +81,7 @@ namespace PollyDemos.Sync
                 {
                     var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
-                    retries++;
+                    Retries++;
                     return default;
                 }
             });
@@ -132,22 +126,18 @@ namespace PollyDemos.Sync
             var client = new HttpClient();
             var internalCancel = false;
 
-            // Do the following until a key is pressed
             while (!(internalCancel || cancellationToken.IsCancellationRequested))
             {
-                totalRequests++;
+                TotalRequests++;
                 watch = Stopwatch.StartNew();
 
                 try
                 {
-                    // Manage the call according to the pipeline.
                     var responseBody = pipeline.Execute(token => IssueRequestAndProcessResponse(client, token), cancellationToken);
 
                     watch.Stop();
-
-                    // Display the response message on the console
                     progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
-                    eventualSuccesses++;
+                    EventualSuccesses++;
                 }
                 // This try-catch is not needed, since we have a Fallback for any Exceptions.
                 // It's only been left in to *demonstrate* it should never get hit.
@@ -164,9 +154,9 @@ namespace PollyDemos.Sync
 
         public override Statistic[] LatestStatistics => new Statistic[]
         {
-            new("Total requests made", totalRequests),
-            new("Requests which eventually succeeded", eventualSuccesses, Color.Green),
-            new("Retries made to help achieve success", retries, Color.Yellow),
+            new("Total requests made", TotalRequests),
+            new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
+            new("Retries made to help achieve success", Retries, Color.Yellow),
             new("Requests failed early by broken circuit", eventualFailuresDueToCircuitBreaking, Color.Magenta),
             new("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
