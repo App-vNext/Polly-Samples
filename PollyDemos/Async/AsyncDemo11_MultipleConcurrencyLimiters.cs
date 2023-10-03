@@ -32,12 +32,10 @@ namespace PollyDemos.Async
                 queueLimit: 10)
             .Build();
 
-        // In this demo we let any number (int.MaxValue) of calls _queue for an execution slot in the bulkhead (simulating a system still _trying to accept/process as many of the calls as possible).
-        // A subsequent demo will look at using no queue (and bulkhead rejections) to simulate automated horizontal scaling.
         private readonly ResiliencePipeline limiterForFaultingCalls =
             new ResiliencePipelineBuilder()
             .AddConcurrencyLimiter(
-                permitLimit: callerParallelCapacity - callerParallelCapacity / 2,
+                permitLimit: callerParallelCapacity / 2,
                 queueLimit: 10)
             .Build();
 
