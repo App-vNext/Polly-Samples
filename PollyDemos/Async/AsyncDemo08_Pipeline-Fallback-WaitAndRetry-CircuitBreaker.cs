@@ -48,7 +48,7 @@ namespace PollyDemos.Async
             // Define our circuit breaker strategy:
             pipelineBuilder.AddCircuitBreaker(new()
             {
-                // New for demo08: since pipeline is aware of the return type that's why the PredicateBuilder has to be as well.
+                // New for demo08: since pipeline has a string type parameter that's why the PredicateBuilder has to have as well.
                 ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
                 FailureRatio = 1.0,
                 MinimumThroughput = 4,
@@ -80,7 +80,7 @@ namespace PollyDemos.Async
             // Define our retry strategy:
             pipelineBuilder.AddRetry(new()
             {
-                // New for demo08: since pipeline is aware of the return type that's why the PredicateBuilder has to be as well.
+                // New for demo08: since pipeline has a string type parameter that's why the PredicateBuilder has to have as well.
                 // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
                 ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(ex => ex is not BrokenCircuitException),
                 MaxRetryAttempts = int.MaxValue, // Retry indefinitely
@@ -166,8 +166,8 @@ namespace PollyDemos.Async
                 // It's only been left in to *demonstrate* it should never get hit.
                 catch (Exception e)
                 {
-                    var errorMessage = "Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.";
-                    throw new InvalidOperationException(errorMessage, e);
+                    var errorMessage = "Should never arrive here. Use of fallbackForAnyException should have provided nice fallback value for any exceptions.";
+                    throw new UnreachableException(errorMessage, e);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);

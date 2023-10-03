@@ -143,7 +143,7 @@ namespace PollyDemos.Sync
                 catch (Exception e)
                 {
                     var errorMessage = "Should never arrive here. Use of fallback for any Exception should have provided nice fallback value for exceptions.";
-                    throw new InvalidOperationException(errorMessage, e);
+                    throw new UnreachableException(errorMessage, e);
                 }
 
                 Thread.Sleep(500);

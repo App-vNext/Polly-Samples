@@ -141,7 +141,7 @@ namespace PollyDemos.Async
                 catch (Exception e)
                 {
                     var errorMessage = "Should never arrive here. Use of fallback for any Exception should have provided nice fallback value for exceptions.";
-                    throw new InvalidOperationException(errorMessage, e);
+                    throw new UnreachableException(errorMessage, e);
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
