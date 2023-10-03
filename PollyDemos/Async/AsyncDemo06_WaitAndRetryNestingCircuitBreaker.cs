@@ -66,7 +66,7 @@ namespace PollyDemos.Async
                 }
             }).Build();
 
-            // Define our circuit breaker strategy: break if the action fails at lease 4 times in a row.
+            // Define our circuit breaker strategy: break if the action fails at least 4 times in a row.
             var circuitBreakerStrategy = new ResiliencePipelineBuilder().AddCircuitBreaker(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
