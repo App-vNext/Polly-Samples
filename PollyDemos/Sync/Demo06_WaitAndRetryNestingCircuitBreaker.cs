@@ -52,21 +52,17 @@ namespace PollyDemos.Sync
                 // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
                 MaxRetryAttempts = int.MaxValue, // Retry indefinitely
-                Delay = TimeSpan.FromMilliseconds(200),  // Wait 200ms between each try
+                Delay = TimeSpan.FromMilliseconds(200),
                 OnRetry = args =>
                 {
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
-
-                    // Tell the user what happened
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;
                 }
             }).Build();
 
-            // Define our circuit breaker strategy: break if the action fails 4 times in a row.
+            // Define our circuit breaker strategy: break if the action fails at least 4 times in a row.
             var circuitBreakerStrategy = new ResiliencePipelineBuilder().AddCircuitBreaker(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
@@ -79,9 +75,7 @@ namespace PollyDemos.Sync
                             $".Breaker logging: Breaking the circuit for {args.BreakDuration.TotalMilliseconds}ms!",
                             Color.Magenta));
 
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"..due to: {exception.Message}", Color.Magenta));
                     return default;
                 },
@@ -113,7 +107,6 @@ namespace PollyDemos.Sync
                     {
                         // This code is executed within the retry strategy.
 
-                        // Note how we can also Execute() a Func<TResult> and pass back the value.
                         var responseBody = circuitBreakerStrategy.Execute(innerToken =>
                         {
                             // This code is executed within the circuit breaker strategy.
