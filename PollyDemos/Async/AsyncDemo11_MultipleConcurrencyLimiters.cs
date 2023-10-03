@@ -20,7 +20,7 @@ namespace PollyDemos.Async
     ///
     /// Bulkheads: making sure one fault doesn't sink the whole ship!
     /// </summary>
-    public class BulkheadAsyncDemo01_WithBulkheads : AsyncBulkheadDemo
+    public class AsyncDemo11_MultipleConcurrencyLimiters : AsyncBulkheadDemo
     {
          // Let's imagine this caller has some theoretically limited capacity.
         const int callerParallelCapacity = 8; // artificially low - but easier to follow, to illustrate principle
@@ -47,7 +47,7 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(nameof(progress));
 
-            PrintHeader(progress, nameof(BulkheadAsyncDemo01_WithBulkheads));
+            PrintHeader(progress, nameof(AsyncDemo11_MultipleConcurrencyLimiters));
             totalRequests = 0;
 
             await Task.FromResult(true).ConfigureAwait(false); // Ensure none of what follows runs synchronously.

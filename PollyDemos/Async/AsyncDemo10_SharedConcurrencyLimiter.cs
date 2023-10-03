@@ -18,7 +18,7 @@ namespace PollyDemos.Async
     /// Watch how the number of pending and failing calls to the good endpoint also climbs,
     /// as the faulting calls saturate all resource in the caller.
     /// </summary>
-    public class BulkheadAsyncDemo00_NoIsolation : AsyncBulkheadDemo
+    public class AsyncDemo10_SharedConcurrencyLimiter : AsyncBulkheadDemo
     {
         // Let's imagine this caller has some theoretically limited capacity, so that *it* will suffer capacity-starvation, if the downstream system is faulting.
         // In demo 00, all calls share the same bulkhead.
@@ -35,7 +35,7 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            PrintHeader(progress, nameof(BulkheadAsyncDemo00_NoIsolation));
+            PrintHeader(progress, nameof(AsyncDemo10_SharedConcurrencyLimiter));
             totalRequests = 0;
 
             await Task.FromResult(true).ConfigureAwait(false); // Ensure none of what follows runs synchronously.
