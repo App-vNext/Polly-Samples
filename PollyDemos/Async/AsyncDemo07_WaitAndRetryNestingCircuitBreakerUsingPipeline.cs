@@ -27,7 +27,7 @@ namespace PollyDemos.Async
         {
             ArgumentNullException.ThrowIfNull(progress);
 
-            // Let's call a web api service to make repeated requests to a server.
+            // Let's call a web API service to make repeated requests to a server.
             // The service is configured to fail after 3 requests in 5 seconds.
 
             eventualSuccesses = 0;
@@ -38,7 +38,7 @@ namespace PollyDemos.Async
 
             PrintHeader(progress, nameof(AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline));
 
-            // New for demo07: here we define a pipeline builder which will be used to compose strategies gradually.
+            // New for demo07: here we define a pipeline builder which will be used to compose strategies incrementally.
             var pipelineBuilder = new ResiliencePipelineBuilder();
 
             // New for demo07: the order of strategy definitions has changed.
@@ -116,7 +116,7 @@ namespace PollyDemos.Async
                     {
                         // This code is executed through both strategies in the pipeline:
                         // Retry is the outer, and circuit breaker is the inner.
-                        // Demo 06 shows a broken-out version of what this is equivalent to.
+                        // Demo 06 shows a decomposed version of what this is equivalent to.
 
                         return await IssueRequestAndProcessResponseAsync(client, token);
                     }, cancellationToken);
