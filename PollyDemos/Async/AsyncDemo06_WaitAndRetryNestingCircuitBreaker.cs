@@ -52,14 +52,10 @@ namespace PollyDemos.Async
                 // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
                 MaxRetryAttempts = int.MaxValue, // Retry indefinitely
-                Delay = TimeSpan.FromMilliseconds(200),  // Wait between each try
+                Delay = TimeSpan.FromMilliseconds(200),
                 OnRetry = args =>
                 {
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
-
-                    // Tell the user what happened
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
                     retries++;
                     return default;
@@ -79,9 +75,7 @@ namespace PollyDemos.Async
                             $".Breaker logging: Breaking the circuit for {args.BreakDuration.TotalMilliseconds}ms!",
                             Color.Magenta));
 
-                    // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
-                    // Note the ! sign (null-forgiving operator) at the end of the command.
-                    var exception = args.Outcome.Exception!; // The Exception property is nullable
+                    var exception = args.Outcome.Exception!;
                     progress.Report(ProgressWithMessage($"..due to: {exception.Message}", Color.Magenta));
                     return default;
                 },
@@ -113,7 +107,6 @@ namespace PollyDemos.Async
                     {
                         // This code is executed within the retry strategy.
 
-                        // Note how we can also ExecuteAsync() a Func<Task<TResult>> and pass back the value.
                         var responseBody = await circuitBreakerStrategy.ExecuteAsync(async innerToken =>
                         {
                             // This code is executed within the circuit breaker strategy.
