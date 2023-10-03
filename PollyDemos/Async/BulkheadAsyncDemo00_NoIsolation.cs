@@ -18,17 +18,8 @@ namespace PollyDemos.Async
     /// Watch how the number of pending and failing calls to the good endpoint also climbs,
     /// as the faulting calls saturate all resource in the caller.
     /// </summary>
-    public class BulkheadAsyncDemo00_NoIsolation : AsyncDemo
+    public class BulkheadAsyncDemo00_NoIsolation : AsyncBulkheadDemo
     {
-        // Track the number of 'good' and 'faulting' requests made, succeeded and failed.
-        // At any time, requests pending = made - succeeded - failed.
-        private int goodRequestsMade;
-        private int goodRequestsSucceeded;
-        private int goodRequestsFailed;
-        private int faultingRequestsMade;
-        private int faultingRequestsSucceeded;
-        private int faultingRequestsFailed;
-
         // Let's imagine this caller has some theoretically limited capacity, so that *it* will suffer capacity-starvation, if the downstream system is faulting.
         // In demo 00, all calls share the same bulkhead.
         private readonly ResiliencePipeline sharedBulkhead = new ResiliencePipelineBuilder()
@@ -125,21 +116,15 @@ namespace PollyDemos.Async
             messages.Enqueue((string.Empty, Color.Default));
         }
 
-        private Task CallFaultingEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken combinedToken)
+        private Task CallFaultingEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
         {
             ValueTask issueRequest = sharedBulkhead.ExecuteAsync(async token =>
             {
                 try
                 {
-                    // Make a request and get a response, from the faulting endpoint
-                    var response = await client
-                        .GetAsync($"{Configuration.WEB_API_ROOT}/api/nonthrottledfaulting/{totalRequests}", token)
-                        .ConfigureAwait(false);
-                    var responseBody = await response.Content
-                        .ReadAsStringAsync(token)
-                        .ConfigureAwait(false);
+                    var responseBody = await IssueFaultingRequestAndProcessResponseAsync(client, token).ConfigureAwait(false);
 
-                    if (!combinedToken.IsCancellationRequested)
+                    if (!cancellationToken.IsCancellationRequested)
                     {
                         messages.Enqueue(($"Response: {responseBody}", Color.Green));
                     }
@@ -153,7 +138,7 @@ namespace PollyDemos.Async
                     }
                     faultingRequestsFailed++;
                 }
-            }, combinedToken);
+            }, cancellationToken);
 
             Task handleFailure = issueRequest
                 .AsTask()
@@ -170,21 +155,15 @@ namespace PollyDemos.Async
             return handleFailure;
         }
 
-        private Task CallGoodEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken combinedToken)
+        private Task CallGoodEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
         {
             ValueTask issueRequest = sharedBulkhead.ExecuteAsync(async token =>
             {
                 try
                 {
-                    // Make a request and get a response, from the good endpoint
-                    var response = await client
-                        .GetAsync($"{Configuration.WEB_API_ROOT}/api/nonthrottledgood/{totalRequests}", token)
-                        .ConfigureAwait(false);
-                    var responseBody = await response.Content
-                        .ReadAsStringAsync(token)
-                        .ConfigureAwait(false);
+                    var responseBody = await IssueGoodRequestAndProcessResponseAsync(client, token).ConfigureAwait(false);
 
-                    if (!token.IsCancellationRequested)
+                    if (!cancellationToken.IsCancellationRequested)
                     {
                         messages.Enqueue(($"Response: {responseBody}", Color.Green));
                     }
@@ -198,7 +177,7 @@ namespace PollyDemos.Async
                     }
                     goodRequestsFailed++;
                 }
-            }, combinedToken);
+            }, cancellationToken);
 
             Task handleFailure = issueRequest
                 .AsTask()
