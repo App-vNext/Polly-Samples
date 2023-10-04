@@ -24,7 +24,7 @@ namespace PollyDemos.Async
         // In demo 10, all calls share the same concurrency limiter.
         private readonly ResiliencePipeline sharedLimiter = new ResiliencePipelineBuilder()
                 .AddConcurrencyLimiter(
-                    permitLimit: 8,  // (artificially low - but easier to follow to illustrate the principle)
+                    permitLimit: 8,  // artificially low - but easier to follow to illustrate the principle
                     queueLimit: 1)
                 .Build();
 

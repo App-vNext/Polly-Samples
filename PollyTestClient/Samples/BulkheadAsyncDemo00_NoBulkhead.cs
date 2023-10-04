@@ -10,18 +10,18 @@ namespace PollyTestClient.Samples
 {
     /// <summary>
     /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
-    /// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
-    /// Imagine the _caller_ has limited capacity (all single instances of services/webapps eventually hit some capacity limit).
-    /// 
-    /// This demo 00 has no bulkheads to protect the caller.  
+    /// The 'good' endpoint responds quickly.  The 'faulting' endpoint either faults or responds slowly.
+    /// Imagine the _caller_ has limited capacity (all single instances of upstream services/webapps eventually hit some capacity limit).
+    ///
+    /// This demo 10 does not separate call streams into separate concurrency limiters.
     /// A random combination of calls to the 'good' and 'faulting' endpoint are made.
-    /// 
-    /// Observe: --
-    /// Because no bulkheads isolate the separate streams of calls, 
+    ///
+    /// Observations:
+    /// Because concurrency limiters do not isolate the separate streams of calls,
     /// eventually all the caller's capacity is taken up waiting on the 'faulting' downstream calls.
     /// So the performance of 'good' calls is starved of resource, and starts suffering too.
-    /// Watch the number of 'pending' calls to the good endpoint eventually start to climb,
-    /// as the faulting calls saturate all resource in the caller.
+    /// Watch how the number of pending and failing calls to the good endpoint also climbs,
+    /// as the faulting calls saturate all resources in the caller.
     /// </summary>
     public static class BulkheadAsyncDemo00_NoBulkhead
     {
@@ -41,7 +41,7 @@ namespace PollyTestClient.Samples
             Console.WriteLine("=======");
 
             // Let's imagine this caller has some theoretically limited capacity.
-            const int callerParallelCapacity = 8; // (artificially low - but easier to follow, to illustrate principle)
+            const int callerParallelCapacity = 8; // artificially low - but easier to follow to illustrate the principle
             var limitedCapacityCaller = new LimitedConcurrencyLevelTaskScheduler(callerParallelCapacity);
 
             var client = new HttpClient();
@@ -57,18 +57,16 @@ namespace PollyTestClient.Samples
             {
                 i++;
 
-                // Randomly make either 'good' or 'faulting' calls.
                 if (rand.Next(0, 2) == 0)
                 //if (i % 2 == 0)
                 {
                     goodRequestsMade++;
-                    // Call 'good' endpoint.
+
                     tasks.Add(Task.Factory.StartNew(async j =>
                     {
 
                         try
                         {
-                            // Make a request and get a response, from the good endpoint
                             string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledgood/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
                             if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
 
@@ -87,12 +85,11 @@ namespace PollyTestClient.Samples
                 else
                 {
                     faultingRequestsMade++;
-                    // call 'faulting' endpoint.
+
                     tasks.Add(Task.Factory.StartNew(async j =>
                     {
                         try
                         {
-                            // Make a request and get a response, from the faulting endpoint
                             string msg = (await client.GetAsync(Configuration.WEB_API_ROOT + "/api/nonthrottledfaulting/" + j, combinedToken)).Content.ReadAsStringAsync().Result;
                             if (!combinedToken.IsCancellationRequested) ConsoleHelper.WriteLineInColor("Response : " + msg, ConsoleColor.Green);
 
@@ -111,9 +108,8 @@ namespace PollyTestClient.Samples
 
                 OutputState();
 
-                // Wait briefly
                 await Task.Delay(TimeSpan.FromSeconds(0.1), externalCancellationToken);
-            }   
+            }
 
             Console.WriteLine("");
             Console.WriteLine("Total requests made                 : " + i);
