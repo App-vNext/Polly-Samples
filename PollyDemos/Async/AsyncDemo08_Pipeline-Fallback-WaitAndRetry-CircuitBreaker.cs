@@ -13,7 +13,7 @@ namespace PollyDemos.Async
     ///
     /// Observations:
     /// - operation is identical to Demo06 and Demo07
-    /// - except fallback policies provide nice substitute messages, if still fails overall
+    /// - except fallback strategies provide nice substitute messages, if still fails overall
     /// - OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
     /// - also demonstrates how you can use the same kind of strategy (Fallback in this case) twice (or more) in a pipeline.
     /// </summary>

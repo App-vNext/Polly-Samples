@@ -11,7 +11,7 @@ namespace PollyDemos.Async
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
-    /// Observations from this demo:
+    /// Observations:
     /// The operation is identical to Demo06.
     /// The code demonstrates how using the ResiliencePipelineBuilder makes your combined pipeline more concise, at the point of execution.
     /// </summary>

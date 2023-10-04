@@ -6,7 +6,7 @@ namespace PollyDemos.Async
 {
     /// <summary>
     /// Demonstrates using a Retry, a Timeout and two Fallback strategies.
-    /// In this demo, the wait in the wait-and-retry is deliberately so long that the timeout policy wrapping it will time it out
+    /// In this demo, the wait in the wait-and-retry is deliberately so long that the timeout strategy wrapping it will time it out
     /// (in lieu for now of a demo server endpoint responding slowly).
     ///
     /// Loops through a series of HTTP requests, keeping track of each requested
@@ -137,7 +137,7 @@ namespace PollyDemos.Async
             new("Total requests made", TotalRequests),
             new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
             new("Retries made to help achieve success", Retries, Color.Yellow),
-            new("Requests timed out by timeout policy", eventualFailuresDueToTimeout, Color.Magenta),
+            new("Requests timed out by timeout strategy", eventualFailuresDueToTimeout, Color.Magenta),
             new("Requests which failed after longer delay", eventualFailuresForOtherReasons, Color.Red),
         };
     }
