@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Schedulers;
-
-namespace PollyTestClient.Samples
+﻿namespace PollyTestClient.Samples
 {
     /// <summary>
     /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.

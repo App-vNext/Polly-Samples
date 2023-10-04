@@ -1,14 +1,4 @@
-﻿using Polly;
-using Polly.Bulkhead;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Threading.Tasks.Schedulers;
-
-namespace PollyTestClient.Samples
+﻿namespace PollyTestClient.Samples
 {
     /// <summary>
     /// Same scenario as previous demo:

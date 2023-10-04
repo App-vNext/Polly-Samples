@@ -116,6 +116,7 @@ namespace PollyTestClient.Samples
                 // This try-catch is not needed, since we have a Fallback for any Exceptions.
                 // It's only been left in to *demonstrate* it should never get hit.
                 catch (Exception e)
+                {
                     throw new InvalidOperationException("Should never arrive here.  Use of fallbackForAnyException should have provided nice fallback value for any exceptions.", e);
                 }
 
