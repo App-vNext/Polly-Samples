@@ -14,10 +14,10 @@ namespace PollyTestClient.Samples
     /// Demonstrates a PolicyWrap including Fallback, Timeout and WaitAndRetry.
     /// In this demo, the wait in the wait-and-retry is deliberately so long that the timeout policy wrapping it will time it out
     /// (in lieu for now of a demo server endpoint responding slowly).
-    /// 
+    ///
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
-    /// 
+    ///
     /// Obervations from this demo:
     /// - though the console logs that a retry will be made, the 4-second wait before the retry is pre-emptively timed-out by the two-second timeout
     /// - a fallback policy then provides substitute message for the user
@@ -29,7 +29,7 @@ namespace PollyTestClient.Samples
         {
             Console.WriteLine(typeof(AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry).Name);
             Console.WriteLine("=======");
-            // Let's call a web api service to make repeated requests to a server. 
+            // Let's call a web api service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             var client = new HttpClient();
@@ -55,7 +55,7 @@ namespace PollyTestClient.Samples
                 });
 
             // Define a fallback policy: provide a nice substitute message to the user, if we found the call was rejected due to the timeout policy.
-            FallbackPolicy<String> fallbackForTimeout = Policy<String>
+            var fallbackForTimeout = Policy<String>
                 .Handle<TimeoutRejectedException>()
                 .FallbackAsync(
                     fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [Fallback for timeout]",
@@ -69,7 +69,7 @@ namespace PollyTestClient.Samples
                 );
 
             // Define a fallback policy: provide a substitute string to the user, for any exception.
-            FallbackPolicy<String> fallbackForAnyException = Policy<String>
+            var fallbackForAnyException = Policy<String>
                 .Handle<Exception>()
                 .FallbackAsync(
                     fallbackAction: /* Demonstrates fallback action/func syntax */ async ct =>
@@ -87,7 +87,7 @@ namespace PollyTestClient.Samples
                 );
 
             // Compared to previous demo08: here we use *instance* wrap syntax, to wrap all in one go.
-            PolicyWrap<String> policyWrap = fallbackForAnyException.WrapAsync(fallbackForTimeout).WrapAsync(timeoutPolicy).WrapAsync(waitAndRetryPolicy);
+            var policyWrap = fallbackForAnyException.WrapAsync(fallbackForTimeout).WrapAsync(timeoutPolicy).WrapAsync(waitAndRetryPolicy);
 
             int i = 0;
             while (!Console.KeyAvailable && !cancellationToken.IsCancellationRequested)
@@ -122,7 +122,7 @@ namespace PollyTestClient.Samples
             Console.WriteLine("Total requests made                     : " + i);
             Console.WriteLine("Requests which eventually succeeded     : " + eventualSuccesses);
             Console.WriteLine("Retries made to help achieve success    : " + retries);
-            Console.WriteLine("Requests timed out by timeout policy    : " + eventualFailuresDueToTimeout); 
+            Console.WriteLine("Requests timed out by timeout policy    : " + eventualFailuresDueToTimeout);
             Console.WriteLine("Requests which failed after longer delay: " + eventualFailuresForOtherReasons);
 
         }

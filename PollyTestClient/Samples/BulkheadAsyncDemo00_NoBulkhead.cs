@@ -12,12 +12,12 @@ namespace PollyTestClient.Samples
     /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
     /// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
     /// Imagine the _caller_ has limited capacity (all single instances of services/webapps eventually hit some capacity limit).
-    /// 
-    /// This demo 00 has no bulkheads to protect the caller.  
+    ///
+    /// This demo 00 has no bulkheads to protect the caller.
     /// A random combination of calls to the 'good' and 'faulting' endpoint are made.
-    /// 
+    ///
     /// Observe: --
-    /// Because no bulkheads isolate the separate streams of calls, 
+    /// Because no bulkheads isolate the separate streams of calls,
     /// eventually all the caller's capacity is taken up waiting on the 'faulting' downstream calls.
     /// So the performance of 'good' calls is starved of resource, and starts suffering too.
     /// Watch the number of 'pending' calls to the good endpoint eventually start to climb,
@@ -113,7 +113,7 @@ namespace PollyTestClient.Samples
 
                 // Wait briefly
                 await Task.Delay(TimeSpan.FromSeconds(0.1), externalCancellationToken);
-            }   
+            }
 
             Console.WriteLine("");
             Console.WriteLine("Total requests made                 : " + i);

@@ -12,12 +12,12 @@ namespace PollyTestClient.Samples
     /// <summary>
     /// Demonstrates using the WaitAndRetry policy nesting CircuitBreaker.
     /// Same as Demo06 - but this time demonstrates combining the policies, using PolicyWrap.
-    /// 
+    ///
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
-    /// 
+    ///
     /// Obervations from this demo:
-    /// The operation is identical to Demo06.  
+    /// The operation is identical to Demo06.
     /// The code demonstrates how using the PolicyWrap makes your combined-Policy-strategy more concise, at the point of execution.
     /// </summary>
     public static class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap
@@ -26,7 +26,7 @@ namespace PollyTestClient.Samples
         {
             Console.WriteLine(typeof(AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap).Name);
             Console.WriteLine("=======");
-            // Let's call a web api service to make repeated requests to a server. 
+            // Let's call a web api service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             var client = new HttpClient();
@@ -42,7 +42,7 @@ namespace PollyTestClient.Samples
                 attempt => TimeSpan.FromMilliseconds(200),
                 (exception, calculatedWaitDuration) =>
                 {
-                    // This is your new exception handler! 
+                    // This is your new exception handler!
                     // Tell the user what they've won!
                     ConsoleHelper.WriteLineInColor(".Log,then retry: " + exception.Message, ConsoleColor.Yellow);
                     retries++;
@@ -64,7 +64,7 @@ namespace PollyTestClient.Samples
                 );
 
             // New for demo07: combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap.
-            PolicyWrap policyWrap = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
+            var policyWrap = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
 
             int i = 0;
             // Do the following until a key is pressed

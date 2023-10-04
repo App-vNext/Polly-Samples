@@ -13,12 +13,12 @@ namespace PollyTestClient.Samples
     /// <summary>
     /// Demonstrates a PolicyWrap including two Fallback policies (for different exceptions), WaitAndRetry and CircuitBreaker.
     /// As Demo07 - but now uses Fallback policies to provide substitute values, when the call still fails overall.
-    ///  
+    ///
     /// Loops through a series of Http requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
-    /// 
+    ///
     /// Obervations from this demo:
-    /// - operation identical to Demo06 and Demo07  
+    /// - operation identical to Demo06 and Demo07
     /// - except fallback policies provide nice substitute messages, if still fails overall
     /// - onFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
     /// - also demonstrates how you can use the same kind of policy (Fallback in this case) twice (or more) in a wrap.
@@ -29,7 +29,7 @@ namespace PollyTestClient.Samples
         {
             Console.WriteLine(typeof(AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker).Name);
             Console.WriteLine("=======");
-            // Let's call a web api service to make repeated requests to a server. 
+            // Let's call a web api service to make repeated requests to a server.
             // The service is programmed to fail after 3 requests in 5 seconds.
 
             var client = new HttpClient();
@@ -66,7 +66,7 @@ namespace PollyTestClient.Samples
                 );
 
             // Define a fallback policy: provide a nice substitute message to the user, if we found the circuit was broken.
-            FallbackPolicy<String> fallbackForCircuitBreaker = Policy<String>
+            var fallbackForCircuitBreaker = Policy<String>
                 .Handle<BrokenCircuitException>()
                 .FallbackAsync(
                     fallbackValue: /* Demonstrates fallback value syntax */ "Please try again later [Fallback for broken circuit]",
@@ -80,7 +80,7 @@ namespace PollyTestClient.Samples
                 );
 
             // Define a fallback policy: provide a substitute string to the user, for any exception.
-            FallbackPolicy<String> fallbackForAnyException = Policy<String>
+            var fallbackForAnyException = Policy<String>
                 .Handle<Exception>()
                 .FallbackAsync(
                     fallbackAction: /* Demonstrates fallback action/func syntax */ async ct =>
@@ -98,11 +98,11 @@ namespace PollyTestClient.Samples
                 );
 
             // As demo07: we combine the waitAndRetryPolicy and circuitBreakerPolicy into a PolicyWrap, using the *static* Policy.Wrap syntax.
-            PolicyWrap myResilienceStrategy = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
+            var myResilienceStrategy = Policy.WrapAsync(waitAndRetryPolicy, circuitBreakerPolicy);
 
-            // Added in demo08: we wrap the two fallback policies onto the front of the existing wrap too.  Demonstrates the *instance* wrap syntax. And the fact that the PolicyWrap myResilienceStrategy from above is just another Policy, which can be onward-wrapped too.  
+            // Added in demo08: we wrap the two fallback policies onto the front of the existing wrap too.  Demonstrates the *instance* wrap syntax. And the fact that the PolicyWrap myResilienceStrategy from above is just another Policy, which can be onward-wrapped too.
             // With this pattern, you can build an overall resilience strategy programmatically, reusing some common parts (eg PolicyWrap myResilienceStrategy) but varying other parts (eg Fallback) individually for different calls.
-            PolicyWrap<String> policyWrap = fallbackForAnyException.WrapAsync(fallbackForCircuitBreaker.WrapAsync(myResilienceStrategy));
+            var policyWrap = fallbackForAnyException.WrapAsync(fallbackForCircuitBreaker.WrapAsync(myResilienceStrategy));
             // For info: Equivalent to: PolicyWrap<String> policyWrap = Policy.Wrap(fallbackForAnyException, fallbackForCircuitBreaker, waitAndRetryPolicy, circuitBreakerPolicy);
 
             int i = 0;
