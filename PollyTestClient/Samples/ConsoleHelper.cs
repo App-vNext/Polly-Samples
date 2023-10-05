@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PollyTestClient.Samples
+﻿namespace PollyTestClient.Samples
 {
     public static class ConsoleHelper
     {

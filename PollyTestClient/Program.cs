@@ -1,12 +1,10 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using PollyTestClient.Samples;
 
 namespace PollyTestClient
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             // Execute samples:
 
@@ -24,43 +22,43 @@ namespace PollyTestClient
             // Synchronous demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            //Samples.Demo00_NoPolicy.Execute();
-            //Samples.Demo01_RetryNTimes.Execute();
-            //Samples.Demo02_WaitAndRetryNTimes.Execute();
-            //Samples.Demo03_WaitAndRetryNTimes_WithEnoughRetries.Execute();
-            //Samples.Demo04_WaitAndRetryForever.Execute();
-            //Samples.Demo05_WaitAndRetryWithExponentialBackoff.Execute();
-            //Samples.Demo06_WaitAndRetryNestingCircuitBreaker.Execute();
-            //Samples.Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.Execute();
-            //Samples.Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker.Execute();
-            //Samples.Demo09_Wrap_Fallback_Timeout_WaitAndRetry.Execute();
+            Demo00_NoStrategy.Execute();
+            //Demo01_RetryNTimes.Execute();
+            //Demo02_WaitAndRetryNTimes.Execute();
+            //Demo03_WaitAndRetryNTimes_WithEnoughRetries.Execute();
+            //Demo04_WaitAndRetryForever.Execute();
+            //Demo05_WaitAndRetryWithExponentialBackoff.Execute();
+            //Demo06_WaitAndRetryNestingCircuitBreaker.Execute();
+            //Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.Execute();
+            //Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker.Execute();
+            //Demo09_Wrap_Fallback_Timeout_WaitAndRetry.Execute();
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Asynchronous demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationTokenSource cancellationTokenSource = new();
             CancellationToken cancellationToken = cancellationTokenSource.Token;
 
             // These async demos use .Wait() (rather than await) with the async calls, only for the purposes of allowing the demos still to remain the primary execution thread and own the Console output.
 
-            Samples.AsyncDemo00_NoPolicy.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo01_RetryNTimes.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo02_WaitAndRetryNTimes.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo04_WaitAndRetryForever.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo05_WaitAndRetryWithExponentialBackoff.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo06_WaitAndRetryNestingCircuitBreaker.ExecuteAsync(cancellationToken).Wait(); 
-            //Samples.AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker.ExecuteAsync(cancellationToken).Wait();
-            //Samples.AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo00_NoPolicy.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo01_RetryNTimes.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo02_WaitAndRetryNTimes.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo04_WaitAndRetryForever.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo05_WaitAndRetryWithExponentialBackoff.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo06_WaitAndRetryNestingCircuitBreaker.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker.ExecuteAsync(cancellationToken).Wait();
+            //AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry.ExecuteAsync(cancellationToken).Wait();
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Bulkhead demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            //Samples.BulkheadAsyncDemo00_NoBulkhead.ExecuteAsync(cancellationToken).Wait();
-            //Samples.BulkheadAsyncDemo01_WithBulkheads.ExecuteAsync(cancellationToken).Wait();
+            //BulkheadAsyncDemo00_NoBulkhead.ExecuteAsync(cancellationToken).Wait();
+            //BulkheadAsyncDemo01_WithBulkheads.ExecuteAsync(cancellationToken).Wait();
 
 
             // Keep the console open.
