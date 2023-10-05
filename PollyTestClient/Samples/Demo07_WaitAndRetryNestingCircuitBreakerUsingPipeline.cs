@@ -4,29 +4,21 @@ using Polly.CircuitBreaker;
 namespace PollyTestClient.Samples
 {
     /// <summary>
-    /// Demonstrates using the Retry strategy nesting CircuitBreaker.
+    /// Demonstrates using the Retry and CircuitBreaker strategies.
+    /// Same as Demo06 but this time combines the strategies by using ResiliencePipelineBuilder.
+    ///
     /// Loops through a series of HTTP requests, keeping track of each requested
     /// item and reporting server failures when encountering exceptions.
     ///
-    /// Discussion:  What if the underlying system was completely down?
-    /// Keeping retrying would be pointless...
-    /// ... and would leave the client hanging, retrying for successes which never come.
-    ///
-    /// Enter circuit-breaker:
-    /// After too many failures, breaks the circuit for a period, during which it blocks calls + fails fast.
-    /// - protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover)
-    /// - allows the client to get a fail response _fast, not wait for ages, if downstream is awol.
-    ///
-    /// Observations from this demo:
-    /// Note how after the circuit decides to break, subsequent calls fail faster.
-    /// Note how breaker gives underlying system time to recover ...
-    /// ... by the time circuit closes again, underlying system has recovered!
+    /// Observations:
+    /// The operation is identical to Demo06.
+    /// The code demonstrates how using the ResiliencePipelineBuilder makes your combined pipeline more concise, at the point of execution.
     /// </summary>
-    public static class Demo06_WaitAndRetryNestingCircuitBreaker
+    public static class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline
     {
         public static void Execute()
         {
-            Console.WriteLine(nameof(Demo06_WaitAndRetryNestingCircuitBreaker));
+            Console.WriteLine(nameof(Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline));
             Console.WriteLine("=======");
 
             int eventualSuccesses = 0;
@@ -35,23 +27,14 @@ namespace PollyTestClient.Samples
             int eventualFailuresForOtherReasons = 0;
             int totalRequests = 0;
 
-            var retryStrategy = new ResiliencePipelineBuilder().AddRetry(new()
-            {
-                // Exception filtering - we don't retry if the inner circuit-breaker judges the underlying system is out of commission.
-                ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
-                MaxRetryAttempts = int.MaxValue, // Retry indefinitely
-                Delay = TimeSpan.FromMilliseconds(200),
-                OnRetry = args =>
-                {
-                    var exception = args.Outcome.Exception!;
-                    ConsoleHelper.WriteLineInColor($".Log, then retry: {exception.Message}", ConsoleColor.Yellow);
-                    retries++;
-                    return default;
-                }
-            }).Build();
+            // Define a pipeline builder which will be used to compose strategies incrementally.
+            var pipelineBuilder = new ResiliencePipelineBuilder();
 
-            // Define our circuit breaker strategy: break if the action fails at least 4 times in a row.
-            var circuitBreakerStrategy = new ResiliencePipelineBuilder().AddCircuitBreaker(new()
+            // The order of strategy definitions has changed.
+            // Circuit breaker comes first because that will be the inner strategy.
+            // Retry comes second because that will be the outer strategy.
+
+            pipelineBuilder.AddCircuitBreaker(new()
             {
                 ShouldHandle = new PredicateBuilder().Handle<Exception>(),
                 FailureRatio = 1.0,
@@ -77,7 +60,24 @@ namespace PollyTestClient.Samples
                     ConsoleHelper.WriteLineInColor(".Breaker logging: Half-open: Next call is a trial!", ConsoleColor.Magenta);
                     return default;
                 }
-            }).Build();
+            }); // We are not calling the Build method because we want to add one more strategy to the pipeline.
+
+            pipelineBuilder.AddRetry(new()
+            {
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
+                MaxRetryAttempts = int.MaxValue,
+                Delay = TimeSpan.FromMilliseconds(200),
+                OnRetry = args =>
+                {
+                    var exception = args.Outcome.Exception!;
+                    ConsoleHelper.WriteLineInColor($"Strategy logging: {exception.Message}", ConsoleColor.Yellow);
+                    retries++;
+                    return default;
+                }
+            }); // We are not calling the Build method here because we will do it as a separate step to make the code cleaner.
+
+            // Build the pipeline since we have added all the necessary strategies to it.
+            var pipeline = pipelineBuilder.Build();
 
             while (!Console.KeyAvailable)
             {
@@ -86,23 +86,21 @@ namespace PollyTestClient.Samples
 
                 try
                 {
-                    retryStrategy.Execute(outerToken =>
+                     // Manage the call according to the pipeline.
+                    string responseBody = pipeline.Execute(token =>
                     {
-                        // This code is executed within the retry strategy.
+                        // This code is executed through both strategies in the pipeline:
+                        // Retry is the outer, and circuit breaker is the inner.
+                        // Demo 06 shows a decomposed version of what this is equivalent to.
 
-                        string responseBody = circuitBreakerStrategy.Execute(innerToken =>
-                        {
-                            // This code is executed within the circuit breaker strategy.
-
-                            return HttpClientHelper.IssueRequestAndProcessResponse(totalRequests, innerToken);
-                        }, outerToken);
-
-                        watch.Stop();
-
-                        ConsoleHelper.WriteInColor($"Response : {responseBody}", ConsoleColor.Green);
-                        ConsoleHelper.WriteLineInColor($" (after {watch.ElapsedMilliseconds}ms)", ConsoleColor.Green);
-                        eventualSuccesses++;
+                        return HttpClientHelper.IssueRequestAndProcessResponse(totalRequests, token);
                     }, CancellationToken.None);
+
+                    watch.Stop();
+                    ConsoleHelper.WriteInColor($"Response : {responseBody}", ConsoleColor.Green);
+                    ConsoleHelper.WriteLineInColor($" (after {watch.ElapsedMilliseconds}ms)", ConsoleColor.Green);
+
+                    eventualSuccesses++;
                 }
                 catch (BrokenCircuitException bce)
                 {

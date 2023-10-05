@@ -29,9 +29,9 @@ namespace PollyTestClient
             //Demo04_WaitAndRetryForever.Execute();
             //Demo05_WaitAndRetryWithExponentialBackoff.Execute();
             //Demo06_WaitAndRetryNestingCircuitBreaker.Execute();
-            //Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap.Execute();
-            //Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker.Execute();
-            //Demo09_Wrap_Fallback_Timeout_WaitAndRetry.Execute();
+            //Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline.Execute();
+            //Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker.Execute();
+            //Demo09_Pipeline_Fallback_Timeout_WaitAndRetry.Execute();
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Asynchronous demos
