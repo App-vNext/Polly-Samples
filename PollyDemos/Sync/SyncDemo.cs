@@ -10,7 +10,7 @@ namespace PollyDemos.Sync
         {
             // Make a request and get a response
             var url = $"{Configuration.WEB_API_ROOT}/api/values/{TotalRequests}";
-            var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), cancellationToken);
+            using var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), cancellationToken);
 
             // Read response's body
             using var stream = response.Content.ReadAsStream(cancellationToken);

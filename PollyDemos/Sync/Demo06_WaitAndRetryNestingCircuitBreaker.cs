@@ -97,7 +97,6 @@ namespace PollyDemos.Sync
 
                 try
                 {
-                    // Retry the following call according to the strategy.
                     retryStrategy.Execute(outerToken =>
                     {
                         // This code is executed within the retry strategy.
