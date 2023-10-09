@@ -36,8 +36,8 @@ namespace PollyTestClientConsole
             // Synchronous demos
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            //SyncDemo? syncDemo;
-            //syncDemo = new Demo00_NoStrategy();
+            SyncDemo? syncDemo;
+            syncDemo = new Demo00_NoStrategy();
             //syncDemo = new Demo01_RetryNTimes();
             //syncDemo = new Demo02_WaitAndRetryNTimes();
             //syncDemo = new Demo03_WaitAndRetryNTimes_WithEnoughRetries();
@@ -47,7 +47,7 @@ namespace PollyTestClientConsole
             //syncDemo = new Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline();
             //syncDemo = new Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker();
             //syncDemo = new Demo09_Pipeline_Fallback_Timeout_WaitAndRetry();
-            //syncDemo!.Execute(cancellationToken, progress);
+            syncDemo!.Execute(cancellationToken, progress);
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Asynchronous demos
@@ -70,10 +70,10 @@ namespace PollyTestClientConsole
             // Bulkhead demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            AsyncConcurrencyLimiterDemo? limiterDemo;
-            limiterDemo = new AsyncDemo10_SharedConcurrencyLimiter();
+            //AsyncConcurrencyLimiterDemo? limiterDemo;
+            //limiterDemo = new AsyncDemo10_SharedConcurrencyLimiter();
             //limiterDemo = new AsyncDemo11_MultipleConcurrencyLimiters();
-            await limiterDemo!.ExecuteAsync(cancellationToken, progress);
+            //await limiterDemo!.ExecuteAsync(cancellationToken, progress);
 
             Console.ReadKey();
             cancellationSource.Cancel();
