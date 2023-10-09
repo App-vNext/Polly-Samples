@@ -106,7 +106,7 @@ namespace PollyDemos.Async
                         {
                             // This code is executed within the circuit breaker strategy.
 
-                            return IssueRequestAndProcessResponseAsync(client, innerToken);
+                            return await IssueRequestAndProcessResponseAsync(client, innerToken);
 
                         }, outerToken);
 

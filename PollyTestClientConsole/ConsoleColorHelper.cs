@@ -1,32 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using PollyDemos.OutputHelpers;
+﻿using PollyDemos.OutputHelpers;
 
 namespace PollyTestClientConsole
 {
     public static class ConsoleColorHelper
     {
-        public static ConsoleColor ToConsoleColor(this Color color)
+        public static ConsoleColor ToConsoleColor(this Color color) => color switch
         {
-            switch (color)
-            {
-                case Color.White:
-                case Color.Default:
-                    return ConsoleColor.White;
-                case Color.Green:
-                    return ConsoleColor.Green;
-                case Color.Magenta:
-                    return ConsoleColor.Magenta;
-                case Color.Red:
-                    return ConsoleColor.Red;
-                case Color.Yellow:
-                    return ConsoleColor.Yellow;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+            Color.White or Color.Default => ConsoleColor.White,
+            Color.Green => ConsoleColor.Green,
+            Color.Magenta => ConsoleColor.Magenta,
+            Color.Red => ConsoleColor.Red,
+            Color.Yellow => ConsoleColor.Yellow,
+            _ => throw new ArgumentOutOfRangeException(nameof(color)),
+        };
     }
 }
