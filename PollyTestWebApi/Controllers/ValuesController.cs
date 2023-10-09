@@ -9,10 +9,7 @@ namespace PollyTestWebApi.Controllers
     public class ValuesController : ControllerBase
     {
         // GET: api/Values/5
-        [HttpGet("{id}", Name = "GetValuesById")]
-        public string Get(int id)
-        {
-            return "Response from server to request #" + id;
-        }
+        [HttpGet("{id}")]
+        public string Get(int id) => $"Response from server to request #{id}";
     }
 }

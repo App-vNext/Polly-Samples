@@ -76,8 +76,6 @@ namespace PollyDemos.Async
                     tasks.Add(CallFaultingEndpoint(client, messages, thisRequest, combinedToken));
                 }
 
-                AddSummary(messages);
-
                 while (messages.TryDequeue(out var tuple))
                 {
                     progress.Report(ProgressWithMessage(tuple.Message, tuple.Color));
@@ -92,22 +90,6 @@ namespace PollyDemos.Async
                 {
                 }
             }
-        }
-
-        private void AddSummary(ConcurrentQueue<(string Message, Color Color)> messages)
-        {
-            messages.Enqueue(($"Total requests: requested {TotalRequests:00}, ", Color.White));
-            messages.Enqueue(($"Good endpoint: requested {GoodRequestsMade:00}, ", Color.White));
-            messages.Enqueue(($"Good endpoint:succeeded {GoodRequestsSucceeded:00}, ", Color.Green));
-            messages.Enqueue(($"Good endpoint:pending {GoodRequestsMade - GoodRequestsSucceeded - GoodRequestsFailed:00}, ", Color.Yellow));
-            messages.Enqueue(($"Good endpoint:failed {GoodRequestsFailed:00}.", Color.Red));
-            messages.Enqueue((string.Empty, Color.Default));
-
-            messages.Enqueue(($"Faulting endpoint: requested {FaultingRequestsMade:00}, ", Color.White));
-            messages.Enqueue(($"Faulting endpoint:succeeded {FaultingRequestsSucceeded:00}, ", Color.Green));
-            messages.Enqueue(($"Faulting endpoint:pending {FaultingRequestsMade - FaultingRequestsSucceeded - FaultingRequestsFailed:00}, ", Color.Yellow));
-            messages.Enqueue(($"Faulting endpoint:failed {FaultingRequestsFailed:00}.", Color.Red));
-            messages.Enqueue((string.Empty, Color.Default));
         }
 
         private Task CallFaultingEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
