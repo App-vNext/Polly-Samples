@@ -12,6 +12,9 @@ namespace PollyDemos.Sync
             var url = $"{Configuration.WEB_API_ROOT}/api/values/{TotalRequests}";
             using var response = client.Send(new HttpRequestMessage(HttpMethod.Get, url), cancellationToken);
 
+            // Throw exception if the response code is other than 2xx
+            response.EnsureSuccessStatusCode();
+
             // Read response's body
             using var stream = response.Content.ReadAsStream(cancellationToken);
             using var streamReader = new StreamReader(stream);

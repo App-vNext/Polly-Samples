@@ -1,30 +1,26 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using PollyDemos.OutputHelpers;
-using PollyDemos.Sync;
+﻿using PollyDemos.OutputHelpers;
 using PollyDemos.Async;
+using PollyDemos.Sync;
 
 namespace PollyTestClientConsole
 {
     internal class Program
     {
-        private static readonly object lockObject = new object();
-
-        private static async Task Main(string[] args)
+        private static async Task Main()
         {
-            Statistic[] statistics = new Statistic[0];
+            var statistics = Array.Empty<Statistic>();
 
             var progress = new Progress<DemoProgress>();
-            progress.ProgressChanged += (sender, progressArgs) =>
+            progress.ProgressChanged += (_, args) =>
             {
-                foreach (var message in progressArgs.Messages)
+                foreach (var message in args.Messages)
+                {
                     WriteLineInColor(message.Message, message.Color.ToConsoleColor());
-                statistics = progressArgs.Statistics;
+                }
+                statistics = args.Statistics;
             };
 
-            var cancellationSource = new CancellationTokenSource();
+            using var cancellationSource = new CancellationTokenSource();
             var cancellationToken = cancellationSource.Token;
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -32,7 +28,7 @@ namespace PollyTestClientConsole
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // Work through the demos in order, to discover features.
+            // Walk through the demos in order, to discover features.
             // See <summary> at top of each demo class, for explanation.
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -40,33 +36,35 @@ namespace PollyTestClientConsole
             // Synchronous demos
             //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            //new Demo00_NoPolicy().Execute(cancellationToken, progress);
-            //new Demo01_RetryNTimes().Execute(cancellationToken, progress);
-            //new Demo02_WaitAndRetryNTimes().Execute(cancellationToken, progress);
-            //new Demo03_WaitAndRetryNTimes_WithEnoughRetries().Execute(cancellationToken, progress);
-            //new Demo04_WaitAndRetryForever().Execute(cancellationToken, progress);
-            //new Demo05_WaitAndRetryWithExponentialBackoff().Execute(cancellationToken, progress);
-            //new Demo06_WaitAndRetryNestingCircuitBreaker().Execute(cancellationToken, progress);
-            //new Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap().Execute(cancellationToken, progress);
-            //new Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker().Execute(cancellationToken, progress);
-            //new Demo09_Wrap_Fallback_Timeout_WaitAndRetry().Execute(cancellationToken, progress);
+            //SyncDemo? syncDemo;
+            //syncDemo = new Demo00_NoStrategy();
+            //syncDemo = new Demo01_RetryNTimes();
+            //syncDemo = new Demo02_WaitAndRetryNTimes();
+            //syncDemo = new Demo03_WaitAndRetryNTimes_WithEnoughRetries();
+            //syncDemo = new Demo04_WaitAndRetryForever();
+            //syncDemo = new Demo05_WaitAndRetryWithExponentialBackoff();
+            //syncDemo = new Demo06_WaitAndRetryNestingCircuitBreaker();
+            //syncDemo = new Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline();
+            //syncDemo = new Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker();
+            //syncDemo = new Demo09_Pipeline_Fallback_Timeout_WaitAndRetry();
+            //syncDemo!.Execute(cancellationToken, progress);
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Asynchronous demos
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            // These async demos use .Wait() (rather than await) with the async calls, only for the purposes of allowing the demos still to remain the primary execution thread and own the Console output.
-
-            await new AsyncDemo00_NoStrategy().ExecuteAsync(cancellationToken, progress);
-            //new AsyncDemo01_RetryNTimes().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo02_WaitAndRetryNTimes().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo04_WaitAndRetryForever().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo05_WaitAndRetryWithExponentialBackoff().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo06_WaitAndRetryNestingCircuitBreaker().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker().ExecuteAsync(cancellationToken, progress).Wait();
-            //new AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry().ExecuteAsync(cancellationToken, progress).Wait();
+            AsyncDemo? asyncDemo;
+            asyncDemo = new AsyncDemo00_NoStrategy();
+            //asyncDemo = new AsyncDemo01_RetryNTimes();
+            //asyncDemo = new AsyncDemo02_WaitAndRetryNTimes();
+            //asyncDemo = new AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries();
+            //asyncDemo = new AsyncDemo04_WaitAndRetryForever();
+            //asyncDemo = new AsyncDemo05_WaitAndRetryWithExponentialBackoff();
+            //asyncDemo = new AsyncDemo06_WaitAndRetryNestingCircuitBreaker();
+            //asyncDemo = new AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline();
+            //asyncDemo = new AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker();
+            //asyncDemo = new AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry();
+            await asyncDemo!.ExecuteAsync(cancellationToken, progress);
 
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Bulkhead demos
@@ -75,32 +73,26 @@ namespace PollyTestClientConsole
             //new BulkheadAsyncDemo00_NoIsolation().ExecuteAsync(cancellationToken, progress).Wait();
             //new BulkheadAsyncDemo01_WithBulkheads().ExecuteAsync(cancellationToken, progress).Wait();
 
-
-            // Keep the console open.
             Console.ReadKey();
             cancellationSource.Cancel();
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine();
 
-            // Output statistics.
-            int longestDescription = statistics.Max(s => s.Description.Length);
+            var longestDescription = statistics.Max(s => s.Description.Length);
             foreach (Statistic stat in statistics)
-                WriteLineInColor(stat.Description.PadRight(longestDescription) + ": " + stat.Value,
-                    stat.Color.ToConsoleColor());
+            {
+                WriteLineInColor($"{stat.Description.PadRight(longestDescription)}: {stat.Value}",stat.Color.ToConsoleColor());
+            }
 
-            // Keep the console open.
             Console.ReadKey();
         }
 
-        public static void WriteLineInColor(string msg, ConsoleColor color)
+        private static void WriteLineInColor(string message, ConsoleColor color)
         {
-            lock (lockObject)
-            {
-                Console.ForegroundColor = color;
-                Console.WriteLine(msg);
-                Console.ResetColor();
-            }
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
+            Console.ResetColor();
         }
     }
 }
