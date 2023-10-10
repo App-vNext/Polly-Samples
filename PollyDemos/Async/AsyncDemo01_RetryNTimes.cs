@@ -72,7 +72,7 @@ namespace PollyDemos.Async
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
-                internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
+                internalCancel = ShouldTerminateByKeyPress();
             }
         }
 

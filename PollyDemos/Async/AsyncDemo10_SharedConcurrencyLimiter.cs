@@ -74,14 +74,7 @@ namespace PollyDemos.Async
 
                 // Wait briefly
                 await Task.Delay(TimeSpan.FromSeconds(0.2), externalCancellationToken).ConfigureAwait(false);
-                // Support cancellation by keyboard, when called from a console; ignore exceptions, if console not accessible.
-                try
-                {
-                    internalCancel = Console.KeyAvailable;
-                }
-                catch
-                {
-                }
+                internalCancel = ShouldTerminateByKeyPress();
             }
 
             // Cancel any unstarted and running tasks.
