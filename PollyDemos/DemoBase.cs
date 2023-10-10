@@ -9,8 +9,8 @@ namespace PollyDemos
         protected int EventualFailures;
         protected int Retries;
 
-        // In the case of WPF the UserInteractive will return false
-        protected static bool ShouldTerminateByKeyPress() => Environment.UserInteractive && Console.KeyAvailable;
+        // In the case of WPF the stdIn is redirected.
+        protected static bool ShouldTerminateByKeyPress() => !Console.IsInputRedirected && Console.KeyAvailable;
 
         public virtual string Description => $"[Description for demo {GetType().Name} not yet provided.]";
 
