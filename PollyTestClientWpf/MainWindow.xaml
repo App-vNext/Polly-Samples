@@ -1,11 +1,10 @@
-﻿<Window x:Class="PollyTestClientWpf.MainWindow"
+<Window x:Class="PollyTestClientWpf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PollyTestClientWpf"
         mc:Ignorable="d"
-        Title="PollyDemos" Background="#002C46" d:DesignWidth="1600.304" d:DesignHeight="910.529">
+        Title="PollyDemos" Background="#002C46" Width="1500" Height="1000">
 
     <Window.Resources>
         <Style TargetType="{x:Type Button}">
@@ -28,78 +27,114 @@
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="6" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="6" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="417" />
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" 
-                   Content="Polly Demos" 
-                   FontSize="28" 
-                   Foreground="#FFFFFF"/>
-            <UniformGrid Grid.Row="0" Grid.Column="1"
-                         Rows="1">
+            <StackPanel Grid.Column="0">
+                <Image Source="Polly-Logo.png" Height="200" />
+                <Label Content="Demos" FontSize="28" Foreground="#FFFFFF" />
+            </StackPanel>
+            
 
-                <Button Name="PlayButton" Content="Start"/>
-                <Button Name="StopButton" Content="Stop"/>
-                <Button Name="ClearButton" Content="Clear"/>
+            <StackPanel Grid.Column="1" Orientation="Vertical">
+                
+                <UniformGrid Rows="1" Height="75" >
+                    <Button Name="PlayButton" Content="Start" Click="PlayButton_Click"/>
+                    <Button Name="StopButton" Content="Stop" Click="StopButton_Click"/>
+                    <Button Name="ClearButton" Content="Clear" Click="ClearButton_Click"/>
+                </UniformGrid>
 
-            </UniformGrid>
+                <Label Content="Choose demo:" />
 
-            <Label Grid.Row="2" Grid.Column="0" 
-                   Content="Choose demo:" 
-                   HorizontalContentAlignment="Right"
-                   />
+                <ComboBox Name="Demo" 
+                        FontSize="16" 
+                        Foreground="#002C46" 
+                        Background="#FFFFFF" 
+                        FontWeight="Normal"
+                        SelectionChanged="Demo_OnSelectionChanged">
 
-            <ComboBox Grid.Row="2" Grid.Column="1" 
-                      Name="Demo" 
-                      FontSize="16" 
-                      Foreground="#002C46" 
-                      Background="#FFFFFF" 
-                      FontWeight="Normal"
-                      SelectionChanged="Demo_OnSelectionChanged"
-                      >
-                <ComboBoxItem Name="AsyncDemo00_NoPolicy">Async demo 00: No policies</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo01_RetryNTimes">Async demo 01: Retry N times</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo02_WaitAndRetryNTimes">Async demo 02: WaitAndRetry N times</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries">Async demo 03: WaitAndRetry N times, N big enough to guarantee success</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo04_WaitAndRetryForever">Async demo 04: WaitAndRetryForever</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo05_WaitAndRetryWithExponentialBackoff">Async demo 05: WaitAndRetry with exponential back-off</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo06_WaitAndRetryNestingCircuitBreaker">Async demo 06: WaitAndRetry nesting CircuitBreaker</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap">Async demo 07: as 06, using PolicyWrap</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker">Async demo 08: Fallback, WaitAndRetry, and CircuitBreaker in a PolicyWrap</ComboBoxItem>
-                <ComboBoxItem Name="AsyncDemo09_Wrap_Fallback_Timeout_WaitAndRetry">Async demo 09: Fallback, Timeout and WaitAndRetry, in a PolicyWrap</ComboBoxItem>
-                <ComboBoxItem Name="BulkheadAsyncDemo00_NoIsolation">Bulkhead demo 00: No isolation: Faulting calls swamp resources, also prevent good calls</ComboBoxItem>
-                <ComboBoxItem Name="BulkheadAsyncDemo01_WithBulkheads">Bulkhead demo 01: With bulkheads: Faulting calls isolated in bulkhead, do not swamp resources, good calls still succeed</ComboBoxItem>
-                <ComboBoxItem Name="Demo00_NoPolicy">Sync Demo 00: No policies</ComboBoxItem>
-                <ComboBoxItem Name="Demo01_RetryNTimes">Sync Demo 01: Retry N times</ComboBoxItem>
-                <ComboBoxItem Name="Demo02_WaitAndRetryNTimes">Sync Demo 02: WaitAndRetry N times</ComboBoxItem>
-                <ComboBoxItem Name="Demo03_WaitAndRetryNTimes_WithEnoughRetries">Sync Demo 03: WaitAndRetry N times, N big enough to guarantee success</ComboBoxItem>
-                <ComboBoxItem Name="Demo04_WaitAndRetryForever">Sync Demo 04: WaitAndRetryForever</ComboBoxItem>
-                <ComboBoxItem Name="Demo05_WaitAndRetryWithExponentialBackoff">Sync Demo 05: WaitAndRetry with exponential back-off</ComboBoxItem>
-                <ComboBoxItem Name="Demo06_WaitAndRetryNestingCircuitBreaker">Sync Demo 06: WaitAndRetry nesting CircuitBreaker</ComboBoxItem>
-                <ComboBoxItem Name="Demo07_WaitAndRetryNestingCircuitBreakerUsingPolicyWrap">Sync Demo 07: as 06, using PolicyWrap</ComboBoxItem>
-                <ComboBoxItem Name="Demo08_Wrap_Fallback_WaitAndRetry_CircuitBreaker">Sync Demo 08: Fallback, WaitAndRetry, and CircuitBreaker in a PolicyWrap</ComboBoxItem>
-                <ComboBoxItem Name="Demo09_Wrap_Fallback_Timeout_WaitAndRetry">Sync Demo 09: Fallback, Timeout and WaitAndRetry, in a PolicyWrap</ComboBoxItem>
-            </ComboBox>
+                    <ComboBoxItem Name="Demo00_NoStrategy">
+                        Sync Demo 00: No strategy
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo01_RetryNTimes">
+                        Sync Demo 01: Retry N times
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo02_WaitAndRetryNTimes">
+                        Sync Demo 02: Wait and retry N times
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo03_WaitAndRetryNTimes_WithEnoughRetries">
+                        Sync Demo 03: Wait and retry N times, N big enough to guarantee success
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo04_WaitAndRetryForever">
+                        Sync Demo 04: Wait and retry forever
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo05_WaitAndRetryWithExponentialBackoff">
+                        Sync Demo 05: Wait and retry with exponential back-off
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo06_WaitAndRetryNestingCircuitBreaker">
+                        Sync Demo 06: Wait and retry nesting circuit breaker
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline">
+                        Sync Demo 07: Same as 06, using Pipeline
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker">
+                        Sync Demo 08: Fallback, Retry, and CircuitBreaker in a Pipeline
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo09_Pipeline_Fallback_Timeout_WaitAndRetry">
+                        Sync Demo 09: Fallback, Timeout, and Retry in a Pipeline
+                    </ComboBoxItem>
 
-            <Label Grid.Row="4" Grid.Column="0" 
-                   Content="Description:" 
-                   HorizontalContentAlignment="Right"/>
-            <TextBox Grid.Row="4" Grid.Column="1" 
-                     Name="Description"
-                     TextWrapping="Wrap"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto" 
-                     Height="100" 
-                     FontSize="14" 
-                     FontFamily="Consolas" />
+                    <ComboBoxItem Name="AsyncDemo00_NoStrategy">
+                        Async demo 00: No strategy
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo01_RetryNTimes">
+                        Async demo 01: Retry N times
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo02_WaitAndRetryNTimes">
+                        Async demo 02: Wait and retry N times
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries">
+                        Async demo 03: Wait and retry N times, N big enough to guarantee success
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo04_WaitAndRetryForever">
+                        Async demo 04: Wait and retry forever
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo05_WaitAndRetryWithExponentialBackoff">
+                        Async demo 05: Wait and retry with exponential back-off
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo06_WaitAndRetryNestingCircuitBreaker">
+                        Async demo 06: Wait and retry nesting circuit breaker
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline">
+                        Async demo 07: Same as 06, using Pipeline
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker">
+                        Async demo 08: Fallback, Retry, and CircuitBreaker in a Pipeline
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry">
+                        Async demo 09: Fallback, Timeout, and Retry in a Pipeline
+                    </ComboBoxItem>
+
+                    <ComboBoxItem Name="AsyncDemo10_SharedConcurrencyLimiter">
+                        Async demo 10: Without isolation: Faulting calls swamp resources, also prevent good calls
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="AsyncDemo11_MultipleConcurrencyLimiters">
+                        Async demo 11: With isolation: Faulting calls separated, do not swamp resources, good calls still succeed
+                    </ComboBoxItem>
+
+                </ComboBox>
+
+                <Label Content="Description:" />
+
+                <TextBox Name="Description"
+                        TextWrapping="Wrap"
+                        ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                        Height="100" 
+                        FontSize="14" 
+                        FontFamily="Consolas" />
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="2">
@@ -171,31 +206,31 @@
 
                 </Grid.Resources>
                 <Label Grid.Row="0" Grid.Column="0" x:Name="StatisticLabel00"/>
-                <TextBox Grid.Row="0" Grid.Column="2" x:Name="Statistic00"/>
+                <TextBox Grid.Row="0" Grid.Column="2" x:Name="Statistic00" IsReadOnly="True"/>
 
                 <Label Grid.Row="1" Grid.Column="0" x:Name="StatisticLabel01"/>
-                <TextBox Grid.Row="1" Grid.Column="2" x:Name="Statistic01"/>
+                <TextBox Grid.Row="1" Grid.Column="2" x:Name="Statistic01" IsReadOnly="True"/>
 
                 <Label Grid.Row="2" Grid.Column="0" x:Name="StatisticLabel02"/>
-                <TextBox Grid.Row="2" Grid.Column="2" x:Name="Statistic02"/>
+                <TextBox Grid.Row="2" Grid.Column="2" x:Name="Statistic02" IsReadOnly="True"/>
 
                 <Label Grid.Row="3" Grid.Column="0" x:Name="StatisticLabel03"/>
-                <TextBox Grid.Row="3" Grid.Column="2" x:Name="Statistic03"/>
+                <TextBox Grid.Row="3" Grid.Column="2" x:Name="Statistic03" IsReadOnly="True"/>
 
                 <Label Grid.Row="4" Grid.Column="0" x:Name="StatisticLabel04"/>
-                <TextBox Grid.Row="4" Grid.Column="2" x:Name="Statistic04"/>
+                <TextBox Grid.Row="4" Grid.Column="2" x:Name="Statistic04" IsReadOnly="True"/>
 
                 <Label Grid.Row="5" Grid.Column="0" x:Name="StatisticLabel05"/>
-                <TextBox Grid.Row="5" Grid.Column="2" x:Name="Statistic05"/>
+                <TextBox Grid.Row="5" Grid.Column="2" x:Name="Statistic05" IsReadOnly="True"/>
 
                 <Label Grid.Row="6" Grid.Column="0" x:Name="StatisticLabel06"/>
-                <TextBox Grid.Row="6" Grid.Column="2" x:Name="Statistic06"/>
+                <TextBox Grid.Row="6" Grid.Column="2" x:Name="Statistic06" IsReadOnly="True"/>
 
                 <Label Grid.Row="7" Grid.Column="0" x:Name="StatisticLabel07"/>
-                <TextBox Grid.Row="7" Grid.Column="2" x:Name="Statistic07"/>
+                <TextBox Grid.Row="7" Grid.Column="2" x:Name="Statistic07" IsReadOnly="True"/>
 
                 <Label Grid.Row="8" Grid.Column="0" x:Name="StatisticLabel08"/>
-                <TextBox Grid.Row="8" Grid.Column="2" x:Name="Statistic08"/>
+                <TextBox Grid.Row="8" Grid.Column="2" x:Name="Statistic08" IsReadOnly="True"/>
             </Grid>
         </Grid>
     </Grid>
