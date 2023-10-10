@@ -82,13 +82,7 @@ namespace PollyDemos.Async
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(0.2), externalCancellationToken).ConfigureAwait(false);
-                try
-                {
-                    internalCancel = Console.KeyAvailable;
-                }
-                catch
-                {
-                }
+                internalCancel = ShouldTerminateByKeyPress();
             }
         }
 

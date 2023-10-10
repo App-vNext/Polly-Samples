@@ -131,7 +131,7 @@ namespace PollyDemos.Sync
                 }
 
                 Thread.Sleep(500);
-                internalCancel = TerminateDemosByKeyPress && Console.KeyAvailable;
+                internalCancel = ShouldTerminateByKeyPress();
             }
         }
 
