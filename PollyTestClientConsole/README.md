@@ -15,7 +15,7 @@ flowchart LR
     lib -- invokes --> api
 ```
 
-## Exposed functionalities
+## Exposed functionality
 
 - It lets you start and stop any demo.
 - While the demo is running it prompts the logs.
@@ -43,7 +43,7 @@ dotnet run
 ```
 
 > [!IMPORTANT]
-> **Run the `PollyTestWebApi` as well**
+> **Run the `PollyTestWebApi` project as well**
 >
 > Please make sure that [`PollyTestWebApi`](../PollyTestWebApi/README.md) is also running. <br/>
 > Otherwise the demos will not work properly (you will see _connection refused_ messages).
