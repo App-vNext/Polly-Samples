@@ -9,6 +9,7 @@ flowchart LR
     wpf{{PollyTestClientWPF}}
     lib>PollyDemos]
     api[/PollyTestWebApi\]
+    style api stroke:#0f0
 
     console -- uses --> lib
     wpf -- uses --> lib
