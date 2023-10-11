@@ -19,10 +19,10 @@ flowchart LR
 ## Exposed functionality
 
 - There are 10 synchronous demos to show the basics of Polly. Each has an asynchronous counterpart.
-- There are two extra asynchronous demos to illustrate the usage of `ConcurrencyLimiter`.
+- There are two extra asynchronous demos to illustrate the usage of [`ConcurrencyLimiter`](https://www.pollydocs.org/migration-v8.html#migrating-bulkhead-policies).
 - Each demo builds on the former one so, the comments are focused only on the new things.
 - Every demo runs until it is stopped.
-- The demos expose colored logs and statistics via a `DemoProgress` data class.
+- The demos expose colored logs and statistics via a [`DemoProgress`](OutputHelpers/DemoProgress.cs) data class.
 
 ## Structure
 
@@ -58,5 +58,5 @@ classDiagram
         +DemoProgress ProgressWithMessage()
     }
 ```
-- Several data classes are defined under the `OutputHelpers` directory.
-- The `Configuration` class contains the base URL of the `PollyTestWebApi` project.
+- Several data classes are defined under the [`OutputHelpers`](OutputHelpers/) directory.
+- The [`Configuration`](Configuration.cs) class contains the base URL of the [`PollyTestWebApi`](../PollyTestWebApi/README.md) project.

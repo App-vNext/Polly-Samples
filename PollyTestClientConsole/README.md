@@ -25,16 +25,18 @@ flowchart LR
 
 ## Structure
 
-- The `Program.cs` is the main entry point.
-- To run a new demo: comment out the current one and uncomment the next.
-- To switch from the sync to async demos overwrite the `useSyncDemos` to `false`.
-- We suggest to run the demos in the same order as they are defined in this file.
+- The [`Program.cs`](Program.cs) is the main entry point.
+- To run a new demo, comment out the current one and uncomment the next.
+- To switch from the sync to async demos change the value of the  `useSyncDemos` variable to `false`.
+- We suggest to run the demos in the same order as they are defined.
 
 ## How to run?
+
 - From the `PollySamples` directory:
 ```none
 dotnet run --project PollyTestClientConsole/PollyTestClientConsole.csproj
 ```
+
 - From the `PollyTestClientConsole` directory:
 ```none
 dotnet run
@@ -43,5 +45,5 @@ dotnet run
 > [!IMPORTANT]
 > **Run the `PollyTestWebApi` as well**
 >
-> Please make sure that `PollyTestWebApi` is also running. <br/>
+> Please make sure that [`PollyTestWebApi`](../PollyTestWebApi/README.md) is also running. <br/>
 > Otherwise the demos will not work properly (you will see _connection refused_ messages).
