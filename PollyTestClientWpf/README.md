@@ -40,11 +40,13 @@ flowchart LR
 ## How to run?
 
 - From the `PollySamples` directory:
+
 ```none
 dotnet run --project PollyTestClientWpf/PollyTestClientWpf.csproj
 ```
 
 - From the `PollyTestClientWpf` directory:
+
 ```none
 dotnet run
 ```
