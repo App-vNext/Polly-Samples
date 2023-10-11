@@ -1,4 +1,4 @@
-# Polly Test Client Console
+# Polly Demos
 
 - This project contains all the Polly demos.
 - This is the only project which is not runnable since it is a class library.
@@ -58,5 +58,6 @@ classDiagram
         +DemoProgress ProgressWithMessage()
     }
 ```
+
 - Several data classes are defined under the [`OutputHelpers`](OutputHelpers/) directory.
 - The [`Configuration`](Configuration.cs) class contains the base URL of the [`PollyTestWebApi`](../PollyTestWebApi/README.md) project.
