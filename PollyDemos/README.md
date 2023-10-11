@@ -16,20 +16,17 @@ flowchart LR
     lib -- invokes --> api
 ```
 
-## Exposed functionalities
+## Exposed functionality
 
-- There are 10 synchronous demos to show the basics of Polly.
-  - Each has an asynchronous counterpart.
+- There are 10 synchronous demos to show the basics of Polly. Each has an asynchronous counterpart.
 - There are two extra asynchronous demos to illustrate the usage of `ConcurrencyLimiter`.
-- Each demo builds on the former one
-  - so, the comments are focused only on the new things.
-- Every demo runs until they are stopped.
+- Each demo builds on the former one so, the comments are focused only on the new things.
+- Every demo runs until it is stopped.
 - The demos expose colored logs and statistics via a `DemoProgress` data class.
 
 ## Structure
 
-- In order to keep the demos Polly focused
-  - the common parts are extracted into base classes.
+- In order to keep the demos Polly focused, the common parts are extracted into base classes.
 - This diagram depicts the inheritance hierarchy:
   - _Note: not all `DemoXY` and `AsyncDemoYZ` classes were added to diagram for sake of simplicity._
 
@@ -62,4 +59,4 @@ classDiagram
     }
 ```
 - Several data classes are defined under the `OutputHelpers` directory.
-- The `Configuration` class contains the base url of the `PollyTestWebApi`.
+- The `Configuration` class contains the base URL of the `PollyTestWebApi` project.
