@@ -1,10 +1,9 @@
-﻿namespace PollyDemos
+namespace PollyDemos;
+
+public static class Configuration
 {
-    public static class Configuration
-    {
-        /// <summary>
-        /// The root Polly Samples web API site address.
-        /// </summary>
-        public const string WEB_API_ROOT = "http://localhost:45179";
-    }
+    /// <summary>
+    /// The root Polly Samples web API site address.
+    /// </summary>
+    public const string WEB_API_ROOT = "http://localhost:45179";
 }

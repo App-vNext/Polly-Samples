@@ -1,12 +1,11 @@
-﻿namespace PollyDemos.OutputHelpers
+namespace PollyDemos.OutputHelpers;
+
+public enum Color
 {
-    public enum Color
-    {
-        Default,
-        Green,
-        Red,
-        Yellow,
-        Magenta,
-        White
-    }
+    Default,
+    Green,
+    Red,
+    Yellow,
+    Magenta,
+    White
 }

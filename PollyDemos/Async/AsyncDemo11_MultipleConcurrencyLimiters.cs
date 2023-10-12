@@ -1,180 +1,179 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async
+namespace PollyDemos.Async;
+
+/// <summary>
+/// Same scenario as previous demo:
+/// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
+/// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
+/// Imagine the _caller_ has limited capacity (all single instances of services/webapps eventually hit some capacity limit).
+///
+/// Compared to demo 10, this demo 11 isolates the calls
+/// to the 'good' and 'faulting' endpoints in separate concurrency limiters.
+/// A random combination of calls to the 'good' and 'faulting' endpoint are made.
+///
+/// Observations:
+/// Because the separate 'good' and 'faulting' streams are isolated in separate concurrency limiters,
+/// the 'faulting' calls still back up (high pending and failing number), but
+/// 'good' calls (in a separate concurrency limiter) are *unaffected* (all succeed; none pending or failing).
+///
+/// Concurrency limiters can be used to implement the bulkhead resiliency pattern.
+/// Bulkheads' motto: making sure one fault doesn't sink the whole ship!
+/// </summary>
+public class AsyncDemo11_MultipleConcurrencyLimiters : AsyncConcurrencyLimiterDemo
 {
-    /// <summary>
-    /// Same scenario as previous demo:
-    /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
-    /// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
-    /// Imagine the _caller_ has limited capacity (all single instances of services/webapps eventually hit some capacity limit).
-    ///
-    /// Compared to demo 10, this demo 11 isolates the calls
-    /// to the 'good' and 'faulting' endpoints in separate concurrency limiters.
-    /// A random combination of calls to the 'good' and 'faulting' endpoint are made.
-    ///
-    /// Observations:
-    /// Because the separate 'good' and 'faulting' streams are isolated in separate concurrency limiters,
-    /// the 'faulting' calls still back up (high pending and failing number), but
-    /// 'good' calls (in a separate concurrency limiter) are *unaffected* (all succeed; none pending or failing).
-    ///
-    /// Concurrency limiters can be used to implement the bulkhead resiliency pattern.
-    /// Bulkheads' motto: making sure one fault doesn't sink the whole ship!
-    /// </summary>
-    public class AsyncDemo11_MultipleConcurrencyLimiters : AsyncConcurrencyLimiterDemo
+     // Let's imagine this caller has some theoretically limited capacity.
+    const int callerParallelCapacity = 8; // artificially low - but easier to follow to illustrate the principle
+
+    private readonly ResiliencePipeline limiterForGoodCalls = new ResiliencePipelineBuilder()
+        .AddConcurrencyLimiter(
+            permitLimit: callerParallelCapacity / 2,
+            queueLimit: 10)
+        .Build();
+
+    private readonly ResiliencePipeline limiterForFaultingCalls = new ResiliencePipelineBuilder()
+        .AddConcurrencyLimiter(
+            permitLimit: callerParallelCapacity / 2,
+            queueLimit: 10)
+        .Build();
+
+    public override string Description =>
+        "Demonstrates a good call stream and faulting call stream separated into separate concurrency limiters. The faulting call stream is isolated from affecting the good call stream.";
+
+    public override async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
     {
-         // Let's imagine this caller has some theoretically limited capacity.
-        const int callerParallelCapacity = 8; // artificially low - but easier to follow to illustrate the principle
+        ArgumentNullException.ThrowIfNull(nameof(progress));
 
-        private readonly ResiliencePipeline limiterForGoodCalls = new ResiliencePipelineBuilder()
-            .AddConcurrencyLimiter(
-                permitLimit: callerParallelCapacity / 2,
-                queueLimit: 10)
-            .Build();
+        PrintHeader(progress);
+        TotalRequests = 0;
 
-        private readonly ResiliencePipeline limiterForFaultingCalls = new ResiliencePipelineBuilder()
-            .AddConcurrencyLimiter(
-                permitLimit: callerParallelCapacity / 2,
-                queueLimit: 10)
-            .Build();
+        await ValueTask.FromResult(true);
 
-        public override string Description =>
-            "Demonstrates a good call stream and faulting call stream separated into separate concurrency limiters. The faulting call stream is isolated from affecting the good call stream.";
+        var tasks = new List<Task>();
+        var internalCancellationTokenSource = new CancellationTokenSource();
+        var combinedToken = CancellationTokenSource
+            .CreateLinkedTokenSource(externalCancellationToken, internalCancellationTokenSource.Token)
+            .Token;
 
-        public override async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
+        var messages = new ConcurrentQueue<(string Message, Color Color)>();
+        var client = new HttpClient();
+        var internalCancel = false;
+
+        while (!(internalCancel || externalCancellationToken.IsCancellationRequested))
         {
-            ArgumentNullException.ThrowIfNull(nameof(progress));
+            TotalRequests++;
+            var thisRequest = TotalRequests;
 
-            PrintHeader(progress);
-            TotalRequests = 0;
-
-            await ValueTask.FromResult(true);
-
-            var tasks = new List<Task>();
-            var internalCancellationTokenSource = new CancellationTokenSource();
-            var combinedToken = CancellationTokenSource
-                .CreateLinkedTokenSource(externalCancellationToken, internalCancellationTokenSource.Token)
-                .Token;
-
-            var messages = new ConcurrentQueue<(string Message, Color Color)>();
-            var client = new HttpClient();
-            var internalCancel = false;
-
-            while (!(internalCancel || externalCancellationToken.IsCancellationRequested))
+            if (Random.Shared.Next(0, 2) == 0)
             {
-                TotalRequests++;
-                var thisRequest = TotalRequests;
-
-                if (Random.Shared.Next(0, 2) == 0)
-                {
-                    GoodRequestsMade++;
-                    tasks.Add(CallGoodEndpoint(client, messages, thisRequest, combinedToken));
-                }
-                else
-                {
-                    FaultingRequestsMade++;
-                    tasks.Add(CallFaultingEndpoint(client, messages, thisRequest, combinedToken));
-                }
-
-                while (messages.TryDequeue(out var tuple))
-                {
-                    progress.Report(ProgressWithMessage(tuple.Message, tuple.Color));
-                }
-
-                await Task.Delay(TimeSpan.FromSeconds(0.2), externalCancellationToken).ConfigureAwait(false);
-                internalCancel = ShouldTerminateByKeyPress();
+                GoodRequestsMade++;
+                tasks.Add(CallGoodEndpoint(client, messages, thisRequest, combinedToken));
             }
-        }
-
-        private Task CallFaultingEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
-        {
-            ValueTask issueRequest = limiterForFaultingCalls.ExecuteAsync(async token =>
+            else
             {
-                try
-                {
-                    var responseBody = await IssueFaultingRequestAndProcessResponseAsync(client, token).ConfigureAwait(false);
+                FaultingRequestsMade++;
+                tasks.Add(CallFaultingEndpoint(client, messages, thisRequest, combinedToken));
+            }
 
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        messages.Enqueue(($"Response: {responseBody}", Color.Green));
-                    }
-                    FaultingRequestsSucceeded++;
-                }
-                catch (Exception e)
-                {
-                    if (!token.IsCancellationRequested)
-                    {
-                        messages.Enqueue(($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
-                    }
-                    FaultingRequestsFailed++;
-                }
-            }, cancellationToken);
-
-            Task handleFailure = issueRequest
-                .AsTask()
-                .ContinueWith((failedTask, state) =>
-                {
-                    if (failedTask.IsFaulted)
-                    {
-                        var message = $"Request {state} failed with: {failedTask.Exception!.Flatten().InnerExceptions.First().Message}";
-                        messages.Enqueue((message, Color.Red));
-                    }
-                    FaultingRequestsFailed++;
-                }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion);
-
-            return handleFailure;
-        }
-
-        private Task CallGoodEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
-        {
-            ValueTask issueRequest = limiterForGoodCalls.ExecuteAsync(async token =>
+            while (messages.TryDequeue(out var tuple))
             {
-                try
-                {
-                    var responseBody = await IssueGoodRequestAndProcessResponseAsync(client, token).ConfigureAwait(false);
+                progress.Report(ProgressWithMessage(tuple.Message, tuple.Color));
+            }
 
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        messages.Enqueue(($"Response: {responseBody}", Color.Green));
-                    }
-                    GoodRequestsSucceeded++;
-                }
-                catch (Exception e)
-                {
-                    if (!token.IsCancellationRequested)
-                    {
-                        messages.Enqueue(($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
-                    }
-                    GoodRequestsFailed++;
-                }
-            }, cancellationToken);
-
-            Task handleFailure = issueRequest
-                .AsTask()
-                .ContinueWith((failedTask, state) =>
-                {
-                    if (failedTask.IsFaulted)
-                    {
-                        var message = $"Request {state} failed with: {failedTask.Exception!.Flatten().InnerExceptions.First().Message}";
-                        messages.Enqueue((message, Color.Red));
-                    }
-                    GoodRequestsFailed++;
-                }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion);
-
-            return handleFailure;
+            await Task.Delay(TimeSpan.FromSeconds(0.2), externalCancellationToken).ConfigureAwait(false);
+            internalCancel = ShouldTerminateByKeyPress();
         }
-
-        public override Statistic[] LatestStatistics => new Statistic[]
-        {
-            new("Total requests made", TotalRequests, Color.Default),
-            new("Good endpoint: requested", GoodRequestsMade, Color.Default),
-            new("Good endpoint: succeeded", GoodRequestsSucceeded, Color.Green),
-            new("Good endpoint: pending", GoodRequestsMade - GoodRequestsSucceeded - GoodRequestsFailed, Color.Yellow),
-            new("Good endpoint: failed", GoodRequestsFailed, Color.Red),
-            new("Faulting endpoint: requested", FaultingRequestsMade, Color.Default),
-            new("Faulting endpoint: succeeded", FaultingRequestsSucceeded, Color.Green),
-            new("Faulting endpoint: pending", FaultingRequestsMade - FaultingRequestsSucceeded - FaultingRequestsFailed, Color.Yellow),
-            new("Faulting endpoint: failed", FaultingRequestsFailed, Color.Red),
-        };
     }
+
+    private Task CallFaultingEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
+    {
+        ValueTask issueRequest = limiterForFaultingCalls.ExecuteAsync(async token =>
+        {
+            try
+            {
+                var responseBody = await IssueFaultingRequestAndProcessResponseAsync(client, token).ConfigureAwait(false);
+
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    messages.Enqueue(($"Response: {responseBody}", Color.Green));
+                }
+                FaultingRequestsSucceeded++;
+            }
+            catch (Exception e)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    messages.Enqueue(($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
+                }
+                FaultingRequestsFailed++;
+            }
+        }, cancellationToken);
+
+        Task handleFailure = issueRequest
+            .AsTask()
+            .ContinueWith((failedTask, state) =>
+            {
+                if (failedTask.IsFaulted)
+                {
+                    var message = $"Request {state} failed with: {failedTask.Exception!.Flatten().InnerExceptions.First().Message}";
+                    messages.Enqueue((message, Color.Red));
+                }
+                FaultingRequestsFailed++;
+            }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion);
+
+        return handleFailure;
+    }
+
+    private Task CallGoodEndpoint(HttpClient client, ConcurrentQueue<(string Message, Color Color)> messages, int thisRequest, CancellationToken cancellationToken)
+    {
+        ValueTask issueRequest = limiterForGoodCalls.ExecuteAsync(async token =>
+        {
+            try
+            {
+                var responseBody = await IssueGoodRequestAndProcessResponseAsync(client, token).ConfigureAwait(false);
+
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    messages.Enqueue(($"Response: {responseBody}", Color.Green));
+                }
+                GoodRequestsSucceeded++;
+            }
+            catch (Exception e)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    messages.Enqueue(($"Request {thisRequest} eventually failed with: {e.Message}", Color.Red));
+                }
+                GoodRequestsFailed++;
+            }
+        }, cancellationToken);
+
+        Task handleFailure = issueRequest
+            .AsTask()
+            .ContinueWith((failedTask, state) =>
+            {
+                if (failedTask.IsFaulted)
+                {
+                    var message = $"Request {state} failed with: {failedTask.Exception!.Flatten().InnerExceptions.First().Message}";
+                    messages.Enqueue((message, Color.Red));
+                }
+                GoodRequestsFailed++;
+            }, thisRequest, TaskContinuationOptions.NotOnRanToCompletion);
+
+        return handleFailure;
+    }
+
+    public override Statistic[] LatestStatistics => new Statistic[]
+    {
+        new("Total requests made", TotalRequests, Color.Default),
+        new("Good endpoint: requested", GoodRequestsMade, Color.Default),
+        new("Good endpoint: succeeded", GoodRequestsSucceeded, Color.Green),
+        new("Good endpoint: pending", GoodRequestsMade - GoodRequestsSucceeded - GoodRequestsFailed, Color.Yellow),
+        new("Good endpoint: failed", GoodRequestsFailed, Color.Red),
+        new("Faulting endpoint: requested", FaultingRequestsMade, Color.Default),
+        new("Faulting endpoint: succeeded", FaultingRequestsSucceeded, Color.Green),
+        new("Faulting endpoint: pending", FaultingRequestsMade - FaultingRequestsSucceeded - FaultingRequestsFailed, Color.Yellow),
+        new("Faulting endpoint: failed", FaultingRequestsFailed, Color.Red),
+    };
 }
