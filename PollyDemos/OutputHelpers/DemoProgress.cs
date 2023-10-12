@@ -1,10 +1,9 @@
-﻿namespace PollyDemos.OutputHelpers
+namespace PollyDemos.OutputHelpers;
+
+public record struct DemoProgress(Statistic[] Statistics, IEnumerable<ColoredMessage> Messages)
 {
-    public record struct DemoProgress(Statistic[] Statistics, IEnumerable<ColoredMessage> Messages)
+    public DemoProgress(Statistic[] statistics, ColoredMessage message)
+        : this(statistics, new[] { message })
     {
-        public DemoProgress(Statistic[] statistics, ColoredMessage message)
-            : this(statistics, new[] { message })
-        {
-        }
     }
 }

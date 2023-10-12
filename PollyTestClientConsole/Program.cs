@@ -2,97 +2,96 @@
 using PollyDemos.Async;
 using PollyDemos.Sync;
 
-namespace PollyTestClientConsole
+namespace PollyTestClientConsole;
+
+internal static class Program
 {
-    internal class Program
+    private static async Task Main()
     {
-        private static async Task Main()
+        var statistics = Array.Empty<Statistic>();
+
+        var progress = new Progress<DemoProgress>();
+        progress.ProgressChanged += (_, args) =>
         {
-            var statistics = Array.Empty<Statistic>();
-
-            var progress = new Progress<DemoProgress>();
-            progress.ProgressChanged += (_, args) =>
+            foreach (var message in args.Messages)
             {
-                foreach (var message in args.Messages)
-                {
-                    WriteLineInColor(message.Message, message.Color.ToConsoleColor());
-                }
-                statistics = args.Statistics;
-            };
-
-            using var cancellationSource = new CancellationTokenSource();
-            var cancellationToken = cancellationSource.Token;
-
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // Uncomment the samples you wish to run:
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            // Walk through the demos in order, to discover features.
-            // See <summary> at top of each demo class, for explanation.
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            bool useSyncDemos = true;
-            if(useSyncDemos)
-            {
-                SyncDemo? syncDemo;
-                syncDemo = new Demo00_NoStrategy();
-                //syncDemo = new Demo01_RetryNTimes();
-                //syncDemo = new Demo02_WaitAndRetryNTimes();
-                //syncDemo = new Demo03_WaitAndRetryNTimes_WithEnoughRetries();
-                //syncDemo = new Demo04_WaitAndRetryForever();
-                //syncDemo = new Demo05_WaitAndRetryWithExponentialBackoff();
-                //syncDemo = new Demo06_WaitAndRetryNestingCircuitBreaker();
-                //syncDemo = new Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline();
-                //syncDemo = new Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker();
-                //syncDemo = new Demo09_Pipeline_Fallback_Timeout_WaitAndRetry();
-
-                syncDemo!.Execute(cancellationToken, progress);
+                WriteLineInColor(message.Message, message.Color.ToConsoleColor());
             }
-            else
-            {
-                AsyncDemo? asyncDemo;
-                asyncDemo = new AsyncDemo00_NoStrategy();
-                //asyncDemo = new AsyncDemo01_RetryNTimes();
-                //asyncDemo = new AsyncDemo02_WaitAndRetryNTimes();
-                //asyncDemo = new AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries();
-                //asyncDemo = new AsyncDemo04_WaitAndRetryForever();
-                //asyncDemo = new AsyncDemo05_WaitAndRetryWithExponentialBackoff();
-                //asyncDemo = new AsyncDemo06_WaitAndRetryNestingCircuitBreaker();
-                //asyncDemo = new AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline();
-                //asyncDemo = new AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker();
-                //asyncDemo = new AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry();
+            statistics = args.Statistics;
+        };
 
-                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                // Concurrency Limiter demos
-                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        using var cancellationSource = new CancellationTokenSource();
+        var cancellationToken = cancellationSource.Token;
 
-                //asyncDemo = new AsyncDemo10_SharedConcurrencyLimiter();
-                //asyncDemo = new AsyncDemo11_MultipleConcurrencyLimiters();
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Uncomment the samples you wish to run:
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-                await asyncDemo!.ExecuteAsync(cancellationToken, progress);
-            }
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Walk through the demos in order, to discover features.
+        // See <summary> at top of each demo class, for explanation.
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            Console.ReadKey();
-            cancellationSource.Cancel();
-            Console.WriteLine();
-            Console.WriteLine();
-            Console.WriteLine();
+        bool useSyncDemos = true;
+        if(useSyncDemos)
+        {
+            SyncDemo? syncDemo;
+            syncDemo = new Demo00_NoStrategy();
+            //syncDemo = new Demo01_RetryNTimes();
+            //syncDemo = new Demo02_WaitAndRetryNTimes();
+            //syncDemo = new Demo03_WaitAndRetryNTimes_WithEnoughRetries();
+            //syncDemo = new Demo04_WaitAndRetryForever();
+            //syncDemo = new Demo05_WaitAndRetryWithExponentialBackoff();
+            //syncDemo = new Demo06_WaitAndRetryNestingCircuitBreaker();
+            //syncDemo = new Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline();
+            //syncDemo = new Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker();
+            //syncDemo = new Demo09_Pipeline_Fallback_Timeout_WaitAndRetry();
 
-            var longestDescription = statistics.Max(s => s.Description.Length);
-            foreach (Statistic stat in statistics)
-            {
-                WriteLineInColor($"{stat.Description.PadRight(longestDescription)}: {stat.Value}",stat.Color.ToConsoleColor());
-            }
+            syncDemo!.Execute(cancellationToken, progress);
+        }
+        else
+        {
+            AsyncDemo? asyncDemo;
+            asyncDemo = new AsyncDemo00_NoStrategy();
+            //asyncDemo = new AsyncDemo01_RetryNTimes();
+            //asyncDemo = new AsyncDemo02_WaitAndRetryNTimes();
+            //asyncDemo = new AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries();
+            //asyncDemo = new AsyncDemo04_WaitAndRetryForever();
+            //asyncDemo = new AsyncDemo05_WaitAndRetryWithExponentialBackoff();
+            //asyncDemo = new AsyncDemo06_WaitAndRetryNestingCircuitBreaker();
+            //asyncDemo = new AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline();
+            //asyncDemo = new AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker();
+            //asyncDemo = new AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry();
 
-            Console.ReadKey();
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Concurrency Limiter demos
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            //asyncDemo = new AsyncDemo10_SharedConcurrencyLimiter();
+            //asyncDemo = new AsyncDemo11_MultipleConcurrencyLimiters();
+
+            await asyncDemo!.ExecuteAsync(cancellationToken, progress);
         }
 
-        private static void WriteLineInColor(string message, ConsoleColor color)
+        Console.ReadKey();
+        cancellationSource.Cancel();
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.WriteLine();
+
+        var longestDescription = statistics.Max(s => s.Description.Length);
+        foreach (Statistic stat in statistics)
         {
-            Console.ForegroundColor = color;
-            Console.WriteLine(message);
-            Console.ResetColor();
+            WriteLineInColor($"{stat.Description.PadRight(longestDescription)}: {stat.Value}",stat.Color.ToConsoleColor());
         }
+
+        Console.ReadKey();
+    }
+
+    private static void WriteLineInColor(string message, ConsoleColor color)
+    {
+        Console.ForegroundColor = color;
+        Console.WriteLine(message);
+        Console.ResetColor();
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System.Windows;
 
-namespace PollyTestClientWpf
+namespace PollyTestClientWpf;
+
+public partial class App : Application
 {
-    public partial class App : Application
-    {
-    }
 }

@@ -1,58 +1,57 @@
-﻿using PollyDemos.OutputHelpers;
+using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Sync
+namespace PollyDemos.Sync;
+
+/// <summary>
+/// Uses no strategy. Demonstrates behavior of 'faulting server' we are testing against.
+/// Loops through a series of HTTP requests, keeping track of each requested
+/// item and reporting server failures when encountering exceptions.
+/// </summary>
+public class Demo00_NoStrategy : SyncDemo
 {
-    /// <summary>
-    /// Uses no strategy. Demonstrates behavior of 'faulting server' we are testing against.
-    /// Loops through a series of HTTP requests, keeping track of each requested
-    /// item and reporting server failures when encountering exceptions.
-    /// </summary>
-    public class Demo00_NoStrategy : SyncDemo
+    public override string Description =>
+        "This demo demonstrates how our faulting server behaves, with no Polly strategy in use.";
+
+    public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
-        public override string Description =>
-            "This demo demonstrates how our faulting server behaves, with no Polly strategy in use.";
+        ArgumentNullException.ThrowIfNull(progress);
 
-        public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+        EventualSuccesses = 0;
+        EventualFailures = 0;
+        TotalRequests = 0;
+
+        PrintHeader(progress);
+
+        var client = new HttpClient();
+        var internalCancel = false;
+
+        // Do the following until a key is pressed
+        while (!(internalCancel || cancellationToken.IsCancellationRequested))
         {
-            ArgumentNullException.ThrowIfNull(progress);
+            TotalRequests++;
 
-            EventualSuccesses = 0;
-            EventualFailures = 0;
-            TotalRequests = 0;
-
-            PrintHeader(progress);
-
-            var client = new HttpClient();
-            var internalCancel = false;
-
-            // Do the following until a key is pressed
-            while (!(internalCancel || cancellationToken.IsCancellationRequested))
+            try
             {
-                TotalRequests++;
-
-                try
-                {
-                    var responseBody = IssueRequestAndProcessResponse(client);
-                    progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
-                    EventualSuccesses++;
-                }
-                catch (Exception e)
-                {
-                    progress.Report(ProgressWithMessage($"Request {TotalRequests} eventually failed with: {e.Message}", Color.Red));
-                    EventualFailures++;
-                }
-
-                Thread.Sleep(500);
-                internalCancel = ShouldTerminateByKeyPress();
+                var responseBody = IssueRequestAndProcessResponse(client);
+                progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
+                EventualSuccesses++;
             }
-        }
+            catch (Exception e)
+            {
+                progress.Report(ProgressWithMessage($"Request {TotalRequests} eventually failed with: {e.Message}", Color.Red));
+                EventualFailures++;
+            }
 
-        public override Statistic[] LatestStatistics => new Statistic[]
-        {
-            new("Total requests made", TotalRequests),
-            new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
-            new("Retries made to help achieve success", 0, Color.Yellow),
-            new("Requests which eventually failed", EventualFailures, Color.Red),
-        };
+            Thread.Sleep(500);
+            internalCancel = ShouldTerminateByKeyPress();
+        }
     }
+
+    public override Statistic[] LatestStatistics => new Statistic[]
+    {
+        new("Total requests made", TotalRequests),
+        new("Requests which eventually succeeded", EventualSuccesses, Color.Green),
+        new("Retries made to help achieve success", 0, Color.Yellow),
+        new("Requests which eventually failed", EventualFailures, Color.Red),
+    };
 }

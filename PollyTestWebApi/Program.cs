@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddControllers();
 builder.Services.AddRateLimiter(limiterOptions =>
 {
@@ -16,6 +17,7 @@ builder.Services.AddRateLimiter(limiterOptions =>
         await context.HttpContext.Response.WriteAsync("Too many requests have received. Request refused.", CancellationToken.None);
     };
 });
+
 var app = builder.Build();
 
 // Register the ValuesController that is rate limited.
@@ -35,4 +37,3 @@ app.MapGet("/api/NonThrottledFaulting/{id}", async ([FromRoute] int id) =>
 });
 
 app.Run("http://localhost:45179");
-
