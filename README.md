@@ -60,7 +60,7 @@ flowchart LR
 
 ## Want further information?
 
-- For any questions about the operation of the demos, ask on this repo [with an issue](https://github.com/App-vNext/Polly-Samples/issues/new/choose)).
+- For any questions about the operation of the demos, ask on this repo [with an issue](https://github.com/App-vNext/Polly-Samples/issues/new/choose).
 - For any questions about Polly, ask in the [Polly repository](https://www.github.com/App-vNext/Polly/issues/new/choose).
 - For full Polly syntax, see [Polly repository]((https://github.com/App-vNext/Polly#readme)) and the [Polly documentation](https://www.pollydocs.org/).
 
