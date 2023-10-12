@@ -38,14 +38,25 @@ public class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : SyncDemo
         // Define a pipeline builder which will be used to compose strategies incrementally.
         var pipelineBuilder = new ResiliencePipelineBuilder();
 
-        // The order of strategy definitions has changed.
-        // Circuit breaker comes first because that will be the inner strategy.
-        // Retry comes second because that will be the outer strategy.
+        pipelineBuilder.AddRetry(new()
+        {
+            ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
+            MaxRetryAttempts = int.MaxValue,
+            Delay = TimeSpan.FromMilliseconds(200),
+            OnRetry = args =>
+            {
+                var exception = args.Outcome.Exception!;
+                progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
+                Retries++;
+                return default;
+            }
+        }); // We are not calling the Build method here because we will do it as a separate step to make the code cleaner.
 
         pipelineBuilder.AddCircuitBreaker(new()
         {
             ShouldHandle = new PredicateBuilder().Handle<Exception>(),
             FailureRatio = 1.0,
+            SamplingDuration = TimeSpan.FromSeconds(2),
             MinimumThroughput = 4,
             BreakDuration = TimeSpan.FromSeconds(3),
             OnOpened = args =>
@@ -69,20 +80,6 @@ public class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : SyncDemo
                 return default;
             }
         }); // We are not calling the Build method because we want to add one more strategy to the pipeline.
-
-        pipelineBuilder.AddRetry(new()
-        {
-            ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is not BrokenCircuitException),
-            MaxRetryAttempts = int.MaxValue,
-            Delay = TimeSpan.FromMilliseconds(200),
-            OnRetry = args =>
-            {
-                var exception = args.Outcome.Exception!;
-                progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
-                Retries++;
-                return default;
-            }
-        }); // We are not calling the Build method here because we will do it as a separate step to make the code cleaner.
 
         // Build the pipeline since we have added all the necessary strategies to it.
         var pipeline = pipelineBuilder.Build();

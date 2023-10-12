@@ -40,6 +40,36 @@ public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : SyncDemo
         Stopwatch? watch = null;
         var pipelineBuilder = new ResiliencePipelineBuilder<string>();
 
+        // Define a fallback strategy: provide a substitute message to the user, for any exception.
+        pipelineBuilder.AddFallback(new()
+        {
+            ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
+            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for any exception]"),
+            OnFallback = args =>
+            {
+                watch!.Stop();
+                var exception = args.Outcome.Exception!;
+                progress.Report(ProgressWithMessage($"Fallback catches eventually failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
+                eventualFailuresForOtherReasons++;
+                return default;
+            }
+        });
+
+        // Define a fallback strategy: provide a substitute message to the user, if we found the call was rejected due to timeout.
+        pipelineBuilder.AddFallback(new()
+        {
+            ShouldHandle = new PredicateBuilder<string>().Handle<TimeoutRejectedException>(),
+            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for timeout]"),
+            OnFallback = args =>
+            {
+                watch!.Stop();
+                var exception = args.Outcome.Exception!;
+                progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
+                eventualFailuresDueToTimeout++;
+                return default;
+            }
+        });
+
         // Define our timeout strategy: time out after 2 seconds.
         pipelineBuilder.AddTimeout(new TimeoutStrategyOptions()
         {
@@ -67,39 +97,9 @@ public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : SyncDemo
             }
         });
 
-        // Define a fallback strategy: provide a substitute message to the user, if we found the call was rejected due to timeout.
-        pipelineBuilder.AddFallback(new()
-        {
-            ShouldHandle = new PredicateBuilder<string>().Handle<TimeoutRejectedException>(),
-            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for timeout]"),
-            OnFallback = args =>
-            {
-                watch!.Stop();
-                var exception = args.Outcome.Exception!;
-                progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
-                eventualFailuresDueToTimeout++;
-                return default;
-            }
-        });
-
-        // Define a fallback strategy: provide a substitute message to the user, for any exception.
-        pipelineBuilder.AddFallback(new()
-        {
-            ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
-            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for any exception]"),
-            OnFallback = args =>
-            {
-                watch!.Stop();
-                var exception = args.Outcome.Exception!;
-                progress.Report(ProgressWithMessage($"Fallback catches eventually failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
-                eventualFailuresForOtherReasons++;
-                return default;
-            }
-        });
-
         // Build the pipeline which now composes four strategies (from inner to outer):
-        // Timeout
         // Retry
+        // Timeout
         // Fallback for timeout
         // Fallback for any other exception
         var pipeline = pipelineBuilder.Build();

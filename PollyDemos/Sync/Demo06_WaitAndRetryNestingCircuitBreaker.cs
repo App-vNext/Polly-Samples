@@ -63,6 +63,7 @@ public class Demo06_WaitAndRetryNestingCircuitBreaker : SyncDemo
         {
             ShouldHandle = new PredicateBuilder().Handle<Exception>(),
             FailureRatio = 1.0,
+            SamplingDuration = TimeSpan.FromSeconds(2),
             MinimumThroughput = 4,
             BreakDuration = TimeSpan.FromSeconds(3),
             OnOpened = args =>
