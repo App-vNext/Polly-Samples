@@ -42,11 +42,57 @@ public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
         // Provide the return type (string) to be able to use Fallback.
         var pipelineBuilder = new ResiliencePipelineBuilder<string>();
 
+        // Define a fallback strategy: provide a substitute message to the user, for any exception.
+        pipelineBuilder.AddFallback(new()
+        {
+            ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
+            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for any exception]"),
+            OnFallback = args =>
+            {
+                watch!.Stop();
+                var exception = args.Outcome.Exception!;
+                progress.Report(ProgressWithMessage($"Fallback catches eventually failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
+                eventualFailuresForOtherReasons++;
+                return default;
+            }
+        });
+
+        // Define a fallback strategy: provide a substitute message to the user, if we found the circuit was broken.
+        pipelineBuilder.AddFallback(new()
+        {
+            ShouldHandle = new PredicateBuilder<string>().Handle<BrokenCircuitException>(),
+            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [message substituted by fallback strategy]"),
+            OnFallback = args =>
+            {
+                watch!.Stop();
+                var exception = args.Outcome.Exception!;
+                progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
+                eventualFailuresDueToCircuitBreaking++;
+                return default;
+            }
+        });
+
+        pipelineBuilder.AddRetry(new()
+        {
+            // Since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
+            ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(ex => ex is not BrokenCircuitException),
+            MaxRetryAttempts = int.MaxValue, // Retry indefinitely
+            Delay = TimeSpan.FromMilliseconds(200),
+            OnRetry = args =>
+            {
+                var exception = args.Outcome.Exception!;
+                progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
+                Retries++;
+                return default;
+            }
+        });
+
         pipelineBuilder.AddCircuitBreaker(new()
         {
             // Since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
             ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
             FailureRatio = 1.0,
+            SamplingDuration = TimeSpan.FromSeconds(2),
             MinimumThroughput = 4,
             BreakDuration = TimeSpan.FromSeconds(3),
             OnOpened = args =>
@@ -67,51 +113,6 @@ public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
             OnHalfOpened = args =>
             {
                 progress.Report(ProgressWithMessage(".Breaker logging: Half-open: Next call is a trial!", Color.Magenta));
-                return default;
-            }
-        });
-
-        pipelineBuilder.AddRetry(new()
-        {
-            // Since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
-            ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(ex => ex is not BrokenCircuitException),
-            MaxRetryAttempts = int.MaxValue, // Retry indefinitely
-            Delay = TimeSpan.FromMilliseconds(200),
-            OnRetry = args =>
-            {
-                var exception = args.Outcome.Exception!;
-                progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
-                Retries++;
-                return default;
-            }
-        });
-
-        // Define a fallback strategy: provide a substitute message to the user, if we found the circuit was broken.
-        pipelineBuilder.AddFallback(new()
-        {
-            ShouldHandle = new PredicateBuilder<string>().Handle<BrokenCircuitException>(),
-            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [message substituted by fallback strategy]"),
-            OnFallback = args =>
-            {
-                watch!.Stop();
-                var exception = args.Outcome.Exception!;
-                progress.Report(ProgressWithMessage($"Fallback catches failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
-                eventualFailuresDueToCircuitBreaking++;
-                return default;
-            }
-        });
-
-        // Define a fallback strategy: provide a substitute message to the user, for any exception.
-        pipelineBuilder.AddFallback(new()
-        {
-            ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(),
-            FallbackAction = args => Outcome.FromResultAsValueTask("Please try again later [Fallback for any exception]"),
-            OnFallback = args =>
-            {
-                watch!.Stop();
-                var exception = args.Outcome.Exception!;
-                progress.Report(ProgressWithMessage($"Fallback catches eventually failed with: {exception.Message} (after {watch.ElapsedMilliseconds}ms)", Color.Red));
-                eventualFailuresForOtherReasons++;
                 return default;
             }
         });
