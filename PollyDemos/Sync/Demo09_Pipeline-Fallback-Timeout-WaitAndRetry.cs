@@ -97,10 +97,6 @@ public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : SyncDemo
             }
         });
 
-
-
-
-
         // Build the pipeline which now composes four strategies (from inner to outer):
         // Retry
         // Timeout
