@@ -13,7 +13,7 @@ The samples demonstrate the policies in action, against faulting endpoints.
 The solution contains three applications and one class library:
 - `PollyTestWebApi`: This application is a web API with three endpoints. ([Further information](/PollyTestWebApi/README.md))
 - `PollyDemos`: This library contains the Polly demos. ([Further information](/PollyDemos/README.md))
-- `PollyTestClientConsole`: This application provides a CLI to test a demo. ([Further information](/PollyTestClientConsole/README.md))
+- `PollyTestClientConsole`: This application provides a CLI to walk through the demos. ([Further information](/PollyTestClientConsole/README.md))
 - `PollyTestClientWpf`: This application provides a GUI to walk through the demos. ([Further information](/PollyTestClientWpf/README.md))
 
 ```mermaid

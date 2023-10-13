@@ -17,17 +17,16 @@ flowchart LR
 
 ## Exposed functionality
 
-- It lets you start and stop any demo.
+- It lets you start, stop and re-run any demo.
 - While the demo is running it prompts the logs.
 - To stop the demo press _any_ key.
 - When you stop the demo you can scrutinize the logs and check the statistics.
-- To exit from the application press _any_ key after you assessed the prompted messages.
+- To go back to the menu press _any_ key after you assessed the prompted messages.
 
 ## Structure
 
 - The [`Program.cs`](Program.cs) is the main entry point.
-- To run a new demo, comment out the current one and uncomment the next.
-- To switch from the sync to async demos change the value of the  `useSyncDemos` variable to `false`.
+- It creates the menu items and pass them to the [`ConsoleMenu`](/Menu/ConsoleMenu.cs).
 - We suggest to run the demos in the same order as they are defined.
 
 ## How to run?
