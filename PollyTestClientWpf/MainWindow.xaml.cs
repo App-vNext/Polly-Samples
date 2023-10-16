@@ -2,10 +2,9 @@ using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
-using PollyDemos;
-using PollyDemos.Async;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
-using PollyDemos.Sync;
 using Color = PollyDemos.OutputHelpers.Color;
 
 namespace PollyTestClientWpf;
@@ -103,45 +102,12 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (demoType.IsSubclassOf(typeof(SyncDemo)))
+        if (demoType.IsSubclassOf(typeof(DemoBase)))
         {
-            SyncDemo? demoInstance = null;
+            DemoBase? demoInstance = null;
             try
             {
-                demoInstance = Activator.CreateInstance(demoType) as SyncDemo;
-            }
-            catch (Exception) {}
-
-            if (demoInstance is null)
-            {
-                WriteLineInColor($"Unable to instantiate demo: {demoName}", Color.Red);
-                cancellationSource.Cancel();
-                return;
-            }
-
-            try
-            {
-                Task.Factory
-                    .StartNew(
-                        () => demoInstance.Execute(cancellationToken, progress),
-                        cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)
-                    .ContinueWith(t => HandleFailedTask(t, demoName),
-                        CancellationToken.None, TaskContinuationOptions.NotOnRanToCompletion, TaskScheduler.Default);
-            }
-            catch (Exception e)
-            {
-                WriteLineInColor($"Demo {demoName} threw exception: {e}", Color.Red);
-            }
-
-            return;
-        }
-
-        if (demoType.IsSubclassOf(typeof(AsyncDemo)))
-        {
-            AsyncDemo? demoInstance = null;
-            try
-            {
-                demoInstance = Activator.CreateInstance(demoType) as AsyncDemo;
+                demoInstance = Activator.CreateInstance(demoType) as DemoBase;
             }
             catch (Exception) {}
 
@@ -163,7 +129,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        WriteLineInColor($"Unable to identify demo as either sync or async demo: {demoName}", Color.Red);
+        WriteLineInColor($"Unable to identify the demo: {demoName}", Color.Red);
         cancellationSource.Cancel();
     }
 
