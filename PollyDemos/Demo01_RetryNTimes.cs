@@ -14,7 +14,7 @@ namespace PollyDemos;
 public class Demo01_RetryNTimes : DemoBase
 {
     public override string Description =>
-        "This demo demonstrates a first Retry.  It retries three times, immediately.";
+        "This demo demonstrates a first Retry. It retries three times, immediately.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {

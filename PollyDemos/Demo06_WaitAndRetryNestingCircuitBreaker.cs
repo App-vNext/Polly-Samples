@@ -18,9 +18,9 @@ namespace PollyDemos;
 /// Enter circuit-breaker:
 /// After too many failures, breaks the circuit for a period, during which it blocks calls + fails fast.
 /// - protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover)
-/// - allows the client to get a fail response _fast, not wait for ages, if downstream is awol.
+/// - allows the client to get a fail response fast, not wait for ages, if downstream is AWOL.
 ///
-/// Observations from this demo:
+/// Observations:
 /// Note how after the circuit decides to break, subsequent calls fail faster.
 /// Note how breaker gives underlying system time to recover ...
 /// ... by the time circuit closes again, underlying system has recovered!

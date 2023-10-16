@@ -25,7 +25,7 @@ public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : DemoBase
     private int eventualFailuresForOtherReasons;
 
     public override string Description =>
-        "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
+        "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces Fallbacks: we can provide graceful fallback messages, on overall failure.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
@@ -147,7 +147,7 @@ public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : DemoBase
             // It's only been left in to *demonstrate* it should never get hit.
             catch (Exception e)
             {
-                var errorMessage = "Should never arrive here. Use of fallbackForAnyException should have provided nice fallback value for any exceptions.";
+                var errorMessage = "Should never arrive here. Use of fallback for any Exception should have provided nice fallback value for exceptions.";
                 throw new UnreachableException(errorMessage, e);
             }
 

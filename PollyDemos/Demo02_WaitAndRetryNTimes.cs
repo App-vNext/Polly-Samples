@@ -15,7 +15,7 @@ namespace PollyDemos;
 public class Demo02_WaitAndRetryNTimes : DemoBase
 {
     public override string Description =>
-        "Compared to previous demo, this adds waits between the retries. Not always enough wait to ensure success, tho.";
+        "Compared to previous demo, this adds waits between the retry attempts. Not always enough wait to ensure success, tho.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {

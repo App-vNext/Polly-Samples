@@ -15,7 +15,7 @@ namespace PollyDemos;
 public class Demo03_WaitAndRetryNTimes_WithEnoughRetries : DemoBase
 {
     public override string Description =>
-        "Compared to previous demo, this demo adds enough waiting and retrying to always ensure success.";
+        "Compared to previous demo, this adds enough waiting and retrying to always ensure success.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {

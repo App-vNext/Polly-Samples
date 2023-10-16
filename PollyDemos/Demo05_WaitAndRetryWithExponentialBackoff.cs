@@ -8,7 +8,7 @@ namespace PollyDemos;
 /// Loops through a series of HTTP requests, keeping track of each requested
 /// item and reporting server failures when encountering exceptions.
 ///
-/// Observations: All calls still succeed!  Yay!
+/// Observations: All calls still succeed! Yay!
 /// But we didn't hammer the underlying server so hard - we backed off.
 /// That's healthier for it, if it might be struggling ...
 /// ... and if a lot of clients might be doing this simultaneously.
