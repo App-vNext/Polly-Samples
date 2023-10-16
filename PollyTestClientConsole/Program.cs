@@ -1,6 +1,7 @@
-﻿using PollyDemos.OutputHelpers;
-using PollyDemos.Async;
-using PollyDemos.Sync;
+﻿using PollyDemos;
+using PollyDemos.Helpers;
+using PollyDemos.OutputHelpers;
+
 using PollyTestClientConsole;
 using PollyTestClientConsole.Menu;
 
@@ -21,51 +22,30 @@ statistics = args.Statistics;
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 List<ConsoleMenuItem> menu = new()
 {
-    new("Async: No strategy",
-        InvokeAsyncDemo<AsyncDemo00_NoStrategy>),
-    new("Async: Retry N times",
-        InvokeAsyncDemo<AsyncDemo01_RetryNTimes>),
-    new("Async: Wait and retry N times",
-        InvokeAsyncDemo<AsyncDemo02_WaitAndRetryNTimes>),
-    new("Async: Wait and retry N times, N big enough to guarantee success",
-        InvokeAsyncDemo<AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries>),
-    new("Async: Wait and retry forever",
-        InvokeAsyncDemo<AsyncDemo04_WaitAndRetryForever>),
-    new("Async: Wait and retry with exponential back-off",
-        InvokeAsyncDemo<AsyncDemo05_WaitAndRetryWithExponentialBackoff>),
-    new("Async: Wait and retry nesting circuit breaker",
-        InvokeAsyncDemo<AsyncDemo06_WaitAndRetryNestingCircuitBreaker>),
-    new("Async: Wait and retry chaining with circuit breaker by using Pipeline",
-        InvokeAsyncDemo<AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline>),
-    new("Async: Fallback, Retry, and CircuitBreaker in a Pipeline",
-        InvokeAsyncDemo<AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker>),
-    new("Async: Fallback, Timeout, and Retry in a Pipeline",
-        InvokeAsyncDemo<AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry>),
-    new("Async: Without isolation: Faulting calls swamp resources, also prevent good calls",
-        InvokeAsyncDemo<AsyncDemo10_SharedConcurrencyLimiter>),
-    new("Async: With isolation: Faulting calls separated, do not swamp resources, good calls still succeed",
-        InvokeAsyncDemo<AsyncDemo11_MultipleConcurrencyLimiters>),
-
-    new("Sync: No strategy",
-        InvokeSyncDemo<Demo00_NoStrategy>),
-    new("Sync: Retry N times",
-        InvokeSyncDemo<Demo01_RetryNTimes>),
-    new("Sync: Wait and retry N times",
-        InvokeSyncDemo<Demo02_WaitAndRetryNTimes>),
-    new("Sync: Wait and retry N times, N big enough to guarantee success",
-        InvokeSyncDemo<Demo03_WaitAndRetryNTimes_WithEnoughRetries>),
-    new("Sync: Wait and retry forever",
-        InvokeSyncDemo<Demo04_WaitAndRetryForever>),
-    new("Sync: Wait and retry with exponential back-off",
-        InvokeSyncDemo<Demo05_WaitAndRetryWithExponentialBackoff>),
-    new("Sync: Wait and retry nesting circuit breaker",
-        InvokeSyncDemo<Demo06_WaitAndRetryNestingCircuitBreaker>),
-    new("Sync: Wait and retry chaining with circuit breaker by using Pipeline",
-        InvokeSyncDemo<Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline>),
-    new("Sync: Fallback, Retry, and CircuitBreaker in a Pipeline",
-        InvokeSyncDemo<Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker>),
-    new("Sync: Fallback, Timeout, and Retry in a Pipeline",
-        InvokeSyncDemo<Demo09_Pipeline_Fallback_Timeout_WaitAndRetry>),
+    new("00 - No strategy",
+        InvokeDemo<Demo00_NoStrategy>),
+    new("01 - Retry N times",
+        InvokeDemo<Demo01_RetryNTimes>),
+    new("02 - Wait and retry N times",
+        InvokeDemo<Demo02_WaitAndRetryNTimes>),
+    new("03 - Wait and retry N times, N big enough to guarantee success",
+        InvokeDemo<Demo03_WaitAndRetryNTimes_WithEnoughRetries>),
+    new("04 - Wait and retry forever",
+        InvokeDemo<Demo04_WaitAndRetryForever>),
+    new("05 - Wait and retry with exponential back-off",
+        InvokeDemo<Demo05_WaitAndRetryWithExponentialBackoff>),
+    new("06 - Wait and retry nesting circuit breaker",
+        InvokeDemo<Demo06_WaitAndRetryNestingCircuitBreaker>),
+    new("07 - Wait and retry chaining with circuit breaker by using Pipeline",
+        InvokeDemo<Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline>),
+    new("08 - Fallback, Retry, and CircuitBreaker in a Pipeline",
+        InvokeDemo<Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker>),
+    new("09 - Fallback, Timeout, and Retry in a Pipeline",
+        InvokeDemo<Demo09_Pipeline_Fallback_Timeout_WaitAndRetry>),
+    new("10 - Without isolation: Faulting calls swamp resources, also prevent good calls",
+        InvokeDemo<Demo10_SharedConcurrencyLimiter>),
+    new("11 - With isolation: Faulting calls separated, do not swamp resources, good calls still succeed",
+        InvokeDemo<Demo11_MultipleConcurrencyLimiters>),
 
     new("-=Exit=-", () => Environment.Exit(0))
 };
@@ -73,18 +53,8 @@ List<ConsoleMenuItem> menu = new()
 ConsoleMenu.PrintSplashScreen();
 ConsoleMenu.Run(menu);
 
-void InvokeSyncDemo<T>() where T : SyncDemo, new()
-{
-    using var cancellationSource = new CancellationTokenSource();
-    var cancellationToken = cancellationSource.Token;
 
-    new T().Execute(cancellationToken, progress);
-    cancellationSource.Cancel();
-
-    PrintStatisticsThenClear();
-}
-
-void InvokeAsyncDemo<T>() where T : AsyncDemo, new()
+void InvokeDemo<T>() where T : DemoBase, new()
 {
     using var cancellationSource = new CancellationTokenSource();
     var cancellationToken = cancellationSource.Token;
