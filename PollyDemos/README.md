@@ -18,8 +18,8 @@ flowchart LR
 
 ## Exposed functionality
 
-- There are 10 synchronous demos to show the basics of Polly. Each has an asynchronous counterpart.
-- There are two extra asynchronous demos to illustrate the usage of [`ConcurrencyLimiter`](https://www.pollydocs.org/migration-v8.html#migrating-bulkhead-policies).
+- There are 10 demos to show the basics of Polly.
+- There are two extra demos to illustrate the usage of [`ConcurrencyLimiter`](https://www.pollydocs.org/migration-v8.html#migrating-bulkhead-policies).
 - Each demo builds on the former one so, the comments are focused only on the new things.
 - Every demo runs until it is stopped.
 - The demos expose colored logs and statistics via a [`DemoProgress`](OutputHelpers/DemoProgress.cs) data class.
@@ -28,34 +28,27 @@ flowchart LR
 
 - In order to keep the demos Polly focused, the common parts are extracted into base classes.
 - This diagram depicts the inheritance hierarchy:
-  - _Note: not all `DemoXY` and `AsyncDemoYZ` classes were added to diagram for sake of simplicity._
+  - _Note: not all `DemoXY`  classes were added to diagram for sake of simplicity._
 
 ```mermaid
 classDiagram
-    AsyncConcurrencyLimiterDemo <|-- AsyncDemo11_MultipleConcurrencyLimiters
-    AsyncDemo <|-- AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry
-    SyncDemo <|-- Demo00_NoStrategy
-    AsyncDemo <|-- AsyncConcurrencyLimiterDemo
-    DemoBase <|-- AsyncDemo
-    DemoBase <|-- SyncDemo
+    ConcurrencyLimiterDemoBase <|-- Demo11_MultipleConcurrencyLimiters
+    DemoBase <|-- Demo09_Pipeline_Fallback_Timeout_WaitAndRetry
+    DemoBase <|-- Demo00_NoStrategy
+    DemoBase <|-- ConcurrencyLimiterDemoBase
 
-    class AsyncConcurrencyLimiterDemo{
+    class ConcurrencyLimiterDemoBase{
         #int MoreStatisticFields
-        #IssueGoodRequestAndProcessResponseAsync(client, token)
-        #IssueFaultingRequestAndProcessResponseAsync(client, token)
+        #Task<string> IssueGoodRequestAndProcessResponseAsync(...)
+        #Task<string> IssueFaultingRequestAndProcessResponseAsync(...)
     }
-    class AsyncDemo{
-        +void ExecuteAsync(token, progress)
-        #IssueRequestAndProcessResponseAsync(client, token)
-    }
-    class SyncDemo{
-        +void Execute(token, progress)
-        #IssueRequestAndProcessResponse(client, token)
-    }
+
     class DemoBase{
         #int StatisticFields
         +string Description
-        +DemoProgress ProgressWithMessage()
+        #DemoProgress ProgressWithMessage(...)
+        +Task ExecuteAsync(...)
+        #Task<string> IssueRequestAndProcessResponseAsync(...)
     }
 ```
 

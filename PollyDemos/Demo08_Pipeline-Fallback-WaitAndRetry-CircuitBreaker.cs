@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using Polly.CircuitBreaker;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Sync;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates using a Retry, a CircuitBreaker and two Fallback strategies.
@@ -17,15 +19,15 @@ namespace PollyDemos.Sync;
 /// - OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
 /// - also demonstrates how you can use the same kind of strategy (Fallback in this case) twice (or more) in a pipeline.
 /// </summary>
-public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
+public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : DemoBase
 {
     private int eventualFailuresDueToCircuitBreaking;
     private int eventualFailuresForOtherReasons;
 
     public override string Description =>
-        "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces Fallbacks: we can provide graceful fallback messages, on overall failure.";
+        "This demo matches 06 and 07 (retry with circuit-breaker), but also introduces a Fallback: we can provide a graceful fallback message, on overall failure.";
 
-    public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+    public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
         ArgumentNullException.ThrowIfNull(progress);
 
@@ -76,7 +78,7 @@ public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
         {
             // Since pipeline has a string type parameter that's why the PredicateBuilder has to have one as well.
             ShouldHandle = new PredicateBuilder<string>().Handle<Exception>(ex => ex is not BrokenCircuitException),
-            MaxRetryAttempts = int.MaxValue, // Retry indefinitely
+            MaxRetryAttempts = int.MaxValue,
             Delay = TimeSpan.FromMilliseconds(200),
             OnRetry = args =>
             {
@@ -134,7 +136,8 @@ public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
 
             try
             {
-                var responseBody = pipeline.Execute(token => IssueRequestAndProcessResponse(client, token), cancellationToken);
+                var responseBody = await pipeline.ExecuteAsync(async token =>
+                    await IssueRequestAndProcessResponseAsync(client, token), cancellationToken);
 
                 watch.Stop();
                 progress.Report(ProgressWithMessage($"Response : {responseBody} (after {watch.ElapsedMilliseconds}ms)", Color.Green));
@@ -144,11 +147,11 @@ public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : SyncDemo
             // It's only been left in to *demonstrate* it should never get hit.
             catch (Exception e)
             {
-                var errorMessage = "Should never arrive here. Use of fallback for any Exception should have provided nice fallback value for exceptions.";
+                var errorMessage = "Should never arrive here. Use of fallbackForAnyException should have provided nice fallback value for any exceptions.";
                 throw new UnreachableException(errorMessage, e);
             }
 
-            Thread.Sleep(500);
+            await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             internalCancel = ShouldTerminateByKeyPress();
         }
     }

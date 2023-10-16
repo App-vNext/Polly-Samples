@@ -1,63 +1,44 @@
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates the Retry strategy with delays between retry attempts.
+/// Uses no strategy.  Demonstrates behavior of 'faulting server' we are testing against.
 /// Loops through a series of HTTP requests, keeping track of each requested
 /// item and reporting server failures when encountering exceptions.
-///
-/// Observations: We now have waits among the retries.
-/// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
-/// So we still fail some calls.
 /// </summary>
-public class AsyncDemo02_WaitAndRetryNTimes : AsyncDemo
+public class Demo00_NoStrategy : DemoBase
 {
     public override string Description =>
-        "Compared to previous demo, this adds waits between the retries. Not always enough wait to ensure success, tho.";
+        "This demo demonstrates how our faulting server behaves, with no Polly strategy in use.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
         ArgumentNullException.ThrowIfNull(progress);
 
         EventualSuccesses = 0;
-        Retries = 0;
         EventualFailures = 0;
         TotalRequests = 0;
 
         PrintHeader(progress);
 
-        var strategy = new ResiliencePipelineBuilder().AddRetry(new()
-        {
-            ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-            MaxRetryAttempts = 3,
-            Delay = TimeSpan.FromMilliseconds(200), // Wait between each try
-            OnRetry = args =>
-            {
-                var exception = args.Outcome.Exception!;
-                progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
-                Retries++;
-                return default;
-            }
-        }).Build();
-
-
         var client = new HttpClient();
         var internalCancel = false;
 
+        // Do the following until a key is pressed
         while (!(internalCancel || cancellationToken.IsCancellationRequested))
         {
             TotalRequests++;
 
             try
             {
-                await strategy.ExecuteAsync(async token =>
-                {
-                    var responseBody = await IssueRequestAndProcessResponseAsync(client, token);
-                    progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
-                    EventualSuccesses++;
+                // Make a request and get a response
+                var responseBody = await IssueRequestAndProcessResponseAsync(client, cancellationToken);
 
-                }, cancellationToken);
+                // Display the response message on the console
+                progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
+                EventualSuccesses++;
             }
             catch (Exception e)
             {

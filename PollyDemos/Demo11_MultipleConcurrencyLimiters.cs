@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Same scenario as previous demo:
@@ -21,7 +23,7 @@ namespace PollyDemos.Async;
 /// Concurrency limiters can be used to implement the bulkhead resiliency pattern.
 /// Bulkheads' motto: making sure one fault doesn't sink the whole ship!
 /// </summary>
-public class AsyncDemo11_MultipleConcurrencyLimiters : AsyncConcurrencyLimiterDemo
+public class Demo11_MultipleConcurrencyLimiters : ConcurrencyLimiterDemoBase
 {
      // Let's imagine this caller has some theoretically limited capacity.
     const int callerParallelCapacity = 8; // artificially low - but easier to follow to illustrate the principle

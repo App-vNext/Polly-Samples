@@ -1,4 +1,4 @@
-namespace PollyDemos;
+namespace PollyDemos.Helpers;
 
 public static class Configuration
 {

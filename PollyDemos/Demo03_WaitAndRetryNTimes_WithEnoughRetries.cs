@@ -1,6 +1,7 @@
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates the Retry strategy with delays between retry attempts.
@@ -11,7 +12,7 @@ namespace PollyDemos.Async;
 /// But we kind-a had to guess how many retries would be enough before the server responded again ...
 /// (and we're hammering that server with retries)
 /// </summary>
-public class AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries : AsyncDemo
+public class Demo03_WaitAndRetryNTimes_WithEnoughRetries : DemoBase
 {
     public override string Description =>
         "Compared to previous demo, this demo adds enough waiting and retrying to always ensure success.";

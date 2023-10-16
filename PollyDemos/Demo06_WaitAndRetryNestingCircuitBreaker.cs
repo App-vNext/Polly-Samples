@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using Polly.CircuitBreaker;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates using the Retry strategy nesting CircuitBreaker.
@@ -23,7 +25,7 @@ namespace PollyDemos.Async;
 /// Note how breaker gives underlying system time to recover ...
 /// ... by the time circuit closes again, underlying system has recovered!
 /// </summary>
-public class AsyncDemo06_WaitAndRetryNestingCircuitBreaker : AsyncDemo
+public class Demo06_WaitAndRetryNestingCircuitBreaker : DemoBase
 {
     private int eventualFailuresDueToCircuitBreaking;
     private int eventualFailuresForOtherReasons;

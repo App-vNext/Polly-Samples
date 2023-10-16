@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using Polly.CircuitBreaker;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates using the Retry and CircuitBreaker strategies.
@@ -15,7 +17,7 @@ namespace PollyDemos.Async;
 /// The operation is identical to Demo06.
 /// The code demonstrates how using the ResiliencePipelineBuilder makes your combined pipeline more concise, at the point of execution.
 /// </summary>
-public class AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : AsyncDemo
+public class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : DemoBase
 {
     private int eventualFailuresDueToCircuitBreaking;
     private int eventualFailuresForOtherReasons;

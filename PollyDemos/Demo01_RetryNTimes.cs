@@ -1,22 +1,22 @@
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Sync;
+namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates the Retry strategy with delays between retry attempts.
+/// Demonstrates the Retry strategy coming into action.
 /// Loops through a series of HTTP requests, keeping track of each requested
 /// item and reporting server failures when encountering exceptions.
 ///
-/// Observations: We now have waits among the retries.
-/// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
-/// So we still fail some calls.
+/// Observations: There's no wait among these retries. It can be appropriate sometimes.
+/// In this case, no wait hasn't given underlying system time to recover, so calls still fail despite retries.
 /// </summary>
-public class Demo02_WaitAndRetryNTimes : SyncDemo
+public class Demo01_RetryNTimes : DemoBase
 {
     public override string Description =>
-        "Compared to previous demo, this demo adds waits between the retry attempts. Not always enough wait to ensure success, tho.";
+        "This demo demonstrates a first Retry.  It retries three times, immediately.";
 
-    public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+    public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
         ArgumentNullException.ThrowIfNull(progress);
 
@@ -27,14 +27,18 @@ public class Demo02_WaitAndRetryNTimes : SyncDemo
 
         PrintHeader(progress);
 
+        // Define our strategy:
         var strategy = new ResiliencePipelineBuilder().AddRetry(new()
         {
             ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-            MaxRetryAttempts = 3,
-            Delay = TimeSpan.FromMilliseconds(200), // Wait between each try
+            MaxRetryAttempts = 3, // Retry up to 3 times
             OnRetry = args =>
             {
-                var exception = args.Outcome.Exception!;
+                // Due to how we have defined ShouldHandle, this delegate is called only if an exception occurred.
+                // Note the ! sign (null-forgiving operator) at the end of the command.
+                var exception = args.Outcome.Exception!; // The Exception property is nullable
+
+                // Tell the user what happened
                 progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
                 Retries++;
                 return default;
@@ -50,9 +54,13 @@ public class Demo02_WaitAndRetryNTimes : SyncDemo
 
             try
             {
-                strategy.Execute(token =>
+                // Retry the following call according to the strategy.
+                // The cancellationToken passed in to ExecuteAsync() enables the strategy to cancel retries when the token is signalled.
+                await strategy.ExecuteAsync(async token =>
                 {
-                    var responseBody = IssueRequestAndProcessResponse(client, token);
+                    // This code is executed within the strategy
+
+                    var responseBody = await IssueRequestAndProcessResponseAsync(client, token);
                     progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
                     EventualSuccesses++;
 
@@ -64,7 +72,7 @@ public class Demo02_WaitAndRetryNTimes : SyncDemo
                 EventualFailures++;
             }
 
-            Thread.Sleep(500);
+            await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             internalCancel = ShouldTerminateByKeyPress();
         }
     }

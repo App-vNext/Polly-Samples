@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using Polly.Timeout;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates using a Retry, a Timeout and two Fallback strategies.
@@ -17,7 +19,7 @@ namespace PollyDemos.Async;
 /// - a fallback strategy then provides substitute message for the user
 /// - otherwise similar to demo08.
 /// </summary>
-public class AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry : AsyncDemo
+public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : DemoBase
 {
     private int eventualFailuresDueToTimeout;
     private int eventualFailuresForOtherReasons;
