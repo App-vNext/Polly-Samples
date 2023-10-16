@@ -1,6 +1,6 @@
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos;
+namespace PollyDemos.Helpers;
 
 public abstract class DemoBase
 {
@@ -14,21 +14,23 @@ public abstract class DemoBase
 
     public virtual string Description => $"[Description for demo {GetType().Name} not yet provided.]";
 
+    public abstract Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress);
+
     public abstract Statistic[] LatestStatistics { get; }
 
-    public DemoProgress ProgressWithMessage(string message)
+    protected DemoProgress ProgressWithMessage(string message)
         => new(LatestStatistics, new ColoredMessage(message));
 
-    public DemoProgress ProgressWithMessage(string message, Color color)
+    protected DemoProgress ProgressWithMessage(string message, Color color)
         => new(LatestStatistics, new ColoredMessage(message, color));
 
-    public DemoProgress ProgressWithMessages(IEnumerable<ColoredMessage> messages)
-        => new (LatestStatistics, messages);
-
-    public void PrintHeader(IProgress<DemoProgress> progress)
+    protected void PrintHeader(IProgress<DemoProgress> progress)
     {
         progress.Report(ProgressWithMessage(GetType().Name));
         progress.Report(ProgressWithMessage("======"));
         progress.Report(ProgressWithMessage(string.Empty));
     }
+
+    protected async Task<string> IssueRequestAndProcessResponseAsync(HttpClient client, CancellationToken cancellationToken)
+        => await client.GetStringAsync($"{Configuration.WEB_API_ROOT}/api/values/{TotalRequests}", cancellationToken);
 }

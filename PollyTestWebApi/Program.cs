@@ -25,7 +25,7 @@ app.MapControllers();
 app.UseRateLimiter();
 
 // Register two endpoints that are not rate limited.
-// They are used by the async demo 10 and 11
+// They are used by the demo 10 and 11
 app.MapGet("/api/NonThrottledGood/{id}", ([FromRoute] int id) =>
 {
     return $"Fast response from server to request #{id}";

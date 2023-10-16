@@ -36,10 +36,10 @@
                 <Image Source="Polly-Logo.png" Height="200" />
                 <Label Content="Demos" FontSize="28" Foreground="#FFFFFF" />
             </StackPanel>
-            
+
 
             <StackPanel Grid.Column="1" Orientation="Vertical">
-                
+
                 <UniformGrid Rows="1" Height="75" >
                     <Button Name="PlayButton" Content="Start" Click="PlayButton_Click"/>
                     <Button Name="StopButton" Content="Stop" Click="StopButton_Click"/>
@@ -48,80 +48,49 @@
 
                 <Label Content="Choose demo:" />
 
-                <ComboBox Name="Demo" 
-                        FontSize="16" 
-                        Foreground="#002C46" 
-                        Background="#FFFFFF" 
+                <ComboBox Name="Demo"
+                        FontSize="16"
+                        Foreground="#002C46"
+                        Background="#FFFFFF"
                         FontWeight="Normal"
                         SelectionChanged="Demo_OnSelectionChanged">
 
                     <ComboBoxItem Name="Demo00_NoStrategy">
-                        Sync Demo 00: No strategy
+                        00 - No strategy
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo01_RetryNTimes">
-                        Sync Demo 01: Retry N times
+                        01 - Retry N times
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo02_WaitAndRetryNTimes">
-                        Sync Demo 02: Wait and retry N times
+                        02 - Wait and retry N times
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo03_WaitAndRetryNTimes_WithEnoughRetries">
-                        Sync Demo 03: Wait and retry N times, N big enough to guarantee success
+                        03 - Wait and retry N times, N big enough to guarantee success
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo04_WaitAndRetryForever">
-                        Sync Demo 04: Wait and retry forever
+                        04 - Wait and retry forever
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo05_WaitAndRetryWithExponentialBackoff">
-                        Sync Demo 05: Wait and retry with exponential back-off
+                        05 - Wait and retry with exponential back-off
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo06_WaitAndRetryNestingCircuitBreaker">
-                        Sync Demo 06: Wait and retry nesting circuit breaker
+                        06 - Wait and retry nesting circuit breaker
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline">
-                        Sync Demo 07: Same as 06, using Pipeline
+                        07 - Same as 06, using Pipeline
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker">
-                        Sync Demo 08: Fallback, Retry, and CircuitBreaker in a Pipeline
+                        08 - Fallback, Retry, and CircuitBreaker in a Pipeline
                     </ComboBoxItem>
                     <ComboBoxItem Name="Demo09_Pipeline_Fallback_Timeout_WaitAndRetry">
-                        Sync Demo 09: Fallback, Timeout, and Retry in a Pipeline
+                        09 - Fallback, Timeout, and Retry in a Pipeline
                     </ComboBoxItem>
 
-                    <ComboBoxItem Name="AsyncDemo00_NoStrategy">
-                        Async demo 00: No strategy
+                    <ComboBoxItem Name="Demo10_SharedConcurrencyLimiter">
+                        10 - Without isolation: Faulting calls swamp resources, also prevent good calls
                     </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo01_RetryNTimes">
-                        Async demo 01: Retry N times
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo02_WaitAndRetryNTimes">
-                        Async demo 02: Wait and retry N times
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries">
-                        Async demo 03: Wait and retry N times, N big enough to guarantee success
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo04_WaitAndRetryForever">
-                        Async demo 04: Wait and retry forever
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo05_WaitAndRetryWithExponentialBackoff">
-                        Async demo 05: Wait and retry with exponential back-off
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo06_WaitAndRetryNestingCircuitBreaker">
-                        Async demo 06: Wait and retry nesting circuit breaker
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline">
-                        Async demo 07: Same as 06, using Pipeline
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker">
-                        Async demo 08: Fallback, Retry, and CircuitBreaker in a Pipeline
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry">
-                        Async demo 09: Fallback, Timeout, and Retry in a Pipeline
-                    </ComboBoxItem>
-
-                    <ComboBoxItem Name="AsyncDemo10_SharedConcurrencyLimiter">
-                        Async demo 10: Without isolation: Faulting calls swamp resources, also prevent good calls
-                    </ComboBoxItem>
-                    <ComboBoxItem Name="AsyncDemo11_MultipleConcurrencyLimiters">
-                        Async demo 11: With isolation: Faulting calls separated, do not swamp resources, good calls still succeed
+                    <ComboBoxItem Name="Demo11_MultipleConcurrencyLimiters">
+                        11 - With isolation: Faulting calls separated, do not swamp resources, good calls still succeed
                     </ComboBoxItem>
 
                 </ComboBox>
@@ -130,9 +99,9 @@
 
                 <TextBox Name="Description"
                         TextWrapping="Wrap"
-                        ScrollViewer.VerticalScrollBarVisibility="Auto" 
-                        Height="100" 
-                        FontSize="14" 
+                        ScrollViewer.VerticalScrollBarVisibility="Auto"
+                        Height="100"
+                        FontSize="14"
                         FontFamily="Consolas" />
             </StackPanel>
         </Grid>
@@ -151,12 +120,12 @@
             <Label Grid.Row="0" Grid.Column="0"
                    Content="Output"/>
 
-            <RichTextBox Grid.Row="1" Grid.Column="0" 
+            <RichTextBox Grid.Row="1" Grid.Column="0"
                          x:Name="Output"
                          Width="1061"
-                         VerticalScrollBarVisibility="Auto" 
-                         HorizontalScrollBarVisibility="Auto" 
-                         Foreground="#002C46" 
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         Foreground="#002C46"
                          Background="#FFFFFF"
                          FontSize="14"
                          FontFamily="Consolas">
@@ -167,7 +136,7 @@
                 </RichTextBox.Resources>
             </RichTextBox>
 
-            <Label Grid.Row="0" Grid.Column="2" 
+            <Label Grid.Row="0" Grid.Column="2"
                    Content="Statistic"/>
 
             <Grid Grid.Row="1" Grid.Column="2">

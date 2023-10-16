@@ -1,24 +1,23 @@
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Sync;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates the Retry strategy with delays between retry attempts.
 /// Loops through a series of HTTP requests, keeping track of each requested
 /// item and reporting server failures when encountering exceptions.
 ///
-/// Observations: We no longer have to guess how many retries are enough.
-/// All calls still succeed!  Yay!
-/// But we're still hammering that underlying server with retries.
-/// Imagine if lots of clients were doing that simultaneously
-///  - could just increase load on an already-struggling server!
+/// Observations: We now have waits among the retries.
+/// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
+/// So we still fail some calls.
 /// </summary>
-public class Demo04_WaitAndRetryForever : SyncDemo
+public class Demo02_WaitAndRetryNTimes : DemoBase
 {
     public override string Description =>
-        "This demo also retries enough to always ensure success. But we haven't had to 'guess' how many retries were necessary. We just said: wait-and-retry-forever.";
+        "Compared to previous demo, this adds waits between the retry attempts. Not always enough wait to ensure success, tho.";
 
-    public override void Execute(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
+    public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
         ArgumentNullException.ThrowIfNull(progress);
 
@@ -32,8 +31,8 @@ public class Demo04_WaitAndRetryForever : SyncDemo
         var strategy = new ResiliencePipelineBuilder().AddRetry(new()
         {
             ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-            MaxRetryAttempts = int.MaxValue, // Retry indefinitely
-            Delay = TimeSpan.FromMilliseconds(200),
+            MaxRetryAttempts = 3,
+            Delay = TimeSpan.FromMilliseconds(200), // Wait between each try
             OnRetry = args =>
             {
                 var exception = args.Outcome.Exception!;
@@ -42,6 +41,7 @@ public class Demo04_WaitAndRetryForever : SyncDemo
                 return default;
             }
         }).Build();
+
 
         var client = new HttpClient();
         var internalCancel = false;
@@ -52,9 +52,9 @@ public class Demo04_WaitAndRetryForever : SyncDemo
 
             try
             {
-                strategy.Execute(token =>
+                await strategy.ExecuteAsync(async token =>
                 {
-                    var responseBody = IssueRequestAndProcessResponse(client, token);
+                    var responseBody = await IssueRequestAndProcessResponseAsync(client, token);
                     progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
                     EventualSuccesses++;
 
@@ -66,7 +66,7 @@ public class Demo04_WaitAndRetryForever : SyncDemo
                 EventualFailures++;
             }
 
-            Thread.Sleep(500);
+            await Task.Delay(TimeSpan.FromSeconds(0.5), cancellationToken);
             internalCancel = ShouldTerminateByKeyPress();
         }
     }

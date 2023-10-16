@@ -1,6 +1,7 @@
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates the Retry strategy coming into action.
@@ -10,10 +11,10 @@ namespace PollyDemos.Async;
 /// Observations: There's no wait among these retries. It can be appropriate sometimes.
 /// In this case, no wait hasn't given underlying system time to recover, so calls still fail despite retries.
 /// </summary>
-public class AsyncDemo01_RetryNTimes : AsyncDemo
+public class Demo01_RetryNTimes : DemoBase
 {
     public override string Description =>
-        "This demo demonstrates a first Retry.  It retries three times, immediately.";
+        "This demo demonstrates a first Retry. It retries three times, immediately.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {

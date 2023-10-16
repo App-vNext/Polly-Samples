@@ -1,7 +1,7 @@
 # Polly Test Web API
 
 - This project is a super-lightweight web API.
-- It is invoked by the sync and async demos.
+- It is invoked by the demos.
 
 ```mermaid
 flowchart LR

@@ -1,20 +1,25 @@
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates the Retry strategy with delays between retry attempts.
+/// Demonstrates Retry strategy with calculated retry delays to back off.
 /// Loops through a series of HTTP requests, keeping track of each requested
 /// item and reporting server failures when encountering exceptions.
 ///
-/// Observations: We now have waits among the retries.
-/// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
-/// So we still fail some calls.
+/// Observations: All calls still succeed! Yay!
+/// But we didn't hammer the underlying server so hard - we backed off.
+/// That's healthier for it, if it might be struggling ...
+/// ... and if a lot of clients might be doing this simultaneously.
+///
+/// ... What if the underlying system was totally down tho?
+/// ... Keeping trying forever would be counterproductive (so, see Demo06)
 /// </summary>
-public class AsyncDemo02_WaitAndRetryNTimes : AsyncDemo
+public class Demo05_WaitAndRetryWithExponentialBackoff : DemoBase
 {
     public override string Description =>
-        "Compared to previous demo, this adds waits between the retries. Not always enough wait to ensure success, tho.";
+        "This demonstrates exponential back-off. We have enough retries to ensure success. But we don't hammer the server so hard: we increase the delay between each try.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
@@ -30,17 +35,17 @@ public class AsyncDemo02_WaitAndRetryNTimes : AsyncDemo
         var strategy = new ResiliencePipelineBuilder().AddRetry(new()
         {
             ShouldHandle = new PredicateBuilder().Handle<Exception>(),
-            MaxRetryAttempts = 3,
-            Delay = TimeSpan.FromMilliseconds(200), // Wait between each try
+            MaxRetryAttempts = 6, // We could also retry indefinitely by using int.MaxValue
+            BackoffType = DelayBackoffType.Exponential, // Back off: 1s, 2s, 4s, 8s, ... + jitter
             OnRetry = args =>
             {
                 var exception = args.Outcome.Exception!;
                 progress.Report(ProgressWithMessage($"Strategy logging: {exception.Message}", Color.Yellow));
+                progress.Report(ProgressWithMessage($" ... automatically delaying for {args.RetryDelay.TotalMilliseconds}ms.", Color.Yellow));
                 Retries++;
                 return default;
             }
         }).Build();
-
 
         var client = new HttpClient();
         var internalCancel = false;

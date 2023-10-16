@@ -38,24 +38,23 @@ flowchart LR
   - This explains the intent of that demo, and what resilience it adds to its handling of the calls to the 'faulting server'.
 - Sometimes the `<summary>` also highlights what this demo _doesn't_ achieve, which is often picked up in the following demo.
 - Explore the demos in sequence for best understanding.
-- All demos exist in both sync and async forms.
 
 ### Sequence
 
-| # | Description | Sync link | Async link |
-| :-: | -- | :-: | :-: |
-| 00 | No strategy | [Code](PollyDemos/Sync/Demo00_NoStrategy.cs) | [Code](PollyDemos/Async/AsyncDemo00_NoStrategy.cs) |
-| 01 | Retry N times | [Code](PollyDemos/Sync/Demo01_RetryNTimes.cs) | [Code](PollyDemos/Async/AsyncDemo01_RetryNTimes.cs) |
-| 02 | Wait and retry N times | [Code](PollyDemos/Sync/Demo02_WaitAndRetryNTimes.cs) | [Code](PollyDemos/Async/AsyncDemo02_WaitAndRetryNTimes.cs) |
-| 03 | Wait and retry N times, N big enough to guarantee success | [Code](PollyDemos/Sync/Demo03_WaitAndRetryNTimes_WithEnoughRetries.cs) | [Code](PollyDemos/Async/AsyncDemo03_WaitAndRetryNTimes_WithEnoughRetries.cs) |
-| 04 | Wait and retry forever | [Code](PollyDemos/Sync/Demo04_WaitAndRetryForever.cs) | [Code](PollyDemos/Async/AsyncDemo04_WaitAndRetryForever.cs) |
-| 05 | Wait and retry with exponential back-off | [Code](PollyDemos/Sync/Demo05_WaitAndRetryWithExponentialBackoff.cs) | [Code](PollyDemos/Async/AsyncDemo05_WaitAndRetryWithExponentialBackoff.cs) |
-| 06 | Wait and retry nesting circuit breaker | [Code](PollyDemos/Sync/Demo06_WaitAndRetryNestingCircuitBreaker.cs) | [Code](PollyDemos/Async/AsyncDemo06_WaitAndRetryNestingCircuitBreaker.cs) |
-| 07 | Wait and retry chaining with circuit breaker by using Pipeline | [Code](PollyDemos/Sync/Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline.cs) | [Code](PollyDemos/Async/AsyncDemo07_WaitAndRetryNestingCircuitBreakerUsingPipeline.cs) |
-| 08 | Fallback, Retry, and CircuitBreaker in a Pipeline | [Code](PollyDemos/Sync/Demo08_Pipeline-Fallback-WaitAndRetry-CircuitBreaker.cs) | [Code](PollyDemos/Async/AsyncDemo08_Pipeline-Fallback-WaitAndRetry-CircuitBreaker.cs) |
-| 09 | Fallback, Timeout, and Retry in a Pipeline | [Code](PollyDemos/Sync/Demo09_Pipeline-Fallback-Timeout-WaitAndRetry.cs) | [Code](PollyDemos/Async/AsyncDemo09_Pipeline-Fallback-Timeout-WaitAndRetry.cs) |
-| 10 | Without isolation: Faulting calls swamp resources, <br/>also prevent good calls | - | [Code](PollyDemos/Async/AsyncDemo10_SharedConcurrencyLimiter.cs) |
-| 11 | With isolation: Faulting calls separated, <br/>do not swamp resources, good calls still succeed | - | [Code](PollyDemos/Async/AsyncDemo11_MultipleConcurrencyLimiters.cs) |
+| # | Description | Link |
+| :-: | -- | :-: |
+| 00 | No strategy | [Code](PollyDemos/Demo00_NoStrategy.cs) |
+| 01 | Retry N times | [Code](PollyDemos/Demo01_RetryNTimes.cs) |
+| 02 | Wait and retry N times | [Code](PollyDemos/Demo02_WaitAndRetryNTimes.cs) |
+| 03 | Wait and retry N times, N big enough to guarantee success | [Code](PollyDemos/Demo03_WaitAndRetryNTimes_WithEnoughRetries.cs) |
+| 04 | Wait and retry forever | [Code](PollyDemos/Demo04_WaitAndRetryForever.cs) |
+| 05 | Wait and retry with exponential back-off | [Code](PollyDemos/Demo05_WaitAndRetryWithExponentialBackoff.cs) |
+| 06 | Wait and retry nesting circuit breaker | [Code](PollyDemos/Demo06_WaitAndRetryNestingCircuitBreaker.cs) |
+| 07 | Wait and retry chaining with circuit breaker by using Pipeline | [Code](PollyDemos/Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline.cs) |
+| 08 | Fallback, Retry, and CircuitBreaker in a Pipeline | [Code](PollyDemos/Demo08_Pipeline-Fallback-WaitAndRetry-CircuitBreaker.cs) |
+| 09 | Fallback, Timeout, and Retry in a Pipeline | [Code](PollyDemos/Demo09_Pipeline-Fallback-Timeout-WaitAndRetry.cs) |
+| 10 | Without isolation: Faulting calls swamp resources, <br/>also prevent good calls | [Code](PollyDemos/Demo10_SharedConcurrencyLimiter.cs) |
+| 11 | With isolation: Faulting calls separated, <br/>do not swamp resources, good calls still succeed | [Code](PollyDemos/Demo11_MultipleConcurrencyLimiters.cs) |
 
 
 ## Want further information?

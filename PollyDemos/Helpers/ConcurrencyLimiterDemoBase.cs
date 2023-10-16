@@ -1,6 +1,6 @@
-namespace PollyDemos.Async;
+namespace PollyDemos.Helpers;
 
-public abstract class AsyncConcurrencyLimiterDemo : AsyncDemo
+public abstract class ConcurrencyLimiterDemoBase : DemoBase
 {
     // Track the number of 'good' and 'faulting' requests made, succeeded and failed.
     // At any time, requests pending = made - succeeded - failed.

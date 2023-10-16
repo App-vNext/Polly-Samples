@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
@@ -18,7 +20,7 @@ namespace PollyDemos.Async;
 /// Watch how the number of pending and failing calls to the good endpoint also climbs,
 /// as the faulting calls saturate all resources in the caller.
 /// </summary>
-public class AsyncDemo10_SharedConcurrencyLimiter : AsyncConcurrencyLimiterDemo
+public class Demo10_SharedConcurrencyLimiter : ConcurrencyLimiterDemoBase
 {
     // Let's imagine this caller has some theoretically limited capacity so that *it* will suffer capacity-starvation if the downstream system is faulting.
     // In demo 10, all calls share the same concurrency limiter.

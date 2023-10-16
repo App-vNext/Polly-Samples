@@ -1,12 +1,14 @@
 using System.Diagnostics;
 using Polly.Timeout;
+
+using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
-namespace PollyDemos.Async;
+namespace PollyDemos;
 
 /// <summary>
 /// Demonstrates using a Retry, a Timeout and two Fallback strategies.
-/// In this demo, the wait in the wait-and-retry is deliberately so long that the timeout strategy wrapping it will time it out
+/// In this demo, the delay in the retry is deliberately so long that the timeout strategy wrapping it will time it out
 /// (in lieu for now of a demo server endpoint responding slowly).
 ///
 /// Loops through a series of HTTP requests, keeping track of each requested
@@ -17,13 +19,13 @@ namespace PollyDemos.Async;
 /// - a fallback strategy then provides substitute message for the user
 /// - otherwise similar to demo08.
 /// </summary>
-public class AsyncDemo09_Pipeline_Fallback_Timeout_WaitAndRetry : AsyncDemo
+public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : DemoBase
 {
     private int eventualFailuresDueToTimeout;
     private int eventualFailuresForOtherReasons;
 
     public override string Description =>
-        "Demonstrates introducing a Timeout strategy. The timeout will eventually time-out on the retries. When we timeout, we again use a Fallback strategy to substitute a more graceful message.";
+        "Demonstrates introducing a Timeout strategy. The timeout will eventually time-out on the retries. When we timeout, we again use Fallback strategies to substitute more graceful messages.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
