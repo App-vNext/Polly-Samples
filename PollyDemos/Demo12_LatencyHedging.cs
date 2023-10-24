@@ -18,7 +18,7 @@ namespace PollyDemos;
 /// Only the faster one is awaited (the other is cancelled).
 ///
 /// We suggest to access the PollyTestWebApi's requests log to see the duplicate requests.
-/// /// </summary>
+/// </summary>
 public class Demo12_LatencyHedging : DemoBase
 {
     // This demo also shows how to use resilience context.
@@ -42,7 +42,7 @@ public class Demo12_LatencyHedging : DemoBase
         var strategy = new ResiliencePipelineBuilder<HttpResponseMessage>().AddHedging(new()
         {
             MaxHedgedAttempts = 1, // Issue at most one extra hedged request
-            Delay = TimeSpan.FromSeconds(1), // Wait one second before issuing the hedged request (fallback mode)
+            Delay = TimeSpan.FromSeconds(1), // Wait one second before issuing the hedged request (latency mode)
             OnHedging = args =>
             {
                 // Retrieve the request id from the context
