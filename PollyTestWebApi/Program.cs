@@ -25,7 +25,7 @@ app.MapControllers();
 app.UseRateLimiter();
 
 // Register two endpoints that are not rate limited.
-// They are used by the demo 10 and 11
+// They are used by the demo 10 and 11 (concurrency limiter)
 app.MapGet("/api/NonThrottledGood/{id}", ([FromRoute] int id) =>
 {
     return $"Fast response from server to request #{id}";
@@ -35,12 +35,15 @@ app.MapGet("/api/NonThrottledFaulting/{id}", async ([FromRoute] int id) =>
     await Task.Delay(TimeSpan.FromSeconds(5));
     return $"Slow response from server to request #{id}";
 });
+
+// Register a cancellable endpoint that is not rate limited.
+// It is used by the demo 12 (hedging)
 app.MapGet("/api/VaryingResponseTime/{id}", async (CancellationToken token, [FromRoute] int id) =>
 {
     var jitter = Random.Shared.Next(-800, 800);
-    var delayMs = 1_000 + jitter;
-    await Task.Delay(TimeSpan.FromMilliseconds(delayMs), token);
-    return $"Deferred response (~{delayMs} ms) from server to request #{id}";
+    var delayMilliseconds = 1_000 + jitter;
+    await Task.Delay(TimeSpan.FromMilliseconds(delayMilliseconds), token);
+    return $"Deferred response with ~{delayMilliseconds}ms from server to request #{id}";
 });
 
 app.Run("http://localhost:45179");

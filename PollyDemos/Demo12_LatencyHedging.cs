@@ -42,7 +42,7 @@ public class Demo12_LatencyHedging : DemoBase
         var strategy = new ResiliencePipelineBuilder<HttpResponseMessage>().AddHedging(new()
         {
             MaxHedgedAttempts = 1, // Issue at most one extra hedged request
-            Delay = TimeSpan.FromSeconds(1), // Wait one second before issuing the hedged request
+            Delay = TimeSpan.FromSeconds(1), // Wait one second before issuing the hedged request (fallback mode)
             OnHedging = args =>
             {
                 // Retrieve the request id from the context

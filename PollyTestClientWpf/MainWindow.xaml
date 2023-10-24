@@ -93,6 +93,10 @@
                         11 - With isolation: Faulting calls separated, do not swamp resources, good calls still succeed
                     </ComboBoxItem>
 
+                    <ComboBoxItem Name="Demo12_LatencyHedging">
+                        12 - Hedging in latency mode
+                    </ComboBoxItem>
+
                 </ComboBox>
 
                 <Label Content="Description:" />
