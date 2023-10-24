@@ -12,7 +12,7 @@ public abstract class DemoBase
     // In the case of WPF the stdIn is redirected.
     protected static bool ShouldTerminateByKeyPress() => !Console.IsInputRedirected && Console.KeyAvailable;
 
-    public virtual string Description => $"[Description for demo {GetType().Name} not yet provided.]";
+    public abstract string Description {get;}
 
     public abstract Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress);
 

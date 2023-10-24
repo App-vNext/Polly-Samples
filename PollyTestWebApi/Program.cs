@@ -35,5 +35,12 @@ app.MapGet("/api/NonThrottledFaulting/{id}", async ([FromRoute] int id) =>
     await Task.Delay(TimeSpan.FromSeconds(5));
     return $"Slow response from server to request #{id}";
 });
+app.MapGet("/api/VaryingResponseTime/{id}", async (CancellationToken token, [FromRoute] int id) =>
+{
+    var jitter = Random.Shared.Next(-800, 800);
+    var delayMs = 1_000 + jitter;
+    await Task.Delay(TimeSpan.FromMilliseconds(delayMs), token);
+    return $"Deferred response (~{delayMs} ms) from server to request #{id}";
+});
 
 app.Run("http://localhost:45179");
