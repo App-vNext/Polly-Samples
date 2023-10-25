@@ -10,14 +10,14 @@ namespace PollyDemos;
 ///     Most of the time it responds with success, but other times it sends a failure response.
 /// </para>
 /// <para>
-///     If we can assume that this is just a transient failure then retry could help.<br/>
+///     If we can assume that this is just a transient failure then retries could help.<br/>
 ///     Hedging can be used to issue the same request as a retry or craft a hedged request.
 /// </para>
 /// <para>
 ///     Observations:
 ///     <list type="bullet">
 ///         <item>Same as in the previous demo.</item>
-///         <item>But this time hedging will act as a combined retry and fallback strategies.</item>
+///         <item>But this time hedging will act as a combined retry and fallback strategy.</item>
 ///         <item><When hedging runs out of attempts, it returns a static fallback response.</item>
 ///     </list>
 /// </para>
@@ -56,7 +56,7 @@ public class Demo14_FallbackHedging_RetryWithFallback : DemoBase
                 Retries++;
                 return default;
             },
-            // Alter the default behavior to perform retries until it runs out of the attempts,
+            // Alter the default behavior to perform retries until it runs out of attempts,
             // then it should return a fallback value
             ActionGenerator = args =>
             {

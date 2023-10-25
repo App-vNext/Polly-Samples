@@ -17,7 +17,7 @@ namespace PollyDemos;
 ///     <list type="bullet">
 ///         <item>When the original response indicates failure then a new hedged request is issued.</item>
 ///         <item>In this demo the hedging will act as a simple retry strategy.</item>
-///         <item>In the next demo hedging will act as a combined retry and fallback strategies.</item>
+///         <item>In the next demo hedging will act as a combined retry and fallback strategy.</item>
 ///     </list>
 /// </para>
 /// Take a look at the logs for PollyTestWebApi's requests to see the duplicates.
@@ -27,7 +27,7 @@ public class Demo13_FallbackHedging_RetryOnly : DemoBase
     private readonly ResiliencePropertyKey<int> requestIdKey = new("RequestId");
     private readonly ResiliencePropertyKey<int> attemptNumberKey = new("AttemptNumber");
     public override string Description =>
-        "Demonstrates a mitigation action for failed responses. If the response indicates failure then it will issue a new request. The hedging strategy waits for the first success response or it runs out of retry attempts.";
+        "Demonstrates a mitigation action for failed responses. If the response indicates failure then it will issue a new request. The hedging strategy waits for the first successful response or it runs out of retry attempts.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
@@ -40,7 +40,7 @@ public class Demo13_FallbackHedging_RetryOnly : DemoBase
 
         var strategy = new ResiliencePipelineBuilder<HttpResponseMessage>().AddHedging(new()
         {
-            ShouldHandle = new PredicateBuilder<HttpResponseMessage>().HandleResult(res => !res.IsSuccessStatusCode), // Handle unsuccess responses
+            ShouldHandle = new PredicateBuilder<HttpResponseMessage>().HandleResult(res => !res.IsSuccessStatusCode), // Handle unsuccessful responses
             MaxHedgedAttempts = 2, // Issue at most two extra hedged requests
             Delay = TimeSpan.FromMilliseconds(-1), // Issue a hedged request if response does not indicate success (fallback mode)
             OnHedging = args =>
