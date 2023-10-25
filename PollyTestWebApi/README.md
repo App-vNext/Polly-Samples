@@ -21,28 +21,40 @@ flowchart LR
 - It exposes several simple endpoints.
 - All of them echo back the received parameter (`{id}`) with some hard-coded prefixes.
 
-### `GET /api/Values/{id}`
+### Basic scenarios
+
+#### `GET /api/Values/{id}`
 
 - It simply returns a string.
 - It is decorated with rate limiting.
   - It allows 3 requests per 5 seconds.
   - If the threshold is exceeded then it returns an HTTP 429 status code.
 
-### `GET /api/NonThrottledGood/{id}`
+### Concurrency limiter scenarios
+
+#### `GET /api/NonThrottledGood/{id}`
 
 - It simply returns a string.
 - As its name suggests, it is **not** decorated with rate limiting.
 
-### `GET /api/NonThrottledFaulting/{id}`
+#### `GET /api/NonThrottledFaulting/{id}`
 
 - It waits **5 seconds** before returning a string.
 - It emulates slow processing.
 - As its name suggests, it is **not** decorated with rate limiting.
 
-### `GET /api/VaryingResponseTime/{id}`
+### Hedging scenarios
+
+#### `GET /api/VaryingResponseTime/{id}`
 
 - It waits **1 second** +/- several milliseconds before returning a string.
 - It emulates varying response processing.
+- It is **not** decorated with rate limiting.
+
+#### `GET /api/VaryingResponseStatus/{id}`
+
+- It waits **half a second** before returning a response.
+- It emulates varying response status codes.
 - It is **not** decorated with rate limiting.
 
 ## Structure
