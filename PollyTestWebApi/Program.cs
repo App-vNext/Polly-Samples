@@ -38,12 +38,12 @@ app.MapGet("/api/NonThrottledFaulting/{id}", async ([FromRoute] int id) =>
 
 // Register a cancellable endpoint that is not rate limited.
 // It is used by the demo 12 (hedging)
-app.MapGet("/api/VaryingResponseTime/{id}", async (CancellationToken token, [FromRoute] int id) =>
+app.MapGet("/api/VaryingResponseTime/{id}", async (CancellationToken token, [FromRoute] string id) =>
 {
     var jitter = Random.Shared.Next(-800, 800);
-    var delayMilliseconds = 1_000 + jitter;
-    await Task.Delay(TimeSpan.FromMilliseconds(delayMilliseconds), token);
-    return $"Deferred response with ~{delayMilliseconds}ms from server to request #{id}";
+    var delay = TimeSpan.FromSeconds(1) + TimeSpan.FromMilliseconds(jitter);
+    await Task.Delay(delay, token);
+    return $"Deferred response with ~{delay.TotalMilliseconds}ms from server to request #{id}";
 });
 
 app.Run("http://localhost:45179");

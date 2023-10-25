@@ -5,30 +5,34 @@ namespace PollyDemos;
 
 /// <summary>
 /// Imagine a microservice with an endpoint of varying response times.
-/// Most of the times it responds in a timely manner, but sometimes it takes too long to send a response.
+/// Most of the time it responds in a timely manner, but sometimes it takes too long to send a response.
 ///
 /// This problem is known as long tail latency. One of the well-known solutions for tail-tolerance is called hedged request.
 /// A hedged request is issued (as a mitigation action) when the original request's response is considered too slow.
 /// So, we have two pending requests: the original request and the hedged request.
-/// The faster response will be propagated back to the caller. The slower will receive the cancellation request signal.
+/// The faster response will be propagated back to the caller. The slower one will receive the cancellation request signal.
 ///
 /// Observations:
 /// When the response arrives less than a second then the hedging will not be triggered.
-/// When the response did not arrive on time then a second (hedged) request is issued as well.
-/// Only the faster one is awaited (the other is cancelled).
+/// When the response does not arrive on time then a second (hedged) request is issued as well.
+/// Only the faster one is awaited (the other one is cancelled).
 ///
-/// We suggest to access the PollyTestWebApi's requests log to see the duplicate requests.
+/// Take a look at the logs for PollyTestWebApi's requests to see the duplicates.
 /// </summary>
 public class Demo12_LatencyHedging : DemoBase
 {
     // This demo also shows how to use resilience context.
     // We will set the request id just before we issue the original request.
     // We access this id inside the OnHedging delegate.
-    // The resilience context is type-safe that's why we need to use ResiliencePropertyKey<int>.
+    // The resilience context is generic, so we need to use the ResiliencePropertyKey<int> type.
     private readonly ResiliencePropertyKey<int> requestIdKey = new("RequestId");
 
+    // We will set the attempt number inside the OnHedging delegate.
+    // We access this number inside the decorated callback.
+    private readonly ResiliencePropertyKey<int> attemptNumberKey = new("AttemptNumber");
+
     public override string Description =>
-        "Demonstrates a mitigation action for slow responses. If the response doesn't arrive less than a second then it will issue a new request. The hedging strategy waits for the fastest response.";
+        "Demonstrates a mitigation action for slow responses. If the response doesn't arrive within a second then it will issue a new request. The hedging strategy waits for the fastest response.";
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)
     {
@@ -46,8 +50,13 @@ public class Demo12_LatencyHedging : DemoBase
             OnHedging = args =>
             {
                 // Retrieve the request id from the context
-                var requestId = args.ActionContext.Properties.GetValue(requestIdKey, 0);
-                progress.Report(ProgressWithMessage($"Strategy logging: Slow response for request #{requestId} detected. Preparing to execute the {args.AttemptNumber} hedged action.", Color.Yellow));
+                var requestId = $"{args.ActionContext.Properties.GetValue(requestIdKey, 0)}-{args.AttemptNumber}";
+
+                // Set the attempt number on the context
+                var hedgedRequestNumber = args.AttemptNumber + 1;
+                args.ActionContext.Properties.Set(attemptNumberKey, hedgedRequestNumber);
+
+                progress.Report(ProgressWithMessage($"Strategy logging: Slow response for request #{requestId} detected. Preparing to execute hedged action {hedgedRequestNumber}.", Color.Yellow));
                 Retries++;
                 return default;
             }
@@ -67,9 +76,12 @@ public class Demo12_LatencyHedging : DemoBase
             {
                 // Set the request id just before we issue the original request
                 context.Properties.Set(requestIdKey, TotalRequests);
-                var response = await strategy.ExecuteAsync(async _ =>
-                    await client.GetAsync($"{Configuration.WEB_API_ROOT}/api/VaryingResponseTime/{TotalRequests}", cancellationToken),
-                    context);
+                var response = await strategy.ExecuteAsync(async ctx =>
+                {
+                    // Retrieve the attempt number from the context
+                    var requestId = $"{TotalRequests}-{ctx.Properties.GetValue(attemptNumberKey, 0)}";
+                    return await client.GetAsync($"{Configuration.WEB_API_ROOT}/api/VaryingResponseTime/{requestId}", cancellationToken);
+                }, context);
 
                 var responseBody = await response.Content.ReadAsStringAsync();
                 progress.Report(ProgressWithMessage($"Response : {responseBody}", Color.Green));
@@ -77,7 +89,8 @@ public class Demo12_LatencyHedging : DemoBase
             }
             catch (Exception e)
             {
-                progress.Report(ProgressWithMessage($"Request {TotalRequests} eventually failed with: {e.Message}", Color.Red));
+                var requestId = $"{TotalRequests}-{context.Properties.GetValue(attemptNumberKey, 0)}";
+                progress.Report(ProgressWithMessage($"Request {requestId} eventually failed with: {e.Message}", Color.Red));
                 EventualFailures++;
             }
             finally
