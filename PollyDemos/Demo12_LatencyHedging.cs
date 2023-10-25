@@ -15,7 +15,7 @@ namespace PollyDemos;
 /// Observations:
 /// When the response arrives less than a second then the hedging will not be triggered.
 /// When the response does not arrive on time then a second (hedged) request is issued as well.
-/// Only the faster one is waited (the other one is cancelled).
+/// Only the faster one is waited for (the other one is cancelled).
 ///
 /// Take a look at the logs for PollyTestWebApi's requests to see the duplicates.
 /// </summary>
