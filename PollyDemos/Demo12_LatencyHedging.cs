@@ -4,19 +4,24 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Imagine a microservice with an endpoint of varying response times.
-/// Most of the time it responds in a timely manner, but sometimes it takes too long to send a response.
-///
-/// This problem is known as long tail latency. One of the well-known solutions for tail-tolerance is called hedged request.
-/// A hedged request is issued (as a mitigation action) when the original request's response is considered too slow.
-/// So, we have two pending requests: the original request and the hedged request.
-/// The faster response will be propagated back to the caller. The slower one will receive the cancellation request signal.
-///
+/// <para>
+///     Imagine a microservice with an endpoint of varying response times.<br/>
+///     Most of the time it responds in a timely manner, but sometimes it takes too long to send a response.
+/// </para>
+/// <para>
+///     This problem is known as long tail latency. One of the well-known solutions for tail-tolerance is called hedged request.<br/>
+///     A hedged request is issued (as a mitigation action) when the original request's response is considered too slow.<br/>
+///     So, we have two pending requests: the original request and the hedged request.<br/>
+///     The faster response will be propagated back to the caller. The slower one will receive the cancellation request signal.
+/// </para>
+/// <para>
 /// Observations:
-/// When the response arrives less than a second then the hedging will not be triggered.
-/// When the response does not arrive on time then a second (hedged) request is issued as well.
-/// Only the faster one is waited for (the other one is cancelled).
-///
+///     <list type="bullet">
+///         <item>When the response arrives less than a second then the hedging will not be triggered.</item>
+///         <item>When the response does not arrive on time then a second (hedged) request is issued as well.</item>
+///         <item>Only the faster one is waited for (the other one is cancelled).</item>
+///     </list>
+/// </para>
 /// Take a look at the logs for PollyTestWebApi's requests to see the duplicates.
 /// </summary>
 public class Demo12_LatencyHedging : DemoBase
