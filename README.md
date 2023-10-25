@@ -56,6 +56,8 @@ flowchart LR
 | 10 | Without isolation: Faulting calls swamp resources, <br/>also prevent good calls | [Code](PollyDemos/Demo10_SharedConcurrencyLimiter.cs) |
 | 11 | With isolation: Faulting calls separated, <br/>do not swamp resources, good calls still succeed | [Code](PollyDemos/Demo11_MultipleConcurrencyLimiters.cs) |
 | 12 | Hedging in latency mode | [Code](PollyDemos/Demo12_LatencyHedging.cs) |
+| 13 | Hedging in fallback mode: retry only | [Code](PollyDemos/Demo13_FallbackHedging-RetryOnly.cs) |
+| 14 | Hedging in fallback mode: retry with fallback | [Code](PollyDemos/Demo14_FallbackHedging-RetryWithFallback.cs) |
 
 
 ## Want further information?

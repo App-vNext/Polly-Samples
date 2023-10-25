@@ -48,6 +48,10 @@ List<ConsoleMenuItem> menu = new()
         InvokeDemo<Demo11_MultipleConcurrencyLimiters>),
     new("12 - Hedging in latency mode",
         InvokeDemo<Demo12_LatencyHedging>),
+    new("13 - Hedging in fallback mode: retry only",
+        InvokeDemo<Demo13_FallbackHedging_RetryOnly>),
+    new("14 - Hedging in fallback mode: retry with fallback",
+        InvokeDemo<Demo14_FallbackHedging_RetryWithFallback>),
 
     new("-=Exit=-", () => Environment.Exit(0))
 };

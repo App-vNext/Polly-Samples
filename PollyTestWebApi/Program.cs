@@ -46,4 +46,15 @@ app.MapGet("/api/VaryingResponseTime/{id}", async (CancellationToken token, [Fro
     return $"Deferred response with ~{delay.TotalMilliseconds}ms from server to request #{id}";
 });
 
+// Register a cancellable endpoint that is not rate limited.
+// It is used by the demo 13, 14 (hedging)
+app.MapGet("/api/VaryingResponseStatus/{id}", async (CancellationToken token, [FromRoute] string id) =>
+{
+    var isSuccess = Random.Shared.NextDouble() > 0.5d;
+    await Task.Delay(TimeSpan.FromSeconds(0.5));
+    return isSuccess
+        ? Results.Ok($"Success response with from server to request #{id}")
+        : Results.Problem($"Failed response with from server to request #{id}", statusCode: 418);
+});
+
 app.Run("http://localhost:45179");

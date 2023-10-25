@@ -96,6 +96,12 @@
                     <ComboBoxItem Name="Demo12_LatencyHedging">
                         12 - Hedging in latency mode
                     </ComboBoxItem>
+                    <ComboBoxItem Name="Demo13_FallbackHedging_RetryOnly">
+                        13 - Hedging in fallback mode: retry only
+                    </ComboBoxItem>
+                    <ComboBoxItem Name="Demo14_FallbackHedging_RetryWithFallback">
+                        14 - Hedging in fallback mode: retry with fallback
+                    </ComboBoxItem>
 
                 </ComboBox>
 
