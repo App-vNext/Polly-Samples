@@ -18,7 +18,7 @@ flowchart LR
 
 ## Exposed functionality
 
-- It exposes three simple endpoints.
+- It exposes several simple endpoints.
 - All of them echo back the received parameter (`{id}`) with some hard-coded prefixes.
 
 ### `GET /api/Values/{id}`
@@ -35,9 +35,15 @@ flowchart LR
 
 ### `GET /api/NonThrottledFaulting/{id}`
 
-- It waits **5 seconds** before returns a string.
+- It waits **5 seconds** before returning a string.
 - It emulates slow processing.
 - As its name suggests, it is **not** decorated with rate limiting.
+
+### `GET /api/VaryingResponseTime/{id}`
+
+- It waits **1 second** +/- several milliseconds before returning a string.
+- It emulates varying response processing.
+- It is **not** decorated with rate limiting.
 
 ## Structure
 

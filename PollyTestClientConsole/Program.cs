@@ -46,6 +46,8 @@ List<ConsoleMenuItem> menu = new()
         InvokeDemo<Demo10_SharedConcurrencyLimiter>),
     new("11 - With isolation: Faulting calls separated, do not swamp resources, good calls still succeed",
         InvokeDemo<Demo11_MultipleConcurrencyLimiters>),
+    new("12 - Hedging in latency mode",
+        InvokeDemo<Demo12_LatencyHedging>),
 
     new("-=Exit=-", () => Environment.Exit(0))
 };
