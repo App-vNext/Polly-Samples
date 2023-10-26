@@ -51,9 +51,11 @@ app.MapGet("/api/VaryingResponseTime/{id}", async (CancellationToken token, [Fro
 app.MapGet("/api/VaryingResponseStatus/{id}", async (CancellationToken token, [FromRoute] string id, [FromQuery] bool? useJitter) =>
 {
     var jitter = Random.Shared.Next(-200, 200);
-    var delay = useJitter == false
-     ? TimeSpan.FromSeconds(0.5)
-     : TimeSpan.FromSeconds(0.5) + TimeSpan.FromMilliseconds(jitter);
+    var delay = TimeSpan.FromSeconds(0.5);
+    if(useJitter == true)
+    {
+        delay += TimeSpan.FromMilliseconds(jitter);
+    }
     await Task.Delay(delay);
 
     var isSuccess = Random.Shared.NextDouble() > 0.5d;
