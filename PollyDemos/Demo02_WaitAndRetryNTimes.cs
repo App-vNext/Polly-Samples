@@ -4,13 +4,27 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates the Retry strategy with delays between retry attempts.
-/// Loops through a series of HTTP requests, keeping track of each requested
-/// item and reporting server failures when encountering exceptions.
-///
-/// Observations: We now have waits among the retries.
-/// In this case, still not enough wait - or not enough retries - for the underlying system to have recovered.
-/// So we still fail some calls.
+/// <para>
+///     Demonstrates the Retry strategy with delays between retry attempts. <br/>
+///     Loops through a series of HTTP requests, keeping track of each requested <br/>
+///     item and reporting server failures when encountering exceptions.
+/// </para>
+/// <para>
+///     Observations:
+///     <list type="bullet">
+///         <item>We now have waits among the retries.</item>
+///         <item>In this case, still not enough wait / not enough retries <br/>
+///         for the underlying system to have recovered.</item>
+///         <item>So we still fail some calls.</item>
+///     </list>
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: ... request #N(...)": Response received on time.</item>
+///         <item>"Request N eventually failed ... (Too Many Requests)": Request runs out of retry attempts.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo02_WaitAndRetryNTimes : DemoBase
 {
