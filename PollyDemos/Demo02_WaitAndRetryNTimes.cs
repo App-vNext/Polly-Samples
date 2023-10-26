@@ -22,7 +22,7 @@ namespace PollyDemos;
 ///     How to read the demo logs:
 ///     <list type="bullet">
 ///         <item>"Response: ... request #N(...)": Response received on time.</item>
-///         <item>"Request N eventually failed ... (Too Many Requests)": Request runs out of retry attempts.</item>
+///         <item>"Request N eventually failed ... (Too Many Requests)": Request runs out of retry attempts, shows the rate limited response.</item>
 ///     </list>
 /// </para>
 /// </summary>
