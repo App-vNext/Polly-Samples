@@ -24,7 +24,7 @@ namespace PollyDemos;
 ///     <list type="bullet">
 ///         <item>Because the separate 'good' and 'faulting' streams are isolated in separate concurrency limiters,</item>
 ///         <item>the 'faulting' calls still back up (high pending and failing number),</item>
-///         <item>but 'good' calls (in a separate limiter) are *unaffected* (all succeed; none pending or failing).</item>
+///         <item>but 'good' calls (in a separate limiter) are <strong>unaffected</strong> (all succeed; none pending or failing).</item>
 ///     </list>
 /// </para>
 /// <para>

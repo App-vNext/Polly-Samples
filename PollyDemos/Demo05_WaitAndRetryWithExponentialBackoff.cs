@@ -14,10 +14,10 @@ namespace PollyDemos;
 ///     <list type="bullet">
 ///         <item>All calls still succeed! Yay!</item>
 ///         <item>But we didn't hammer the underlying server so hard - we backed off.</item>
-///         <item>That's healthier for it, if it might be struggling ...<br/>
-///         ... and if a lot of clients might be doing this simultaneously.<br/>
-///         ... What if the underlying system was totally down tho?<br/>
-///         ... Keeping trying forever would be counterproductive (so, see Demo06)</item>
+///         <item>That's healthier for it, if it might be struggling...<br/>
+///         and if a lot of clients might be doing this simultaneously.<br/>
+///         What if the underlying system was totally down though?<br/>
+///         Keeping trying forever would be counterproductive (see Demo06).</item>
 ///     </list>
 /// </para>
 /// <para>

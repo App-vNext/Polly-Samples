@@ -13,7 +13,7 @@ namespace PollyDemos;
 ///     Observations:
 ///     <list type="bullet">
 ///         <item>We now have waits and enough retries: all calls now succeed! Yay!</item>
-///         <item>But we kind-a had to guess how many retries would be enough before the server responded again ...<br/>
+///         <item>But we kinda had to guess how many retries would be enough before the server responded again...<br/>
 ///         (and we're hammering that server with retries)</item>
 ///     </list>
 /// </para>

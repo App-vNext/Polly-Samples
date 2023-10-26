@@ -14,14 +14,14 @@ namespace PollyDemos;
 /// </para>
 /// <para>
 ///     Discussion:  What if the underlying system was completely down? <br/>
-///     Keeping retrying would be pointless ...<br/>
-///     .. and would leave the client hanging, retrying for successes which never come.
+///     Keeping retrying would be pointless...<br/>
+///     and would leave the client hanging, retrying for successes which never come.
 /// </para>
 /// <para>
 ///     Enter circuit-breaker:
 ///     <list type="bullet">
-///         <item>After too many failures, breaks the circuit for a period, during which it blocks calls + fails fast.</item>
-///         <item>Protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover)</item>
+///         <item>After too many failures, breaks the circuit for a period, during which it blocks calls and fails fast.</item>
+///         <item>Protects the downstream system from too many calls if it's really struggling (reduces load, so it can recover).</item>
 ///         <item>Allows the client to get a fail response fast, not wait for ages, if downstream is AWOL.</item>
 ///     </list>
 /// </para>
@@ -29,8 +29,8 @@ namespace PollyDemos;
 ///     Observations:
 ///     <list type="bullet">
 ///         <item>Note how after the circuit decides to break, subsequent calls fail faster.</item>
-///         <item>Note how breaker gives underlying system time to recover ...<br/>
-///         ... by the time circuit closes again, underlying system has recovered!</item>
+///         <item>Note how breaker gives underlying system time to recover...<br/>
+///         by the time circuit closes again, underlying system has recovered!</item>
 ///     </list>
 /// </para>
 /// <para>

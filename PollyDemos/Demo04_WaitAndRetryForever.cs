@@ -15,8 +15,8 @@ namespace PollyDemos;
 ///         <item>We no longer have to guess how many retries are enough.</item>
 ///         <item>All calls still succeed! Yay!</item>
 ///         <item>But we're still hammering that underlying server with retries.</item>
-///         <item>Imagine if lots of clients were doing that simultaneously <br/>
-///         ... could just increase load on an already-struggling server!</item>
+///         <item>Imagine if lots of clients were doing that simultaneously...<br/>
+///         could just increase load on an already-struggling server!</item>
 ///     </list>
 /// </para>
 /// <para>
