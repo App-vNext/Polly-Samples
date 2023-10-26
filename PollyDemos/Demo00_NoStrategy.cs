@@ -4,9 +4,19 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Uses no strategy.  Demonstrates behavior of 'faulting server' we are testing against.
-/// Loops through a series of HTTP requests, keeping track of each requested
-/// item and reporting server failures when encountering exceptions.
+/// <para>
+///     Uses no strategy. <br/>
+///     Demonstrates behavior of 'faulting server' we are testing against <br/>
+///     Loops through a series of HTTP requests, keeping track of each requested <br/>
+///     item and reporting server failures when encountering exceptions.
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: ... request #N(...)": Response received on time.</item>
+///         <item>"Request N eventually failed ... (Too Many Requests)": Request is rejected due to rate limit exceeded.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo00_NoStrategy : DemoBase
 {

@@ -6,19 +6,36 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
-/// The 'good' endpoint responds quickly.  The 'faulting' endpoint either faults or responds slowly.
-/// Imagine the _caller_ has limited capacity (all single instances of upstream services/webapps eventually hit some capacity limit).
-///
-/// This demo 10 does not separate call streams into separate concurrency limiters.
-/// A random combination of calls to the 'good' and 'faulting' endpoint are made.
-///
-/// Observations:
-/// Because concurrency limiters do not isolate the separate streams of calls,
-/// eventually all the caller's capacity is taken up waiting on the 'faulting' downstream calls.
-/// So the performance of 'good' calls is starved of resource, and starts suffering too.
-/// Watch how the number of pending and failing calls to the good endpoint also climbs,
-/// as the faulting calls saturate all resources in the caller.
+/// <para>
+///     Scenario:
+///     <list type="bullet">
+///         <item>Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.</item>
+///         <item>The 'good' endpoint responds quickly. The 'faulting' endpoint faults, and responds slowly.</item>
+///         <item>Imagine the caller has limited capacity (all single instances of services/webapps eventually hit some capacity limit).</item>
+///     </list>
+/// </para>
+/// <para>
+///     This demo does not separate call streams into separate concurrency limiters.<br/>
+///     A random combination of calls to the 'good' and 'faulting' endpoint are made.
+/// </para>
+/// <para>
+///     Observations:
+///     <list type="bullet">
+///         <item>Because concurrency limiters do not isolate the separate streams of calls,
+///         eventually all the caller's capacity is taken up waiting on the 'faulting' downstream calls.</item>
+///         <item>So the performance of 'good' calls is starved of resource, and starts suffering too.</item>
+///         <item>Watch how the number of pending and failing calls to the good endpoint also climbs,
+///         as the faulting calls saturate all resources in the caller.</item>
+///     </list>
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: Fast ... to request #N": Response received from nonthrottledgood route.</item>
+///         <item>"Response: Slow... to request #N": Response received from nonthrottledfaulting route.</item>
+///         <item>"Request N failed with: ... rate limiter": Concurrency limit is reached, request is rejected.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo10_SharedConcurrencyLimiter : ConcurrencyLimiterDemoBase
 {

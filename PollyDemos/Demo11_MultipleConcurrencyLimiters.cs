@@ -6,22 +6,39 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Same scenario as previous demo:
-/// Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.
-/// The 'good' endpoint responds quickly.  The 'faulting' endpoint faults, and responds slowly.
-/// Imagine the _caller_ has limited capacity (all single instances of services/webapps eventually hit some capacity limit).
-///
-/// Compared to demo 10, this demo 11 isolates the calls
-/// to the 'good' and 'faulting' endpoints in separate concurrency limiters.
-/// A random combination of calls to the 'good' and 'faulting' endpoint are made.
-///
-/// Observations:
-/// Because the separate 'good' and 'faulting' streams are isolated in separate concurrency limiters,
-/// the 'faulting' calls still back up (high pending and failing number), but
-/// 'good' calls (in a separate concurrency limiter) are *unaffected* (all succeed; none pending or failing).
-///
-/// Concurrency limiters can be used to implement the bulkhead resiliency pattern.
-/// Bulkheads' motto: making sure one fault doesn't sink the whole ship!
+/// <para>
+///     Same scenario as previous demo:
+///     <list type="bullet">
+///         <item>Imagine a microservice or web front end (the upstream caller) trying to call two endpoints on a downstream system.</item>
+///         <item>The 'good' endpoint responds quickly. The 'faulting' endpoint faults, and responds slowly.</item>
+///         <item>Imagine the caller has limited capacity (all single instances of services/webapps eventually hit some capacity limit).</item>
+///     </list>
+/// </para>
+/// <para>
+///     Compared to demo 10, this demo isolates the calls
+///     to the 'good' and 'faulting' endpoints in separate concurrency limiters. <br/>
+///     A random combination of calls to the 'good' and 'faulting' endpoint are made.
+/// </para>
+/// <para>
+///     Observations:
+///     <list type="bullet">
+///         <item>Because the separate 'good' and 'faulting' streams are isolated in separate concurrency limiters,</item>
+///         <item>the 'faulting' calls still back up (high pending and failing number),</item>
+///         <item>but 'good' calls (in a separate limiter) are <strong>unaffected</strong> (all succeed; none pending or failing).</item>
+///     </list>
+/// </para>
+/// <para>
+///     Concurrency limiters can be used to implement the bulkhead resiliency pattern. <br/>
+///     Bulkheads' motto: making sure one fault doesn't sink the whole ship!
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: Fast ... to request #N": Response received from nonthrottledgood route.</item>
+///         <item>"Response: Slow... to request #N": Response received from nonthrottledfaulting route.</item>
+///         <item>"Request N failed with: ... rate limiter": Concurrency limit is reached, request is rejected.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo11_MultipleConcurrencyLimiters : ConcurrencyLimiterDemoBase
 {

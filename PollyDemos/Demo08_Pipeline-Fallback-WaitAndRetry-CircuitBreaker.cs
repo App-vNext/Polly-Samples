@@ -7,17 +7,31 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates using a Retry, a CircuitBreaker and two Fallback strategies.
-/// Same as Demo07 but now uses Fallback strategies to provide substitute values, when the call still fails overall.
-///
-/// Loops through a series of HTTP requests, keeping track of each requested
-/// item and reporting server failures when encountering exceptions.
-///
-/// Observations:
-/// - operation is identical to Demo06 and Demo07
-/// - except fallback strategies provide nice substitute messages, if still fails overall
-/// - OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07
-/// - also demonstrates how you can use the same kind of strategy (Fallback in this case) twice (or more) in a pipeline.
+/// <para>
+///     Demonstrates using a Retry, a CircuitBreaker and two Fallback strategies. <br/>
+///     Same as Demo07 but now uses Fallback strategies to provide substitute values, when the call still fails overall.
+/// </para>
+/// <para>
+///     Loops through a series of HTTP requests, keeping track of each requested <br/>
+///     item and reporting server failures when encountering exceptions.
+/// </para>
+/// <para>
+///     Observations:
+///     <list type="bullet">
+///         <item>operation is identical to Demo06 and Demo07</item>
+///         <item>except fallback strategies provide nice substitute messages, if still fails overall</item>
+///         <item>OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07</item>
+///         <item>also demonstrates how you can use the same kind of strategy <br/>(Fallback in this case) twice (or more) in a pipeline.</item>
+///     </list>
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: ... request #N(...)": Response received on time.</item>
+///         <item>"Fallback catches failed with: ...": Shortcut request due to broken circuit is caught by the fallback.</item>
+///         <item>"Response: Please try again later [message ...": Shortcut request's response is substituted.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo08_Pipeline_Fallback_WaitAndRetry_CircuitBreaker : DemoBase
 {

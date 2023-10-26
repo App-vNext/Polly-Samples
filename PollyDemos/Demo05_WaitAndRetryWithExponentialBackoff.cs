@@ -4,17 +4,28 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates Retry strategy with calculated retry delays to back off.
-/// Loops through a series of HTTP requests, keeping track of each requested
-/// item and reporting server failures when encountering exceptions.
-///
-/// Observations: All calls still succeed! Yay!
-/// But we didn't hammer the underlying server so hard - we backed off.
-/// That's healthier for it, if it might be struggling ...
-/// ... and if a lot of clients might be doing this simultaneously.
-///
-/// ... What if the underlying system was totally down tho?
-/// ... Keeping trying forever would be counterproductive (so, see Demo06)
+/// <para>
+///     Demonstrates Retry strategy with calculated retry delays to back off. <br/>
+///     Loops through a series of HTTP requests, keeping track of each requested <br/>
+///     item and reporting server failures when encountering exceptions.
+/// </para>
+/// <para>
+///     Observations:
+///     <list type="bullet">
+///         <item>All calls still succeed! Yay!</item>
+///         <item>But we didn't hammer the underlying server so hard - we backed off.</item>
+///         <item>That's healthier for it, if it might be struggling...<br/>
+///         and if a lot of clients might be doing this simultaneously.<br/>
+///         What if the underlying system was totally down though?<br/>
+///         Keeping trying forever would be counterproductive (see Demo06).</item>
+///     </list>
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: ... request #N(...)": Response received on time.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo05_WaitAndRetryWithExponentialBackoff : DemoBase
 {

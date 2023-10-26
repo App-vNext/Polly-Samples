@@ -7,15 +7,29 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates using the Retry and CircuitBreaker strategies.
-/// Same as Demo06 but this time combines the strategies by using ResiliencePipelineBuilder.
-///
-/// Loops through a series of HTTP requests, keeping track of each requested
-/// item and reporting server failures when encountering exceptions.
-///
-/// Observations:
-/// The operation is identical to Demo06.
-/// The code demonstrates how using the ResiliencePipelineBuilder makes your combined pipeline more concise, at the point of execution.
+/// <para>
+///     Demonstrates using the Retry and CircuitBreaker strategies.<br/>
+///     Same as Demo06 but this time combines the strategies by using ResiliencePipelineBuilder.
+/// </para>
+/// <para>
+///     Loops through a series of HTTP requests, keeping track of each requested <br/>
+///     item and reporting server failures when encountering exceptions.
+/// </para>
+/// <para>
+///     Observations:
+///     <list type="bullet">
+///         <item>The operation is identical to Demo06.</item>
+///         <item>The code demonstrates how using the ResiliencePipelineBuilder <br/>
+///         makes your combined pipeline more concise, at the point of execution.</item>
+///     </list>
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: ... request #N(...)": Response received on time.</item>
+///         <item>"Request N failed with: BrokenCircuitException": Request is shortcut due to broken circuit.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo07_WaitAndRetryNestingCircuitBreakerUsingPipeline : DemoBase
 {
