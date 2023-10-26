@@ -19,8 +19,8 @@ namespace PollyDemos;
 ///     Observations:
 ///     <list type="bullet">
 ///         <item>operation is identical to Demo06 and Demo07</item>
-///         <item>except fallback strategies provide nice substitute messages</item>
-///         <item>if still fails overall OnFallback delegate captures the stats <br/>that were captured in try/catches in demos 06 and 07</item>
+///         <item>except fallback strategies provide nice substitute messages, if still fails overall</item>
+///         <item>OnFallback delegate captures the stats that were captured in try/catches in demos 06 and 07</item>
 ///         <item>also demonstrates how you can use the same kind of strategy <br/>(Fallback in this case) twice (or more) in a pipeline.</item>
 ///     </list>
 /// </para>
