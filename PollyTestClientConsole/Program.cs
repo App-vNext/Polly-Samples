@@ -52,6 +52,8 @@ List<ConsoleMenuItem> menu = new()
         InvokeDemo<Demo13_FallbackHedging_RetryOnly>),
     new("14 - Hedging in fallback mode: retry with fallback",
         InvokeDemo<Demo14_FallbackHedging_RetryWithFallback>),
+    new("15 - Hedging in parallel mode",
+        InvokeDemo<Demo15_ParallelHedging>),
 
     new("-=Exit=-", () => Environment.Exit(0))
 };

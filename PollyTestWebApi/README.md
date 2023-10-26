@@ -53,7 +53,7 @@ flowchart LR
 
 #### `GET /api/VaryingResponseStatus/{id}`
 
-- It waits **half a second** before returning a response.
+- It waits **half a second** (optionally +/- several milliseconds) before returning a response.
 - It emulates varying response status codes.
 - It is **not** decorated with rate limiting.
 

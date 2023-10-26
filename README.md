@@ -58,6 +58,7 @@ flowchart LR
 | 12 | Hedging in latency mode | [Code](PollyDemos/Demo12_LatencyHedging.cs) |
 | 13 | Hedging in fallback mode: retry only | [Code](PollyDemos/Demo13_FallbackHedging-RetryOnly.cs) |
 | 14 | Hedging in fallback mode: retry with fallback | [Code](PollyDemos/Demo14_FallbackHedging-RetryWithFallback.cs) |
+| 15 | Hedging in parallel mode | [Code](PollyDemos/Demo15_ParallelHedging.cs) |
 
 
 ## Want further information?

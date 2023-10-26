@@ -102,6 +102,9 @@
                     <ComboBoxItem Name="Demo14_FallbackHedging_RetryWithFallback">
                         14 - Hedging in fallback mode: retry with fallback
                     </ComboBoxItem>
+                    <ComboBoxItem Name="Demo15_ParallelHedging">
+                        15 - Hedging in parallel mode
+                    </ComboBoxItem>
 
                 </ComboBox>
 
