@@ -52,7 +52,7 @@ app.MapGet("/api/VaryingResponseStatus/{id}", async (CancellationToken token, [F
 {
     var jitter = Random.Shared.Next(-200, 200);
     var delay = TimeSpan.FromSeconds(0.5);
-    if(useJitter == true)
+    if (useJitter == true)
     {
         delay += TimeSpan.FromMilliseconds(jitter);
     }
