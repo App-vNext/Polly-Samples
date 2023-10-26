@@ -7,17 +7,32 @@ using PollyDemos.OutputHelpers;
 namespace PollyDemos;
 
 /// <summary>
-/// Demonstrates using a Retry, a Timeout and two Fallback strategies.
-/// In this demo, the delay in the retry is deliberately so long that the timeout strategy wrapping it will time it out
-/// (in lieu for now of a demo server endpoint responding slowly).
-///
-/// Loops through a series of HTTP requests, keeping track of each requested
-/// item and reporting server failures when encountering exceptions.
-///
-/// Observations:
-/// - though the console logs that a retry will be made, the 4-second wait before the retry is pre-emptively timed-out by the two-second timeout
-/// - a fallback strategy then provides substitute message for the user
-/// - otherwise similar to demo08.
+/// <para>
+///     Demonstrates using a Retry, a Timeout and two Fallback strategies. <br/>
+///     In this demo, the delay in the retry is deliberately so long that the timeout strategy wrapping it will time it out <br/>
+///     (in lieu for now of a demo server endpoint responding slowly).
+/// </para>
+/// <para>
+///     Loops through a series of HTTP requests, keeping track of each requested <br/>
+///     item and reporting server failures when encountering exceptions.
+/// </para>
+/// <para>
+///     Observations:
+///     <list type="bullet">
+///         <item>though the console logs that a retry will be made, the 4-second wait before the retry <br/>
+///         is preemptively timed-out by the two-second timeout</item>
+///         <item>a fallback strategy then provides substitute message for the user</item>
+///         <item>otherwise similar to demo08.</item>
+///     </list>
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Response: ... request #N(...)": Response received on time.</item>
+///         <item>"Fallback catches failed with: ...": Preemptively timed-out request is caught by the fallback.</item>
+///         <item>"Response: Please try again later [Fallback for timeout]": Preemptively timed-out request's response is substituted.</item>
+///     </list>
+/// </para>
 /// </summary>
 public class Demo09_Pipeline_Fallback_Timeout_WaitAndRetry : DemoBase
 {
