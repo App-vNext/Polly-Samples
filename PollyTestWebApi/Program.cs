@@ -25,7 +25,7 @@ app.MapControllers();
 app.UseRateLimiter();
 
 // Register two endpoints that are not rate limited.
-// They are used by demo 10 and 11 (concurrency limiter)
+// They are used by demos 10 and 11 (concurrency limiter)
 app.MapGet("/api/NonThrottledGood/{id}", ([FromRoute] int id) =>
 {
     return $"Fast response from server to request #{id}";
@@ -51,7 +51,7 @@ app.MapGet("/api/VaryingResponseTime/{id}", async (CancellationToken token, [Fro
 app.MapGet("/api/VaryingResponseStatus/{id}", async (CancellationToken token, [FromRoute] string id, [FromQuery] bool? useJitter) =>
 {
     var jitter = Random.Shared.Next(-200, 200);
-    var delay = useJitter == true
+    var delay = useJitter == false
      ? TimeSpan.FromSeconds(0.5)
      : TimeSpan.FromSeconds(0.5) + TimeSpan.FromMilliseconds(jitter);
     await Task.Delay(delay);
