@@ -22,6 +22,13 @@ namespace PollyDemos;
 ///         <item>Only the faster one is waited for (the other one is cancelled).</item>
 ///     </list>
 /// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Deferred ... to request #N-0": The original request was faster.</item>
+///         <item>"Deferred ... to request #N-1": The hedged request was faster.</item>
+///     </list>
+/// </para>
 /// Take a look at the logs for PollyTestWebApi's requests to see the duplicates.
 /// </summary>
 public class Demo12_LatencyHedging : DemoBase

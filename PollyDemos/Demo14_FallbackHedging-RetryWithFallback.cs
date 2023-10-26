@@ -18,7 +18,15 @@ namespace PollyDemos;
 ///     <list type="bullet">
 ///         <item>Same as in the previous demo.</item>
 ///         <item>But this time hedging will act as a combined retry and fallback strategy.</item>
-///         <item><When hedging runs out of attempts, it returns a static fallback response.</item>
+///         <item>When hedging runs out of attempts, it returns a static fallback response.</item>
+///     </list>
+/// </para>
+/// <para>
+///     How to read the demo logs:
+///     <list type="bullet">
+///         <item>"Success ... to request #N-0": The original request succeeded.</item>
+///         <item>"Success ... to request #N-1": The first hedged request succeeded.</item>
+///         <item>"Response : Fallback response was provided": The last hedged request succeeded.</item>
 ///     </list>
 /// </para>
 /// Take a look at the logs for PollyTestWebApi's requests to see the duplicates.
@@ -52,7 +60,7 @@ public class Demo14_FallbackHedging_RetryWithFallback : DemoBase
                 var hedgedRequestNumber = args.AttemptNumber + 1;
                 args.ActionContext.Properties.Set(attemptNumberKey, hedgedRequestNumber);
 
-                progress.Report(ProgressWithMessage($"Strategy logging: Failed response for request #{requestId} detected. Preparing to execute the {hedgedRequestNumber} hedged action.", Color.Yellow));
+                progress.Report(ProgressWithMessage($"Strategy logging: Failed response for request #{requestId} detected. Preparing to execute hedged action {hedgedRequestNumber}.", Color.Yellow));
                 Retries++;
                 return default;
             },
@@ -67,7 +75,7 @@ public class Demo14_FallbackHedging_RetryWithFallback : DemoBase
                 }
 
                 // Return a static fallback value
-                var fallbackResponse = new HttpResponseMessage(HttpStatusCode.RequestTimeout) { Content = new StringContent("Fallback response was provided")};
+                var fallbackResponse = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("Fallback response was provided")};
                 return () => Outcome.FromResultAsValueTask(fallbackResponse);
             }
         }).Build();
