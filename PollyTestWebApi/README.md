@@ -59,13 +59,14 @@ flowchart LR
 
 ## Structure
 
-- The [`Program.cs`](Program.cs) contains the majority of the codebase
-  - the rate limiting policy definition
-  - the controllers registration
-  - and it exposes the last two endpoint via Minimal API
 - The [`Controllers/ValueController.cs`](Controllers/ValuesController.cs)
   - contains the definition of the  `/api/Values/{id}` endpoint
   - decorated with the rate limiting policy
+- The [`Program.cs`](Program.cs) contains the majority of the codebase
+  - the rate limiting policy definition
+  - the controllers registration
+  - and it exposes the rest of the endpoints via Minimal API
+
 
 ## How to run?
 
