@@ -1,4 +1,4 @@
-﻿using PollyDemos;
+using PollyDemos;
 using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
@@ -54,6 +54,8 @@ List<ConsoleMenuItem> menu = new()
         InvokeDemo<Demo14_FallbackHedging_RetryWithFallback>),
     new("15 - Hedging in parallel mode",
         InvokeDemo<Demo15_ParallelHedging>),
+    new ("16 - Entity Framework with Retry N times",
+        InvokeDemo<Demo16_EntityFramework_WithRetryNTimes>),
 
     new("-=Exit=-", () => Environment.Exit(0))
 };
