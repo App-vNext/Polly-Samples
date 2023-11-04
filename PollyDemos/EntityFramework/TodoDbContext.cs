@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace PollyDemos.EntityFramework;
+
 /// <summary>
 /// Represents a database context for TodoItems.
 /// </summary>
