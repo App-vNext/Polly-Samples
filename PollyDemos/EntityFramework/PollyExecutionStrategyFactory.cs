@@ -4,6 +4,7 @@ using Polly;
 using Polly.Timeout;
 
 namespace PollyDemos.EntityFramework;
+
 /// <summary>
 /// Represents a factory for creating <see cref="PollyExecutionStrategy"/> instances.
 /// </summary>
