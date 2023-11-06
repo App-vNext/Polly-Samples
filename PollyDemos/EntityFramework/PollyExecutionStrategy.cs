@@ -75,7 +75,8 @@ public class PollyExecutionStrategy : IExecutionStrategy
             => await opState.op(opState.ctx, opState.st, opState.ct);
 
         return await resiliencePipeline.ExecuteAsync(
-            (token) => StaticOperationAsync(operationState),
+            static (state, token) => StaticOperationAsync(state),
+            operationState,
             cancellationToken);
     }
 }
