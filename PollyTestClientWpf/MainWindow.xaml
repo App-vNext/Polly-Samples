@@ -105,6 +105,9 @@
                     <ComboBoxItem Name="Demo15_ParallelHedging">
                         15 - Hedging in parallel mode
                     </ComboBoxItem>
+                    <ComboBoxItem Name="Demo16_EntityFramework_WithRetryNTimes">
+                        16 - Entity Framework with Retry N times
+                    </ComboBoxItem>
 
                 </ComboBox>
 
