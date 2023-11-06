@@ -49,7 +49,7 @@ public class PollyExecutionStrategy : IExecutionStrategy
         static TResult StaticOperation((Func<DbContext, TState, TResult> op, DbContext ctx, TState st) opState)
             => opState.op(opState.ctx, opState.st);
 
-        return resiliencePipeline.Execute(() => StaticOperation(operationState));
+        return resiliencePipeline.Execute(static (state) => StaticOperation(state), operationState);
     }
 
     /// <summary>
