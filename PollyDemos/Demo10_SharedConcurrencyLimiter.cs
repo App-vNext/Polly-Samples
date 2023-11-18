@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-
 using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
@@ -98,9 +97,10 @@ public class Demo10_SharedConcurrencyLimiter : ConcurrencyLimiterDemoBase
 
         // Cancel any unstarted and running tasks.
         internalCancellationTokenSource.Cancel();
+
         try
         {
-            Task.WaitAll(tasks.ToArray());
+            Task.WaitAll([.. tasks]);
         }
         catch
         {

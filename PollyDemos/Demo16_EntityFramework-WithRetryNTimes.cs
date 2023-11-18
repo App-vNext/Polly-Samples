@@ -30,6 +30,7 @@ public class Demo16_EntityFramework_WithRetryNTimes : DemoBase
 {
     public override string Description =>
         "This demo demonstrates using a Retry resilience pipeline with Entity Framework Core.";
+
     public int ItemsAddedToDatabase = 0;
 
     public override async Task ExecuteAsync(CancellationToken cancellationToken, IProgress<DemoProgress> progress)

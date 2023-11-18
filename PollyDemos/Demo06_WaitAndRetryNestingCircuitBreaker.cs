@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Polly.CircuitBreaker;
-
 using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 
