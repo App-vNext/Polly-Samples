@@ -17,7 +17,7 @@ public partial class MainWindow : Window
 
     private readonly object lockObject = new();
 
-    private Statistic[] closingStatistics = Array.Empty<Statistic>();
+    private Statistic[] closingStatistics = [];
 
     private const int MaxStatisticsToShow = 9;
     private const string StatisticBoxPrefix = "Statistic";
@@ -162,7 +162,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (closingStatistics.Any())
+        if (closingStatistics.Length != 0)
         {
             int longestDescription = closingStatistics.Max(s => s.Description.Length);
             foreach (Statistic stat in closingStatistics)

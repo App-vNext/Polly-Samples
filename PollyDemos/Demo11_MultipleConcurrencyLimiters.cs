@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-
 using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 

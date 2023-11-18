@@ -22,8 +22,8 @@ public class TodoDbContext : DbContext
     {
         // Create a logger factory and add a console logger.
         var loggerFactory = LoggerFactory.Create(factory => factory.AddConsole());
-
         optionsBuilder.UseLoggerFactory(loggerFactory);
+
         // Replace the default execution strategy factory with our own Polly-based implementation.
         optionsBuilder.ReplaceService<IExecutionStrategyFactory, PollyExecutionStrategyFactory>();
         optionsBuilder.UseInMemoryDatabase("data");

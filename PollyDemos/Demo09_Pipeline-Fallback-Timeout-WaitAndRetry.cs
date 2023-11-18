@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Polly.Timeout;
-
 using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 

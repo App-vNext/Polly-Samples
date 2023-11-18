@@ -1,27 +1,28 @@
 using PollyDemos;
 using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
-
 using PollyTestClientConsole;
 using PollyTestClientConsole.Menu;
 
-Statistic[] statistics = Array.Empty<Statistic>();
+Statistic[] statistics = [];
 Progress<DemoProgress> progress = new();
+
 progress.ProgressChanged += (_, args) =>
 {
-foreach (var message in args.Messages)
-{
-    WriteLineInColor(message.Message, message.Color.ToConsoleColor());
-}
-statistics = args.Statistics;
+    foreach (var message in args.Messages)
+    {
+        WriteLineInColor(message.Message, message.Color.ToConsoleColor());
+    }
+
+    statistics = args.Statistics;
 };
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Walk through the demos in order, to discover features.
 // See <summary> at top of each demo class, for explanation.
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-List<ConsoleMenuItem> menu = new()
-{
+List<ConsoleMenuItem> menu =
+[
     new("00 - No strategy",
         InvokeDemo<Demo00_NoStrategy>),
     new("01 - Retry N times",
@@ -58,11 +59,10 @@ List<ConsoleMenuItem> menu = new()
         InvokeDemo<Demo16_EntityFramework_WithRetryNTimes>),
 
     new("-=Exit=-", () => Environment.Exit(0))
-};
+];
 
 ConsoleMenu.PrintSplashScreen();
 ConsoleMenu.Run(menu);
-
 
 void InvokeDemo<T>() where T : DemoBase, new()
 {
@@ -88,7 +88,7 @@ void PrintStatisticsThenClear()
         WriteLineInColor($"{stat.Description.PadRight(longestDescription)}: {stat.Value}", stat.Color.ToConsoleColor());
     }
 
-    statistics = Array.Empty<Statistic>();
+    statistics = [];
 }
 
 void WriteLineInColor(string message, ConsoleColor color)

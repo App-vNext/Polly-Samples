@@ -1,29 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Polly;
 
 namespace PollyDemos.EntityFramework;
-
 
 /// <summary>
 /// Represents a class that implements the <see cref="IExecutionStrategy"/> interface using Polly for resilience and transient-fault handling.
 /// </summary>
-public class PollyExecutionStrategy : IExecutionStrategy
+public class PollyExecutionStrategy(ExecutionStrategyDependencies dependencies, ResiliencePipeline resiliencePipeline) : IExecutionStrategy
 {
-    private readonly ExecutionStrategyDependencies dependencies;
-    private readonly ResiliencePipeline resiliencePipeline;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PollyExecutionStrategy"/> class with the specified dependencies and resilience pipeline.
-    /// </summary>
-    /// <param name="dependencies">The dependencies required by the execution strategy.</param>
-    /// <param name="resiliencePipeline">The resilience pipeline used by the execution strategy.</param>
-    public PollyExecutionStrategy(ExecutionStrategyDependencies dependencies, ResiliencePipeline resiliencePipeline)
-    {
-        this.dependencies = dependencies;
-        this.resiliencePipeline = resiliencePipeline;
-    }
-
     /// <summary>
     /// Gets a value indicating whether the execution strategy should retry on failure.
     /// </summary>

@@ -1,8 +1,9 @@
 namespace PollyTestClientConsole.Menu;
+
 public static class ConsoleMenu
 {
-    static readonly List<string> PollyAsciiArt = new()
-    {
+    private static readonly List<string> PollyAsciiArt =
+    [
         "                                                                                ",
         "                                                                                ",
         "                                                               .,,,*******,     ",
@@ -35,17 +36,19 @@ public static class ConsoleMenu
         "            .%%%%    *(((((((( %%%%%%%%%%%*********                             ",
         "                               %%%%%%%%%%%*********                             ",
         "                                                                                ",
-    };
+    ];
 
     public static void PrintSplashScreen()
     {
         Console.Clear();
         Console.WriteLine("Welcome to Polly Demos!");
+
         foreach(var line in PollyAsciiArt)
         {
             Console.WriteLine(line);
         }
-        Thread.Sleep(2_500);
+
+        Thread.Sleep(TimeSpan.FromSeconds(2.5));
     }
 
     public static void Run(List<ConsoleMenuItem> items)
@@ -82,6 +85,7 @@ public static class ConsoleMenu
     private static void WriteMenu(List<ConsoleMenuItem> items, ConsoleMenuItem selectedItem)
     {
         Console.Clear();
+
         foreach (var item in items)
         {
             Console.Write(item == selectedItem ? "> " : " ");

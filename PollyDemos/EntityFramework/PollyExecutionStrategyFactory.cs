@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
-using Polly;
 using Polly.Timeout;
 
 namespace PollyDemos.EntityFramework;
@@ -11,7 +10,7 @@ namespace PollyDemos.EntityFramework;
 public class PollyExecutionStrategyFactory : IExecutionStrategyFactory
 {
     private readonly ExecutionStrategyDependencies dependencies;
-    private readonly ResiliencePipeline resiliencePipeline;
+    private readonly ResiliencePipeline pipeline;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PollyExecutionStrategyFactory"/> class.
@@ -21,13 +20,12 @@ public class PollyExecutionStrategyFactory : IExecutionStrategyFactory
     public PollyExecutionStrategyFactory(ExecutionStrategyDependencies dependencies, ILoggerFactory loggerFactory)
     {
         this.dependencies = dependencies;
-        resiliencePipeline = new ResiliencePipelineBuilder()
+        pipeline = new ResiliencePipelineBuilder()
             .AddRetry(new()
             {
                 BackoffType = DelayBackoffType.Constant,
                 MaxRetryAttempts = 3,
-                ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is InvalidOperationException
-                    or TimeoutRejectedException)
+                ShouldHandle = new PredicateBuilder().Handle<Exception>(ex => ex is InvalidOperationException or TimeoutRejectedException)
             })
             .AddTimeout(TimeSpan.FromSeconds(1))
             .ConfigureTelemetry(loggerFactory)
@@ -37,5 +35,5 @@ public class PollyExecutionStrategyFactory : IExecutionStrategyFactory
     /// <summary>
     /// Creates a new instance of the <see cref="PollyExecutionStrategy"/> class.
     /// </summary>
-    public IExecutionStrategy Create() => new PollyExecutionStrategy(dependencies, resiliencePipeline);
+    public IExecutionStrategy Create() => new PollyExecutionStrategy(dependencies, pipeline);
 }
