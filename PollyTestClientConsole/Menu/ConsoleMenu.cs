@@ -1,3 +1,5 @@
+using Spectre.Console;
+
 namespace PollyTestClientConsole.Menu;
 
 public static class ConsoleMenu
@@ -53,43 +55,25 @@ public static class ConsoleMenu
 
     public static void Run(List<ConsoleMenuItem> items)
     {
-        int index = 0;
-        WriteMenu(items, items[index]);
-
-        bool isRunning = true;
-        while (isRunning)
+        while (true)
         {
-            Action nextAction = Console.ReadKey().Key switch
+            Console.Clear();
+
+            var demo = AnsiConsole.Prompt(
+                new SelectionPrompt<ConsoleMenuItem>()
+                    .Title("Select a demo to run.")
+                    .PageSize(items.Count)
+                    .AddChoices(items));
+
+            Console.WriteLine("Press Escape to return to menu.");
+
+            demo.Handler();
+
+            do
             {
-                ConsoleKey.DownArrow when index + 1 < items.Count => () => WriteMenu(items, items[++index]),
-                ConsoleKey.UpArrow when index - 1 >= 0 => () => WriteMenu(items, items[--index]),
-                ConsoleKey.Enter => () =>
-                {
-                    Console.Clear();
-                    items[index].Handler();
-                    Console.ReadKey();
-                    Console.WriteLine();
-                    Console.WriteLine("Press any key to return to menu");
-                    Console.ReadKey();
-                    WriteMenu(items, items[index]);
-                },
-                ConsoleKey.Escape => () => isRunning = false,
-                _ => () => { }
-            };
-            nextAction();
-        }
-
-        Console.ReadKey();
-    }
-
-    private static void WriteMenu(List<ConsoleMenuItem> items, ConsoleMenuItem selectedItem)
-    {
-        Console.Clear();
-
-        foreach (var item in items)
-        {
-            Console.Write(item == selectedItem ? "> " : " ");
-            Console.WriteLine(item.Name);
+                Thread.Sleep(TimeSpan.FromSeconds(0.5));
+            }
+            while (Console.ReadKey() is not { Key: ConsoleKey.Escape });
         }
     }
 }

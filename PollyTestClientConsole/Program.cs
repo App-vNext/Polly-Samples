@@ -3,6 +3,8 @@ using PollyDemos.Helpers;
 using PollyDemos.OutputHelpers;
 using PollyTestClientConsole;
 using PollyTestClientConsole.Menu;
+using Spectre.Console;
+using Color = PollyDemos.OutputHelpers.Color;
 
 Statistic[] statistics = [];
 Progress<DemoProgress> progress = new();
@@ -11,7 +13,7 @@ progress.ProgressChanged += (_, args) =>
 {
     foreach (var message in args.Messages)
     {
-        WriteLineInColor(message.Message, message.Color.ToConsoleColor());
+        WriteLineInColor(message.Message, message.Color);
     }
 
     statistics = args.Statistics;
@@ -85,15 +87,14 @@ void PrintStatisticsThenClear()
 
     foreach (Statistic stat in statistics)
     {
-        WriteLineInColor($"{stat.Description.PadRight(longestDescription)}: {stat.Value}", stat.Color.ToConsoleColor());
+        WriteLineInColor($"{stat.Description.PadRight(longestDescription)}: {stat.Value}", stat.Color);
     }
 
     statistics = [];
 }
 
-void WriteLineInColor(string message, ConsoleColor color)
+void WriteLineInColor(string message, Color color)
 {
-    Console.ForegroundColor = color;
-    Console.WriteLine(message);
-    Console.ResetColor();
+    var consoleColor = Spectre.Console.Color.FromConsoleColor(color.ToConsoleColor());
+    AnsiConsole.MarkupLineInterpolated($"[{consoleColor}]{message}[/]");
 }
