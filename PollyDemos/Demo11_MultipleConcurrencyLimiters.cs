@@ -61,7 +61,7 @@ public class Demo11_MultipleConcurrencyLimiters : ConcurrencyLimiterDemoBase
 
     public override async Task ExecuteAsync(CancellationToken externalCancellationToken, IProgress<DemoProgress> progress)
     {
-        ArgumentNullException.ThrowIfNull(nameof(progress));
+        ArgumentNullException.ThrowIfNull(progress);
 
         PrintHeader(progress);
         TotalRequests = 0;
