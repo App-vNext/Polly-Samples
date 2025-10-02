@@ -13,9 +13,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.6" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.6" />
-    <PackageReference Include="Polly.Core" Version="8.6.3" />
-    <PackageReference Include="Polly.Extensions" Version="8.6.3" />
-    <PackageReference Include="Polly.RateLimiting" Version="8.6.3" />
+    <PackageReference Include="Polly.Core" Version="8.6.4" />
+    <PackageReference Include="Polly.Extensions" Version="8.6.4" />
+    <PackageReference Include="Polly.RateLimiting" Version="8.6.4" />
   </ItemGroup>
   <ItemGroup>
     <Using Include="Polly" />
