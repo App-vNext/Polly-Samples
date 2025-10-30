@@ -11,6 +11,6 @@
     <ProjectReference Include="..\PollyDemos\PollyDemos.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Spectre.Console" Version="0.50.0" />
+    <PackageReference Include="Spectre.Console" Version="0.53.0" />
   </ItemGroup>
 </Project>
