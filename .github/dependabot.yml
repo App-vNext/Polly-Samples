@@ -10,6 +10,10 @@ updates:
 - package-ecosystem: nuget
   directory: "/"
   groups:
+    dotnet:
+      patterns:
+        - Microsoft.EntityFrameworkCore.InMemory
+        - Microsoft.Extensions.Logging.Console
     polly:
       patterns:
         - Polly*
